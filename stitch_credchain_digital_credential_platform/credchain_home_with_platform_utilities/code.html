@@ -1,0 +1,662 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CredChain - Secure Digital Credentials</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#fcf9f8",
+                        "on-secondary-fixed-variant": "#00497e",
+                        "on-tertiary-container": "#ffbe95",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "background": "#fcf9f8",
+                        "tertiary-container": "#7e4924",
+                        "primary-container": "#006064",
+                        "on-primary": "#ffffff",
+                        "secondary": "#0061a6",
+                        "secondary-fixed-dim": "#a0caff",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#3f4949",
+                        "surface-variant": "#e5e2e1",
+                        "status-pending": "#F47738",
+                        "tertiary": "#62330f",
+                        "on-primary-fixed": "#002021",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#8ad3d7",
+                        "tertiary-fixed-dim": "#ffb688",
+                        "secondary-container": "#6eb2fe",
+                        "on-secondary-container": "#004376",
+                        "primary": "#00464a",
+                        "surface-container-highest": "#e5e2e1",
+                        "outline": "#6f7979",
+                        "on-background": "#1c1b1b",
+                        "inverse-surface": "#313030",
+                        "on-secondary-fixed": "#001c37",
+                        "border-subtle": "#D1D5DB",
+                        "tertiary-fixed": "#ffdbc7",
+                        "status-valid": "#00703C",
+                        "on-error": "#ffffff",
+                        "surface": "#fcf9f8",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#8fd8dc",
+                        "surface-container-low": "#f6f3f2",
+                        "inverse-primary": "#8ad3d7",
+                        "surface-tint": "#14696d",
+                        "surface-container": "#f0eded",
+                        "status-revoked": "#D4351C",
+                        "on-surface": "#1c1b1b",
+                        "inverse-on-surface": "#f3f0ef",
+                        "primary-fixed": "#a6eff3",
+                        "on-tertiary-fixed": "#311300",
+                        "outline-variant": "#bec8c9",
+                        "on-tertiary-fixed-variant": "#6b3a16",
+                        "surface-container-high": "#eae7e7",
+                        "surface-dim": "#dcd9d9",
+                        "on-primary-fixed-variant": "#004f53",
+                        "secondary-fixed": "#d2e4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "container-max": "1280px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "code-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .dark body {
+            background-color: #121212;
+            color: #f3f0ef;
+        }
+        @media print {
+            header, #cookie-banner, #floating-support, #return-to-top, #search-modal, #confirm-modal, .no-print {
+                display: none !important;
+            }
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            .print-clean {
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-background text-on-background dark:bg-[#121212] dark:text-[#f3f0ef] transition-colors duration-200">
+<!-- 1. Accessibility Skip Link -->
+<a class="sr-only focus:not-sr-only fixed top-2 left-2 z-[100] bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md shadow-lg flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" href="#main-content">
+<span class="">Skip to main content</span>
+<span class="material-symbols-outlined text-sm">arrow_downward</span>
+</a>
+<!-- 2. Scroll Progress Bar -->
+<div class="fixed top-0 left-0 w-full h-[3px] bg-transparent z-[60] pointer-events-none">
+<div class="h-full bg-primary-container dark:bg-primary-fixed w-0 transition-all duration-75" id="scroll-progress-bar"></div>
+</div>
+<!-- Sticky Header & Utilities -->
+<header class="sticky top-0 z-50 backdrop-blur-md bg-surface/90 dark:bg-[#181818]/90 border-b border-outline/20 dark:border-outline-variant/30 w-full transition-colors">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-6" style="height: 56px;">
+<img alt="CredChain" class="h-10 w-auto object-contain dark:brightness-0 dark:invert dark:drop-shadow-[0_0_14px_rgba(245,158,11,0.55)] transition-all duration-200 dark-logo-glow" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</div>
+<!-- Desktop Navigation -->
+<nav class="hidden md:flex gap-8 items-center font-body-lg text-body-lg">
+<a class="text-on-surface-variant dark:text-gray-300 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors px-2 py-1" href="#explorer">Explorer</a>
+<a class="text-on-surface-variant dark:text-gray-300 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors px-2 py-1" href="#wallet">Wallet</a>
+<a class="text-on-surface-variant dark:text-gray-300 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors px-2 py-1" href="#dashboard">Dashboard</a>
+<a class="text-on-surface-variant dark:text-gray-300 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors px-2 py-1" href="#faq-section">FAQs</a>
+</nav>
+<!-- Top Action Utilities -->
+<div class="flex items-center gap-2 sm:gap-3">
+<!-- Site Search Button -->
+<button class="p-2 text-on-surface-variant dark:text-gray-300 hover:bg-surface-container dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5 text-body-sm" id="search-open-btn" onclick="openSearchModal()" title="Search (Cmd+K)">
+<span class="material-symbols-outlined text-[20px]">search</span>
+<span class="hidden lg:inline text-xs text-outline dark:text-gray-400 bg-surface-container dark:bg-gray-800 px-1.5 py-0.5 rounded border border-outline-variant/50">⌘K</span>
+</button>
+<!-- Dark Mode Toggle -->
+<button aria-label="Toggle Dark Mode" class="p-2 text-on-surface-variant dark:text-gray-300 hover:bg-surface-container dark:hover:bg-gray-800 rounded-lg transition-colors" id="theme-toggle" onclick="toggleDarkMode()">
+<span class="material-symbols-outlined text-[20px]" id="theme-icon">dark_mode</span>
+</button>
+<!-- Connect Wallet Button -->
+<button class="relative hidden sm:inline-flex items-center justify-center bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded-lg cursor-pointer hover:bg-surface-tint transition-all duration-200 hover:shadow-md" id="connect-wallet-btn" onclick="simulateConnectWallet()">
+<span class="material-symbols-outlined animate-spin mr-1.5 text-sm hidden" id="wallet-btn-spinner">progress_activity</span>
+<span id="wallet-btn-text" class="">Connect Wallet</span>
+</button>
+<!-- Mobile Hamburger Button -->
+<button aria-label="Open mobile menu" class="md:hidden p-2 text-on-surface-variant dark:text-gray-300 hover:bg-surface-container dark:hover:bg-gray-800 rounded-lg" id="mobile-menu-toggle" onclick="toggleMobileMenu()">
+<span class="material-symbols-outlined text-[24px]" id="mobile-menu-icon">menu</span>
+</button>
+</div>
+</div>
+<!-- Mobile Dropdown Menu -->
+<div class="hidden md:hidden border-t border-outline-variant/30 bg-surface dark:bg-[#181818] px-margin-mobile py-4 space-y-3 shadow-lg" id="mobile-menu">
+<a class="block py-2 text-body-lg text-on-surface-variant dark:text-gray-300 hover:text-primary" href="#explorer" onclick="toggleMobileMenu()">Explorer</a>
+<a class="block py-2 text-body-lg text-on-surface-variant dark:text-gray-300 hover:text-primary" href="#wallet" onclick="toggleMobileMenu()">Wallet</a>
+<a class="block py-2 text-body-lg text-on-surface-variant dark:text-gray-300 hover:text-primary" href="#dashboard" onclick="toggleMobileMenu()">Dashboard</a>
+<a class="block py-2 text-body-lg text-on-surface-variant dark:text-gray-300 hover:text-primary" href="#faq-section" onclick="toggleMobileMenu()">FAQs</a>
+<div class="pt-2">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-2.5 rounded-lg text-center" onclick="simulateConnectWallet(); toggleMobileMenu();">
+            Connect Wallet
+        </button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-center pt-10 pb-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full" id="main-content">
+<!-- Hero Section -->
+<div class="max-w-4xl mx-auto text-center space-y-8 pt-6 pb-12 w-full">
+<!-- Status & Registry Badge -->
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high dark:bg-gray-800 border border-outline-variant/40 text-xs font-medium text-on-surface-variant dark:text-gray-300 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-valid animate-pulse"></span>
+<span class="">Registry Sync: Active • Last updated: March 30, 2026</span>
+</div>
+<div class="space-y-4">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background dark:text-white tracking-tight">
+            Secure, milestone-based digital credentials verified on the blockchain.
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant dark:text-gray-300 max-w-2xl mx-auto">
+            The immutable ledger for professional achievements and certifications.
+        </p>
+</div>
+<!-- CTAs with elevation & hover transition -->
+<div class="flex flex-col sm:flex-row justify-center gap-4 pt-4 max-w-md mx-auto sm:max-w-none">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-8 py-3.5 rounded-lg hover:bg-surface-tint transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md w-full sm:w-auto flex items-center justify-center gap-2" onclick="document.getElementById('query-section').scrollIntoView({behavior: 'smooth'})">
+<span class="">Issuer Portal</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="bg-surface dark:bg-gray-900 text-primary dark:text-primary-fixed border border-primary dark:border-primary-fixed font-label-md text-label-md px-8 py-3.5 rounded-lg hover:bg-surface-container-low dark:hover:bg-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md w-full sm:w-auto flex items-center justify-center gap-2" onclick="openConfirmModal()">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span class="">Verify Credential</span>
+</button>
+</div>
+<!-- Smart Contract & Sample Hash with Copy to Clipboard -->
+<div class="pt-6 flex flex-wrap items-center justify-center gap-3 text-body-sm text-on-surface-variant dark:text-gray-400">
+<div class="flex items-center gap-2 bg-surface-container-lowest dark:bg-gray-800/80 px-3 py-1.5 rounded-lg border border-border-subtle dark:border-gray-700 shadow-sm">
+<span class="text-xs font-mono font-medium text-on-surface dark:text-gray-200">Contract: <span class="text-primary dark:text-primary-fixed">0x71C...b89A</span></span>
+<button class="text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-primary-fixed transition-colors inline-flex items-center gap-1" onclick="copyText('0x71C83d6aB9D2f8e124B89A', this)" title="Copy address">
+<span class="copy-icon material-symbols-outlined text-[16px]">content_copy</span>
+<span class="copy-tooltip text-xs hidden text-status-valid font-medium">Copied!</span>
+</button>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-lowest dark:bg-gray-800/80 px-3 py-1.5 rounded-lg border border-border-subtle dark:border-gray-700 shadow-sm">
+<span class="text-xs font-mono font-medium text-on-surface dark:text-gray-200">Hash: <span class="text-primary dark:text-primary-fixed">0x9d4a...319f</span></span>
+<button class="text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-primary-fixed transition-colors inline-flex items-center gap-1" onclick="copyText('0x9d4a8e23f03b21c4319f', this)" title="Copy verification hash">
+<span class="copy-icon material-symbols-outlined text-[16px]">content_copy</span>
+<span class="copy-tooltip text-xs hidden text-status-valid font-medium">Copied!</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Ledger Stats Skeleton / Loading Preview -->
+<div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
+<div class="bg-surface-container-lowest dark:bg-gray-800/60 p-5 rounded-xl border border-border-subtle dark:border-gray-700 shadow-sm">
+<div class="text-xs text-on-surface-variant dark:text-gray-400 mb-1">Total Anchored Milestones</div>
+<div class="text-2xl font-bold text-on-surface dark:text-white flex items-center gap-2">
+<span class="">1,420,891</span>
+<span class="material-symbols-outlined text-sm text-status-valid animate-pulse">check_circle</span>
+</div>
+<div class="text-[11px] text-status-valid mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> +12.4% this month
+        </div>
+</div>
+<div class="bg-surface-container-lowest dark:bg-gray-800/60 p-5 rounded-xl border border-border-subtle dark:border-gray-700 shadow-sm">
+<div class="text-xs text-on-surface-variant dark:text-gray-400 mb-1">Accredited Issuers</div>
+<div class="text-2xl font-bold text-on-surface dark:text-white flex items-center gap-2">
+<span class="">342 Orgs</span>
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+</div>
+<div class="text-[11px] text-on-surface-variant dark:text-gray-400 mt-1">SIH 26196 Compliant</div>
+</div>
+<div class="bg-surface-container-lowest dark:bg-gray-800/60 p-5 rounded-xl border border-border-subtle dark:border-gray-700 shadow-sm">
+<div class="text-xs text-on-surface-variant dark:text-gray-400 mb-1">Avg Verification Latency</div>
+<div class="text-2xl font-bold text-on-surface dark:text-white">420 ms</div>
+<div class="text-[11px] text-status-valid mt-1">Zero-Knowledge Proof verified</div>
+</div>
+</div>
+<!-- Interactive Query & Form States Section -->
+<section class="w-full max-w-2xl bg-surface-container-lowest dark:bg-gray-800/80 rounded-xl border border-border-subtle dark:border-gray-700 p-6 md:p-8 shadow-sm mb-16" id="query-section">
+<div class="mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-white">Quick Ledger Verification Query</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-gray-300 mt-1">
+            Input a credential hash or private key to verify its cryptographic proof on-chain.
+        </p>
+</div>
+<form class="space-y-4" id="ledger-query-form" onsubmit="handleQuerySubmit(event)">
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-gray-200 mb-1.5" for="cred-id">Credential ID or Student Hash</label>
+<input class="w-full px-3.5 py-2.5 rounded-lg border border-border-subtle dark:border-gray-700 bg-surface dark:bg-gray-900 text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono" id="cred-id" placeholder="e.g. SIH-26196-8834 or 0x9d4a..." type="text">
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-gray-200 mb-1.5" for="cred-key">Access Decryption Key / PIN</label>
+<div class="relative">
+<input class="w-full px-3.5 py-2.5 pr-10 rounded-lg border border-border-subtle dark:border-gray-700 bg-surface dark:bg-gray-900 text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-primary text-sm" id="cred-key" placeholder="Enter secure recipient key" type="password">
+<!-- 5. Password / Key Visibility Toggle -->
+<button class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant dark:text-gray-400 hover:text-on-surface" onclick="toggleKeyVisibility()" type="button">
+<span class="material-symbols-outlined text-[20px]" id="visibility-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Form Feedback Alerts -->
+<div class="hidden p-3 rounded-lg bg-error-container text-on-error-container text-xs flex items-center gap-2 border border-error/20" id="form-error-state">
+<span class="material-symbols-outlined text-sm">error</span>
+<span class="">Please enter both a valid Credential Hash and Decryption Key.</span>
+</div>
+<div class="hidden p-3 rounded-lg bg-[#E6F4EA] dark:bg-emerald-950/50 text-status-valid dark:text-emerald-300 text-xs flex items-center gap-2 border border-status-valid/30" id="form-success-state">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+<span class="">Credential <strong>SIH-26196</strong> is VALID and actively verified on block #19,482,019.</span>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+<button class="w-full sm:w-auto bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-lg hover:bg-surface-tint transition-all flex items-center justify-center gap-2" id="query-submit-btn" type="submit">
+<span class="material-symbols-outlined animate-spin text-sm hidden" id="query-spinner">progress_activity</span>
+<span id="query-btn-text" class="">Execute On-Chain Query</span>
+</button>
+<button class="w-full sm:w-auto text-on-surface-variant dark:text-gray-400 hover:text-on-surface text-body-sm px-4 py-2.5 rounded-lg transition-colors" onclick="resetQueryForm()" type="button">
+                Clear
+            </button>
+</div>
+</form>
+</section>
+<!-- 4. Expandable FAQs (Accordion) -->
+<section class="w-full max-w-3xl mb-12" id="faq-section">
+<div class="text-center mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-white">Frequently Asked Questions</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-gray-300 mt-1">
+            Understanding CredChain's decentralized verification protocols and privacy standards.
+        </p>
+</div>
+<div class="space-y-3">
+<!-- FAQ 1 -->
+<div class="border border-border-subtle dark:border-gray-700 rounded-xl bg-surface-container-lowest dark:bg-gray-800/80 overflow-hidden transition-all">
+<button class="w-full flex items-center justify-between p-4 text-left font-label-md text-on-surface dark:text-white hover:bg-surface-container-low dark:hover:bg-gray-700/50" onclick="toggleAccordion('faq-1')">
+<span class="">How does CredChain support SIH 26196 credential verification?</span>
+<span class="material-symbols-outlined text-on-surface-variant dark:text-gray-400 transition-transform duration-200" id="faq-1-icon">expand_more</span>
+</button>
+<div class="hidden px-4 pb-4 font-body-sm text-body-sm text-on-surface-variant dark:text-gray-300 border-t border-border-subtle/50 dark:border-gray-700 pt-3" id="faq-1-content">
+                CredChain implements the official SIH 26196 decentralized identity specification. Educational and professional institutions anchor cryptographic hashes directly into tamper-proof smart contracts, enabling instantaneous third-party verification without exposing raw student personal records.
+            </div>
+</div>
+<!-- FAQ 2 -->
+<div class="border border-border-subtle dark:border-gray-700 rounded-xl bg-surface-container-lowest dark:bg-gray-800/80 overflow-hidden transition-all">
+<button class="w-full flex items-center justify-between p-4 text-left font-label-md text-on-surface dark:text-white hover:bg-surface-container-low dark:hover:bg-gray-700/50" onclick="toggleAccordion('faq-2')">
+<span class="">What are milestone trails and micro-credentials?</span>
+<span class="material-symbols-outlined text-on-surface-variant dark:text-gray-400 transition-transform duration-200" id="faq-2-icon">expand_more</span>
+</button>
+<div class="hidden px-4 pb-4 font-body-sm text-body-sm text-on-surface-variant dark:text-gray-300 border-t border-border-subtle/50 dark:border-gray-700 pt-3" id="faq-2-content">
+                Milestone trails permit learners to record cumulative steps (e.g. course completions, capstone project approvals, and lab competencies) chronologically. Each milestone receives its own verifiable timestamp and cryptographic seal, demonstrating continuous skill acquisition.
+            </div>
+</div>
+<!-- FAQ 3 -->
+<div class="border border-border-subtle dark:border-gray-700 rounded-xl bg-surface-container-lowest dark:bg-gray-800/80 overflow-hidden transition-all">
+<button class="w-full flex items-center justify-between p-4 text-left font-label-md text-on-surface dark:text-white hover:bg-surface-container-low dark:hover:bg-gray-700/50" onclick="toggleAccordion('faq-3')">
+<span class="">How is privacy guaranteed under GDPR and Web3 standards?</span>
+<span class="material-symbols-outlined text-on-surface-variant dark:text-gray-400 transition-transform duration-200" id="faq-3-icon">expand_more</span>
+</button>
+<div class="hidden px-4 pb-4 font-body-sm text-body-sm text-on-surface-variant dark:text-gray-300 border-t border-border-subtle/50 dark:border-gray-700 pt-3" id="faq-3-content">
+                Zero personally identifiable information (PII) is committed directly to the public blockchain. We utilize Zero-Knowledge cryptographic proofs and encrypted off-chain decentralized storage (IPFS/Filecoin) where only holders possessing the private access key can disclose credential data.
+            </div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-[#181818] border-t border-outline/20 dark:border-outline-variant/30 mt-auto">
+<div class="w-full py-6 px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 max-w-container-max mx-auto">
+<div class="font-label-md text-label-md text-on-surface dark:text-gray-300">© 2026 CredChain Ledger. Built on open standards.</div>
+<nav class="flex gap-6 font-body-sm text-body-sm">
+<a class="text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-primary-fixed underline transition-opacity" href="#privacy">Privacy</a>
+<a class="text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-primary-fixed underline transition-opacity" href="#terms">Terms</a>
+<a class="text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-primary-fixed underline transition-opacity" href="#api">API Docs</a>
+<a class="text-on-surface-variant dark:text-gray-400 hover:text-primary dark:hover:text-primary-fixed underline transition-opacity" href="#source">Source</a>
+</nav>
+</div>
+</footer>
+<!-- 6. Floating Support Widget & Return to Top -->
+<div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 no-print">
+<!-- Return to top button -->
+<button aria-label="Return to top" class="hidden opacity-0 p-3 rounded-full bg-surface dark:bg-gray-800 text-on-surface dark:text-white border border-border-subtle dark:border-gray-700 shadow-lg hover:bg-surface-container dark:hover:bg-gray-700 transition-all duration-200" id="return-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+<span class="material-symbols-outlined text-[20px]">arrow_upward</span>
+</button>
+<!-- Support Button -->
+<button aria-label="Open support" class="p-3.5 rounded-full bg-primary text-on-primary shadow-xl hover:bg-surface-tint transition-all duration-200 flex items-center justify-center" id="support-toggle-btn" onclick="toggleSupportDrawer()">
+<span class="material-symbols-outlined text-[22px]">support_agent</span>
+</button>
+<!-- Quick Support Drawer / Popup -->
+<div class="hidden w-72 p-4 rounded-xl bg-surface dark:bg-[#202020] border border-border-subtle dark:border-gray-700 shadow-2xl text-left" id="support-drawer">
+<div class="flex items-center justify-between pb-2 border-b border-border-subtle dark:border-gray-700">
+<h3 class="font-label-md text-on-surface dark:text-white flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-sm">support_agent</span> CredChain Helpdesk
+            </h3>
+<button class="text-on-surface-variant dark:text-gray-400 hover:text-on-surface" onclick="toggleSupportDrawer()">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<p class="text-xs text-on-surface-variant dark:text-gray-300 py-2">
+            Need assistance with smart contract verification or issuer onboarding?
+        </p>
+<div class="space-y-2 pt-1">
+<a class="block text-center text-xs font-label-md bg-primary text-on-primary py-2 rounded-lg hover:bg-surface-tint" href="mailto:support@credchain.network">Email Onboarding Desk</a>
+<button class="w-full text-center text-xs font-label-md bg-surface-container dark:bg-gray-800 text-on-surface dark:text-gray-200 py-2 rounded-lg hover:bg-surface-container-high" onclick="alert('Connecting to live node dispatcher...'); toggleSupportDrawer();">Live Node Status</button>
+</div>
+</div>
+</div>
+<!-- 7. Cookie & Ledger Consent Banner -->
+<div class="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:max-w-md bg-surface dark:bg-[#1a1a1a] border border-border-subtle dark:border-gray-700 p-4 rounded-xl shadow-2xl z-50 transition-all duration-300" id="cookie-banner"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E" class="hidden" alt="" onerror="if (localStorage.getItem('credchain_cookie_consent')) { var b = document.getElementById('cookie-banner'); if (b) b.remove(); }">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[24px]">cookie</span>
+<div class="space-y-2">
+<h4 class="font-label-md text-label-md text-on-surface dark:text-white">Ledger Privacy &amp; Cookies</h4>
+<p class="text-xs text-on-surface-variant dark:text-gray-300 leading-relaxed">
+                We utilize essential cookies and encrypted local ledger states to authenticate identity assertions and verify credential hashes.
+            </p>
+<div class="flex items-center gap-2 pt-1"><button class="bg-primary text-on-primary text-xs font-semibold px-3 py-1.5 rounded hover:bg-surface-tint transition-colors" onclick="localStorage.setItem('credchain_cookie_consent', 'granted'); const b = document.getElementById('cookie-banner'); b.style.opacity = '0'; setTimeout(() =&gt; b.remove(), 300);">Accept All</button><button class="bg-surface-container dark:bg-gray-800 text-on-surface dark:text-gray-200 text-xs px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors" onclick="localStorage.setItem('credchain_cookie_consent', 'granted'); const b = document.getElementById('cookie-banner'); b.style.opacity = '0'; setTimeout(() =&gt; b.remove(), 300);">Preferences</button><button class="text-on-surface-variant dark:text-gray-400 hover:text-on-surface text-xs px-2 py-1.5 transition-colors" onclick="localStorage.setItem('credchain_cookie_consent', 'dismissed'); const b = document.getElementById('cookie-banner'); b.style.opacity = '0'; setTimeout(() =&gt; b.remove(), 300);">Dismiss</button></div>
+</div>
+</div>
+</div>
+<!-- Site Search Modal Dialog -->
+<div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4" id="search-modal">
+<div class="bg-surface dark:bg-[#1a1a1a] border border-border-subtle dark:border-gray-700 rounded-xl max-w-lg w-full p-4 shadow-2xl space-y-4">
+<div class="flex items-center gap-2 border-b border-border-subtle dark:border-gray-700 pb-2">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="w-full bg-transparent border-none text-on-surface dark:text-white focus:outline-none text-sm" id="search-input" placeholder="Search explorer, issuers, hash or FAQs..." type="text">
+<button class="text-xs text-on-surface-variant dark:text-gray-400 bg-surface-container dark:bg-gray-800 px-2 py-1 rounded" onclick="closeSearchModal()">ESC</button>
+</div>
+<div class="space-y-1.5 text-body-sm">
+<div class="text-[11px] font-semibold text-outline uppercase tracking-wider px-2">Quick Shortcuts</div>
+<a class="flex items-center justify-between p-2 rounded hover:bg-surface-container dark:hover:bg-gray-800 text-on-surface dark:text-gray-200" href="#explorer" onclick="closeSearchModal()">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">explore</span> Ledger Explorer</span>
+<span class="text-xs text-outline">Jump</span>
+</a>
+<a class="flex items-center justify-between p-2 rounded hover:bg-surface-container dark:hover:bg-gray-800 text-on-surface dark:text-gray-200" href="#query-section" onclick="closeSearchModal()">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">verified</span> Verify a Credential</span>
+<span class="text-xs text-outline">Jump</span>
+</a>
+<a class="flex items-center justify-between p-2 rounded hover:bg-surface-container dark:hover:bg-gray-800 text-on-surface dark:text-gray-200" href="#faq-section" onclick="closeSearchModal()">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">help</span> Frequently Asked Questions</span>
+<span class="text-xs text-outline">Jump</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Confirmation Modal -->
+<div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4" id="confirm-modal">
+<div class="bg-surface dark:bg-[#1a1a1a] border border-border-subtle dark:border-gray-700 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-full bg-primary/10 text-primary dark:text-primary-fixed">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<h3 class="font-headline-md text-base text-on-surface dark:text-white">Confirm Ledger Query Action</h3>
+<p class="text-xs text-on-surface-variant dark:text-gray-400">Authenticate session for cryptographic verification</p>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant dark:text-gray-300">
+            This verification query will read state directly from the CredChain consensus node. No gas fee is charged for read operations.
+        </p>
+<div class="flex justify-end gap-2 pt-2">
+<button class="px-4 py-2 text-xs font-medium rounded-lg text-on-surface dark:text-gray-300 hover:bg-surface-container dark:hover:bg-gray-800" onclick="closeConfirmModal()">Cancel</button>
+<button class="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-on-primary hover:bg-surface-tint" onclick="closeConfirmModal(); document.getElementById('query-section').scrollIntoView({behavior:'smooth'});">Proceed to Verify</button>
+</div>
+</div>
+</div>
+<!-- Interactive Scripts: Utilities, UTM Capture, Dark Mode, Forms -->
+<script>
+    // 1. UTM Parameter Capture & Outbound Tracking
+    (function initUTM() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+        utmKeys.forEach(key => {
+            if (urlParams.has(key)) {
+                sessionStorage.setItem(key, urlParams.get(key));
+            }
+        });
+        
+        // Append UTMs to external or outbound links
+        const utmString = utmKeys
+            .filter(k => sessionStorage.getItem(k))
+            .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(sessionStorage.getItem(k))}`)
+            .join('&');
+            
+        if (utmString) {
+            document.querySelectorAll('a[href^="http"]').forEach(link => {
+                const sep = link.href.includes('?') ? '&' : '?';
+                link.href += sep + utmString;
+            });
+        }
+    })();
+
+    // 2. Scroll Progress & Return to Top Visibility
+    window.addEventListener('scroll', () => {
+        const winScroll = document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        const progressBar = document.getElementById('scroll-progress-bar');
+        if (progressBar) progressBar.style.width = scrolled + '%';
+
+        const returnBtn = document.getElementById('return-to-top');
+        if (returnBtn) {
+            if (winScroll > 200) {
+                returnBtn.classList.remove('hidden');
+                returnBtn.classList.remove('opacity-0');
+                returnBtn.classList.add('opacity-100');
+            } else {
+                returnBtn.classList.add('opacity-0');
+                setTimeout(() => { if (winScroll <= 200) returnBtn.classList.add('hidden'); }, 200);
+            }
+        }
+    });
+
+    // 3. Dark Mode Toggle
+    function toggleDarkMode() {
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        if (html.classList.contains('dark')) {
+            html.classList.remove('dark');
+            html.classList.add('light');
+            if (icon) icon.textContent = 'dark_mode';
+            localStorage.setItem('theme', 'light');
+        } else {
+            html.classList.remove('light');
+            html.classList.add('dark');
+            if (icon) icon.textContent = 'light_mode';
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+    // Initialize Theme
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.textContent = 'light_mode';
+    }
+
+    // 4. Mobile Menu Toggle
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    // 5. Search Modal Handling
+    function openSearchModal() {
+        const modal = document.getElementById('search-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => document.getElementById('search-input')?.focus(), 50);
+    }
+    function closeSearchModal() {
+        const modal = document.getElementById('search-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            openSearchModal();
+        }
+        if (e.key === 'Escape') {
+            closeSearchModal();
+            closeConfirmModal();
+        }
+    });
+
+    // 6. Confirmation Modal
+    function openConfirmModal() {
+        const modal = document.getElementById('confirm-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirm-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // 7. Clipboard Copy
+    function copyText(text, btnElement) {
+        navigator.clipboard.writeText(text).then(() => {
+            const icon = btnElement.querySelector('.copy-icon');
+            const tooltip = btnElement.querySelector('.copy-tooltip');
+            if (icon && tooltip) {
+                icon.classList.add('hidden');
+                tooltip.classList.remove('hidden');
+                setTimeout(() => {
+                    tooltip.classList.add('hidden');
+                    icon.classList.remove('hidden');
+                }, 1800);
+            }
+        }).catch(() => {
+            alert('Copied: ' + text);
+        });
+    }
+
+    // 8. Password / Key Visibility Toggle
+    function toggleKeyVisibility() {
+        const keyInput = document.getElementById('cred-key');
+        const icon = document.getElementById('visibility-icon');
+        if (keyInput.type === 'password') {
+            keyInput.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            keyInput.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
+
+    // 9. Interactive Form Submission with Loading & Feedback States
+    function handleQuerySubmit(e) {
+        e.preventDefault();
+        const idInput = document.getElementById('cred-id').value.trim();
+        const keyInput = document.getElementById('cred-key').value.trim();
+        const errorState = document.getElementById('form-error-state');
+        const successState = document.getElementById('form-success-state');
+        const spinner = document.getElementById('query-spinner');
+        const btnText = document.getElementById('query-btn-text');
+
+        errorState.classList.add('hidden');
+        successState.classList.add('hidden');
+
+        if (!idInput || !keyInput) {
+            errorState.classList.remove('hidden');
+            return;
+        }
+
+        // Show loading spinner
+        spinner.classList.remove('hidden');
+        btnText.textContent = 'Verifying on Ledger...';
+
+        setTimeout(() => {
+            spinner.classList.add('hidden');
+            btnText.textContent = 'Execute On-Chain Query';
+            successState.classList.remove('hidden');
+        }, 900);
+    }
+
+    function resetQueryForm() {
+        document.getElementById('ledger-query-form').reset();
+        document.getElementById('form-error-state').classList.add('hidden');
+        document.getElementById('form-success-state').classList.add('hidden');
+    }
+
+    // 10. Accordion Toggle
+    function toggleAccordion(id) {
+        const content = document.getElementById(`${id}-content`);
+        const icon = document.getElementById(`${id}-icon`);
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+        } else {
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    // 11. Support Drawer Toggle
+    function toggleSupportDrawer() {
+        const drawer = document.getElementById('support-drawer');
+        drawer.classList.toggle('hidden');
+    }
+
+    // 12. Cookie Banner Dismiss
+    function dismissCookieBanner() {
+        const banner = document.getElementById('cookie-banner');
+        banner.style.opacity = '0';
+        setTimeout(() => banner.style.display = 'none', 300);
+    }
+
+    // 13. Simulate Connect Wallet Loading
+    function simulateConnectWallet() {
+        const spinner = document.getElementById('wallet-btn-spinner');
+        const text = document.getElementById('wallet-btn-text');
+        spinner.classList.remove('hidden');
+        text.textContent = 'Connecting...';
+        setTimeout(() => {
+            spinner.classList.add('hidden');
+            text.textContent = '0x71C...b89A';
+        }, 800);
+    }
+</script>
+
+
+
+
+
+
+</body></html>

@@ -1,0 +1,15 @@
+# Backend Secrets & Environment
+.env
+.env.*
+*.env
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Compiled Output
+dist/
+build/
+
+# Logs
+*.log

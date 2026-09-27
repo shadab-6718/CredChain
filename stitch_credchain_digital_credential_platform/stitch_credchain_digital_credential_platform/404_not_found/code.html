@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>404 - Page Not Found | CredChain Ledger</title>
+<!-- Material Symbols Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-primary-container": "#8fd8dc",
+                  "error-container": "#ffdad6",
+                  "status-revoked": "#D4351C",
+                  "surface-container-highest": "#e5e2e1",
+                  "surface-container": "#f0eded",
+                  "surface-container-lowest": "#ffffff",
+                  "secondary-fixed-dim": "#a0caff",
+                  "on-surface-variant": "#3f4949",
+                  "surface": "#fcf9f8",
+                  "on-secondary-container": "#004376",
+                  "tertiary-fixed-dim": "#ffb688",
+                  "on-tertiary-container": "#ffbe95",
+                  "error": "#ba1a1a",
+                  "inverse-surface": "#313030",
+                  "inverse-primary": "#8ad3d7",
+                  "surface-dim": "#dcd9d9",
+                  "outline": "#6f7979",
+                  "on-secondary-fixed": "#001c37",
+                  "on-tertiary": "#ffffff",
+                  "tertiary": "#62330f",
+                  "surface-container-high": "#eae7e7",
+                  "on-primary-fixed": "#002021",
+                  "surface-variant": "#e5e2e1",
+                  "on-error-container": "#93000a",
+                  "tertiary-fixed": "#ffdbc7",
+                  "on-background": "#1c1b1b",
+                  "primary-container": "#006064",
+                  "primary-fixed": "#a6eff3",
+                  "surface-bright": "#fcf9f8",
+                  "secondary-fixed": "#d2e4ff",
+                  "on-secondary-fixed-variant": "#00497e",
+                  "status-pending": "#F47738",
+                  "tertiary-container": "#7e4924",
+                  "on-tertiary-fixed": "#311300",
+                  "surface-container-low": "#f6f3f2",
+                  "secondary-container": "#6eb2fe",
+                  "on-error": "#ffffff",
+                  "secondary": "#0061a6",
+                  "on-secondary": "#ffffff",
+                  "background": "#fcf9f8",
+                  "primary": "#00464a",
+                  "inverse-on-surface": "#f3f0ef",
+                  "on-primary": "#ffffff",
+                  "outline-variant": "#bec8c9",
+                  "surface-tint": "#14696d",
+                  "on-surface": "#1c1b1b",
+                  "primary-fixed-dim": "#8ad3d7",
+                  "border-subtle": "#D1D5DB",
+                  "on-tertiary-fixed-variant": "#6b3a16",
+                  "on-primary-fixed-variant": "#004f53",
+                  "status-valid": "#00703C"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "margin-desktop": "32px",
+                  "gutter": "16px",
+                  "margin-mobile": "16px",
+                  "container-max": "1280px",
+                  "base": "8px"
+          },
+          "fontFamily": {
+                  "body-lg": ["Inter"],
+                  "headline-lg-mobile": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "headline-md": ["Inter"],
+                  "code-sm": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "label-md": ["Inter"]
+          },
+          "fontSize": {
+                  "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                  "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                  "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                  "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                  "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                  "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                  "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script><script>
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
+</head>
+<body class="bg-[#fcf9f8] dark:bg-[#0b1315] text-[#1a2327] dark:text-slate-100 font-body-lg text-body-lg min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-white transition-colors">
+<!-- TopNavBar (Shared Component Integration) -->
+<header class="w-full bg-surface dark:bg-[#0e171a]/90 border-b border-outline-variant dark:border-slate-800 z-50 backdrop-blur-md">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-20">
+<!-- Brand Logo + Name Anchor with Prominent Image -->
+<div class="flex items-center gap-3">
+<a class="flex items-center gap-3" href="#"><img alt="CredChain" class="h-12 w-12 object-contain transition-all dark:drop-shadow-[0_0_14px_rgba(0,229,255,0.45)]" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA"></a>
+</div>
+<!-- Navigation Links from JSON Anchor -->
+<nav class="hidden md:flex items-center space-x-6"><a class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-[#132024] px-2 py-1 transition-colors" href="#">Explorer</a><a class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-[#132024] px-2 py-1 transition-colors" href="#">Wallet</a><a class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-[#132024] px-2 py-1 transition-colors" href="#">Dashboard</a></nav>
+<!-- Trailing Action -->
+<div class="flex items-center gap-4">
+<button class="bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-900 dark:hover:bg-teal-400 font-label-md text-label-md px-4 py-2.5 transition-colors hover:bg-primary-container active:opacity-80 font-semibold" type="button">
+          Connect Wallet
+        </button>
+</div>
+</div>
+</header>
+<!-- Breadcrumb Navigation -->
+<nav aria-label="Breadcrumb" class="w-full bg-surface-container-low dark:bg-[#0e171a] border-b border-outline-variant dark:border-slate-800">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-3">
+<ol class="flex items-center space-x-2 font-body-sm text-body-sm text-on-surface-variant"><li class=""><a class="hover:text-primary dark:hover:text-teal-400 flex items-center gap-1 text-on-surface-variant dark:text-slate-400" href="#"><span class="material-symbols-outlined text-[16px]">home</span><span class="">Home</span></a></li><li class="flex items-center text-outline dark:text-slate-600"><span class="material-symbols-outlined text-[14px]">chevron_right</span></li><li aria-current="page" class="font-semibold text-primary dark:text-teal-400">404 Not Found</li></ol>
+</div>
+</nav>
+<!-- Main Canvas: Utilitarian Blockchain 404 Layout -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-16">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Primary Error Section (Gov / Ledger Clear Aesthetic) -->
+<section class="lg:col-span-8 bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-[#22353a] p-6 md:p-10">
+<!-- Status Indicator Pill -->
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-error-container text-error dark:bg-rose-950/50 dark:text-rose-300 border border-transparent dark:border-rose-900/50 font-label-md text-label-md mb-6">
+<span class="material-symbols-outlined text-[16px]">error</span>
+<span class="">HTTP 404: RECORD_UNRESOLVED</span>
+</div>
+<!-- Main Heading -->
+<h1 class="hidden md:block font-headline-lg text-headline-lg text-on-surface dark:text-slate-100 tracking-tight mb-4">
+          404 - Page Not Found
+        </h1>
+<h1 class="md:hidden font-headline-lg-mobile text-headline-lg-mobile text-on-surface dark:text-slate-100 tracking-tight mb-4">
+          404 - Page Not Found
+        </h1>
+<!-- Subtext description as instructed -->
+<p class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-400 max-w-2xl mb-8">
+          The requested ledger record, page, or milestone trail could not be located on the CredChain network.
+        </p>
+<!-- Primary & Secondary CTA cluster -->
+<div class="flex flex-wrap items-center gap-4 mb-10"><a class="inline-flex items-center justify-center gap-2 bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-900 font-label-md text-label-md px-6 py-3 hover:bg-primary-container dark:hover:bg-teal-400 transition-colors active:opacity-80 font-semibold" href="#"><span class="material-symbols-outlined text-[18px]">arrow_back</span><span class="">Return to Home</span></a><a class="inline-flex items-center justify-center gap-2 border border-primary dark:border-teal-800 text-primary dark:text-teal-300 dark:bg-[#16272c] font-label-md text-label-md px-6 py-3 hover:bg-surface-container-low dark:hover:bg-[#1c3239] transition-colors active:opacity-80" href="#"><span class="material-symbols-outlined text-[18px]">travel_explore</span><span class="">Explore Ledger</span></a></div>
+<!-- Ledger Node Trace Diagnostics Container -->
+<div class="border-t border-border-subtle dark:border-[#22353a] pt-6">
+<h2 class="font-label-md text-label-md text-on-surface dark:text-slate-200 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">database</span>
+<span class="">Ledger Inquiry Diagnostics</span>
+</h2>
+<div class="bg-surface-container-low dark:bg-[#0e1a1d] border border-border-subtle dark:border-[#22353a] p-4 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-300 overflow-x-auto space-y-1"><div class="flex items-center justify-between"><span class="font-semibold text-outline dark:text-slate-400">Network State:</span><span class="text-status-valid dark:text-emerald-400 font-medium">Mainnet Online (Block #8,419,203)</span></div><div class="flex items-center justify-between"><span class="font-semibold text-outline dark:text-slate-400">Query Hash:</span><span class="text-on-surface dark:text-slate-300">0x7f4e91a0c4...b289cd</span></div><div class="flex items-center justify-between"><span class="font-semibold text-outline dark:text-slate-400">Resolution Error:</span><span class="text-error dark:text-rose-400 font-medium">Null Pointer / Unmined Merkle Proof</span></div></div>
+</div>
+</section>
+<!-- Asymmetric Ledger Verification Sidebar / Bento Card -->
+<aside class="lg:col-span-4 space-y-6">
+<!-- Verification Ledger Guide Card -->
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-[#22353a] p-6"><h2 class="font-headline-md text-headline-md text-on-surface dark:text-slate-100 mb-2">Ledger Quick Search</h2><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mb-4">Search credential identifiers directly across the active distributed state ledger.</p><form class="space-y-3" onsubmit="event.preventDefault();"><div><label class="block font-label-md text-label-md text-on-surface dark:text-slate-300 mb-1" for="recordId">Credential ID or TxHash</label><input class="w-full border border-border-subtle dark:border-[#24393f] px-3 py-2 text-on-surface dark:text-slate-100 dark:placeholder-slate-500 bg-surface-container-lowest dark:bg-[#0e1a1d] font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-teal-500" id="recordId" placeholder="e.g. 0x48a... or CID-94812" type="text"></div><button class="w-full bg-surface-container-high dark:bg-teal-900/50 text-primary dark:text-teal-300 border border-border-subtle dark:border-teal-700 font-label-md text-label-md py-2.5 hover:bg-surface-container-highest dark:hover:bg-teal-900/70 transition-colors" type="submit">Verify Identifier</button></form></div>
+<!-- Node Status Checklist Box -->
+<div class="bg-surface-container-low dark:bg-[#132024] border border-border-subtle dark:border-[#22353a] p-6"><h3 class="font-label-md text-label-md text-on-surface dark:text-slate-100 mb-4">Verification Assistance</h3><ul class="space-y-3 font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400"><li class="flex items-start gap-2"><span class="material-symbols-outlined text-primary dark:text-teal-400 text-[18px] mt-0.5">check_box</span><span class="">Verify that the issuing authority has finalized consensus for this milestone.</span></li><li class="flex items-start gap-2"><span class="material-symbols-outlined text-primary dark:text-teal-400 text-[18px] mt-0.5">check_box</span><span class="">Review transaction parameters if redirected from an external identity broker.</span></li><li class="flex items-start gap-2"><span class="material-symbols-outlined text-primary dark:text-teal-400 text-[18px] mt-0.5">check_box</span><span class="">Consult public registry indices via CredChain Explorer.</span></li></ul></div>
+</aside>
+</div>
+</main>
+<!-- Footer (Shared Component Integration with 2026 Copyright) -->
+<footer class="bg-surface-container dark:bg-[#0e171a] border-t border-outline-variant dark:border-slate-800 text-on-surface-variant dark:text-slate-400 mt-auto transition-colors">
+<div class="w-full py-base px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-base py-6">
+<!-- Copyright text explicitly updated to 2026 while retaining open standard identity -->
+<div class="font-body-sm text-body-sm text-on-surface-variant">
+        © 2026 CredChain Ledger. Built on open standards.
+      </div>
+<!-- Footer Navigation Links from JSON Anchor -->
+<nav class="flex flex-wrap items-center gap-6"><a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-400 underline transition-opacity duration-150" href="#">Privacy</a><a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-400 underline transition-opacity duration-150" href="#">Terms</a><a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-400 underline transition-opacity duration-150" href="#">API Docs</a><a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-400 underline transition-opacity duration-150" href="#">Source</a></nav>
+</div>
+</footer>
+
+
+
+
+
+
+</body></html>

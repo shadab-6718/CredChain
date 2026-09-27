@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CredChain — UML Architecture & Sequence Diagrams</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 1400px;
+      width: 96%;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 26px;
+      color: #38bdf8;
+      text-align: center;
+    }
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 18px;
+      color: #93c5fd;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+    pre.mermaid {
+      display: flex;
+      justify-content: center;
+      background: transparent;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>CredChain Technical Approach — UML Diagrams</h1>
+  <div class="subtitle">Official UML Architecture Component Diagram &amp; Dynamic Lifecycle Sequence Diagram</div>
+
+  <!-- 1. UML COMPONENT ARCHITECTURE DIAGRAM -->
+  <div class="card">
+    <h2>1. UML 2.5 Component &amp; Deployment Architecture Diagram</h2>
+    <pre class="mermaid">
+flowchart TB
+    %% UML Component Styling
+    classDef actorUML fill:#0284c7,stroke:#38bdf8,stroke-width:2px,color:#ffffff,rx:6px,ry:6px;
+    classDef compUML fill:#1e293b,stroke:#0ea5e9,stroke-width:2px,color:#f8fafc,rx:4px,ry:4px;
+    classDef chainUML fill:#31103f,stroke:#c084fc,stroke-width:2px,color:#f8fafc,rx:4px,ry:4px;
+    classDef ipfsUML fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc,rx:4px,ry:4px;
+    classDef interfaceNode fill:#0f172a,stroke:#64748b,stroke-dasharray: 4 4,stroke-width:1.5px,color:#94a3b8;
+    classDef secBar fill:#0c4a6e,stroke:#38bdf8,stroke-width:2px,color:#ffffff,rx:8px,ry:8px;
+
+    %% ACTORS
+    subgraph ACTORS ["&laquo;actors&raquo; System Stakeholders"]
+        direction LR
+        ACT_ISSUER["&laquo;actor&raquo;<br/>🏛️ <b>Issuer</b><br/>(University / Land Registry)"]:::actorUML
+        ACT_HOLDER["&laquo;actor&raquo;<br/>👤 <b>Holder</b><br/>(Student / Landowner)"]:::actorUML
+        ACT_VERIFIER["&laquo;actor&raquo;<br/>🔍 <b>Verifier</b><br/>(Employer / Bank / Govt)"]:::actorUML
+        ACT_ADMIN["&laquo;actor&raquo;<br/>⚙️ <b>Admin</b><br/>(Governance Authority)"]:::actorUML
+    end
+
+    %% CLIENT TIER
+    subgraph PRESENTATION_TIER ["&laquo;presentation layer&raquo; Frontend Client"]
+        direction TB
+        UI_APP["&laquo;component&raquo;<br/>💻 <b>Frontend Web App (Vite + React)</b><br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Role Dashboards (Issuer / Holder / Verifier / Admin)<br/>• QR Generator & Camera Barcode Scanner<br/>• Client-Side WebCrypto (AES-256 GCM)<br/>• Progressive Milestone Trail Visualizer"]:::compUML
+    end
+
+    %% APPLICATION TIER
+    subgraph APPLICATION_TIER ["&laquo;application layer&raquo; Backend Services"]
+        direction TB
+        BACKEND_API["&laquo;component&raquo;<br/>🖥️ <b>CredChain Backend API (Node.js / Express)</b><br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Credential Lifecycle & Status Controller<br/>• Bilateral Time-Boxed Consent Controller<br/>• Progressive Milestone Integrity Validator<br/>• Institutional DID Onboarding Engine"]:::compUML
+    end
+
+    %% DATA & STORAGE TIER
+    subgraph STORAGE_TIER ["&laquo;persistence layer&raquo; Decentralized Storage & Ledger"]
+        direction LR
+        IPFS_NODE["&laquo;subsystem&raquo;<br/>📦 <b>Decentralized Storage (IPFS)</b><br/>━━━━━━━━━━━━━━━━━━━━<br/>• AES-256 Encrypted Payload Storage<br/>• Immutable Content ID (CID) Generation<br/>• Zero Plaintext PII Preservation"]:::ipfsUML
+
+        BLOCKCHAIN_NODE["&laquo;subsystem&raquo;<br/>⛓️ <b>Blockchain Network (Polygon Amoy)</b><br/>━━━━━━━━━━━━━━━━━━━━<br/>• Credential & Milestone Proof Registry<br/>• Merkle Root & SHA-256 Document Hashes<br/>• Cryptographic Revocation Registry<br/>• DID Accreditation Whitelist"]:::chainUML
+    end
+
+    %% UML DEPENDENCIES & INTERFACES
+    ACT_ISSUER -->|"Uploads doc & milestone"| UI_APP
+    ACT_HOLDER -->|"Manages access & consents"| UI_APP
+    ACT_VERIFIER -->|"Audits QR & verifies trail"| UI_APP
+    ACT_ADMIN -->|"Onboards DIDs & monitors threats"| UI_APP
+
+    UI_APP <==>|"REST APIs / JSON / JWT"| BACKEND_API
+    UI_APP -->|"Client-Side Encrypted File"| IPFS_NODE
+    IPFS_NODE -->|"IPFS CID"| BLOCKCHAIN_NODE
+
+    BACKEND_API <==>|"JSON-RPC / Ethers.js Smart Contracts"| BLOCKCHAIN_NODE
+    BACKEND_API <==>|"Pinata SDK Gateway"| IPFS_NODE
+
+    %% SECURITY BAR
+    SEC["🛡️ &laquo;constraints&raquo; <b>Security &amp; Privacy Architecture:</b> &nbsp;&nbsp; 🔐 Client-side Encryption &nbsp;•&nbsp; 🚫 Zero PII On-Chain &nbsp;•&nbsp; 🤝 Bilateral Time-Boxed Consent &nbsp;•&nbsp; ✨ Tamper-Proof Audit Trail"]:::secBar
+
+    STORAGE_TIER --- SEC
+    </pre>
+  </div>
+
+  <!-- 2. UML SEQUENCE LIFECYCLE DIAGRAM -->
+  <div class="card">
+    <h2>2. UML Dynamic Sequence Diagram (4-Stage Progressive Lifecycle)</h2>
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Issuer as 🏛️ Issuer (University)
+    actor Holder as 👤 Holder (Student)
+    boundary UI as 💻 Frontend (Web App)
+    control API as 🖥️ Backend API
+    database IPFS as 📦 IPFS Storage
+    entity Chain as ⛓️ Blockchain (Polygon)
+    actor Verifier as 🔍 Verifier (Employer/Bank)
+
+    %% 1. ISSUE CREDENTIAL
+    rect rgb(30, 41, 59)
+    note over Issuer, UI: Stage 1: Issue Credential
+    Issuer->>UI: Upload document & select type (Milestone / Final Degree)
+    UI->>UI: Compute SHA-256 Document Hash
+    end
+
+    %% 2. STORE DOCUMENT
+    rect rgb(15, 23, 42)
+    note over UI, IPFS: Stage 2: Encrypt & Store Off-Chain (Two-Zone Privacy)
+    UI->>UI: Encrypt file client-side (AES-256 GCM)
+    UI->>IPFS: Upload encrypted payload
+    IPFS-->>UI: Return Content ID (CID)
+    end
+
+    %% 3. RECORD ON BLOCKCHAIN
+    rect rgb(30, 41, 59)
+    note over UI, Chain: Stage 3: Record Immutable Proof on Blockchain
+    UI->>API: Submit Anchor Request (SHA-256 Hash, IPFS CID, Parent Milestone)
+    API->>Chain: issueCredential(hash, CID, parentMilestoneId)
+    Chain->>Chain: Validate issuer DID whitelist & prerequisite milestone chain
+    Chain-->>API: Emits CredentialIssued(txHash, blockNumber)
+    API-->>UI: Return transaction receipt & generate verifiable QR code
+    UI-->>Holder: Deliver credential to Holder Wallet
+    end
+
+    %% 4. VERIFY / ACCESS
+    rect rgb(15, 23, 42)
+    note over Verifier, Chain: Stage 4: Dual-Gate Verification & Time-Boxed Consent
+    Verifier->>UI: Scan QR code / query credential ID
+    UI->>Chain: verifyCredential(credentialId)
+    Chain-->>UI: Return on-chain status (VALID / REVOKED) + Milestone Audit Trail
+    
+    opt Document Inspection with Consent
+        Verifier->>API: Request access to encrypted document
+        API->>Holder: Inbound access notification (24h-30d time-box)
+        Holder->>API: Approve bilateral consent grant
+        API->>IPFS: Fetch encrypted document via CID
+        IPFS-->>UI: Stream encrypted payload
+        UI->>UI: Decrypt payload using holder-shared session key
+        UI-->>Verifier: Display authentic verified document
+    end
+    end
+    </pre>
+  </div>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark'
+    });
+  </script>
+</body>
+</html>

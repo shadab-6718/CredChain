@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CredChain — Cryptographic Access Recovery Suite</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Forms & Container Queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Immediate Theme Sync to prevent flash -->
+<script>
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
+<!-- Custom Styles for Dark Mode Glow & Animations -->
+<style>
+  @keyframes pulseGlow {
+    0%, 100% {
+      filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.45)) drop-shadow(0 0 10px rgba(0, 96, 100, 0.35));
+    }
+    50% {
+      filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.85)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5));
+    }
+  }
+
+  .dark .logo-glow-pulse {
+    animation: pulseGlow 3.5s ease-in-out infinite;
+  }
+</style>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed-variant": "#00497e",
+            "on-secondary-container": "#004376",
+            "on-surface-variant": "#3f4949",
+            "background": "#fcf9f8",
+            "surface-container": "#f0eded",
+            "surface-variant": "#e5e2e1",
+            "on-primary-container": "#8fd8dc",
+            "on-error": "#ffffff",
+            "tertiary-container": "#7e4924",
+            "inverse-on-surface": "#f3f0ef",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#a6eff3",
+            "inverse-surface": "#313030",
+            "primary-container": "#006064",
+            "surface-container-high": "#eae7e7",
+            "status-valid": "#00703C",
+            "secondary": "#0061a6",
+            "primary-fixed-dim": "#8ad3d7",
+            "secondary-fixed-dim": "#a0caff",
+            "surface": "#fcf9f8",
+            "on-tertiary": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed": "#311300",
+            "inverse-primary": "#8ad3d7",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "surface-tint": "#14696d",
+            "primary": "#00464a",
+            "surface-container-low": "#f6f3f2",
+            "error-container": "#ffdad6",
+            "tertiary": "#62330f",
+            "on-secondary": "#ffffff",
+            "outline": "#6f7979",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#ffbe95",
+            "status-revoked": "#D4351C",
+            "on-secondary-fixed": "#001c37",
+            "on-tertiary-fixed-variant": "#6b3a16",
+            "tertiary-fixed": "#ffdbc7",
+            "secondary-fixed": "#d2e4ff",
+            "on-primary-fixed": "#002021",
+            "status-pending": "#F47738",
+            "surface-bright": "#fcf9f8",
+            "on-background": "#1c1b1b",
+            "outline-variant": "#bec8c9",
+            "border-subtle": "#D1D5DB",
+            "on-surface": "#1c1b1b",
+            "secondary-container": "#6eb2fe",
+            "on-primary-fixed-variant": "#004f53",
+            "tertiary-fixed-dim": "#ffb688",
+            "surface-container-highest": "#e5e2e1"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "base": "8px",
+            "margin-mobile": "16px",
+            "gutter": "16px",
+            "margin-desktop": "32px",
+            "container-max": "1280px"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "code-sm": ["JetBrains Mono", "monospace"],
+            "headline-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background dark:bg-[#080f11] text-on-surface dark:text-[#d1e0e0] font-body-sm text-body-sm min-h-screen flex flex-col antialiased selection:bg-primary selection:text-on-primary transition-colors duration-200">
+<!-- TOP APP BAR -->
+<header class="w-full border-b border-border-subtle dark:border-[#1e2d30] bg-surface dark:bg-[#0d1517] sticky top-0 z-50 px-margin-mobile md:px-margin-desktop transition-colors">
+<div class="max-w-container-max mx-auto h-16 flex items-center justify-between">
+<!-- Left Anchor: Brand & Logo -->
+<div class="flex items-center gap-3">
+<a class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary" href="#home">
+<img alt="CredChain Cryptographic Protocol Logo" class="h-8 w-8 object-contain logo-glow-pulse transition-all" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA"/>
+<span class="text-headline-md font-headline-md text-primary dark:text-[#00E5FF] tracking-tight font-bold transition-colors">CredChain</span>
+</a>
+<div class="hidden sm:inline-flex items-center px-2 py-0.5 border border-border-subtle dark:border-[#1e2d30] bg-surface-container-low dark:bg-[#151d1f] text-on-surface-variant dark:text-[#7f9ba0] font-code-sm text-code-sm uppercase">
+          Ledger v4.18
+        </div>
+</div>
+<!-- Right Navigation Cluster & Actions -->
+<div class="flex items-center gap-3 md:gap-5">
+<div class="hidden lg:flex items-center gap-6 border-r border-border-subtle dark:border-[#1e2d30] pr-6">
+<a class="text-on-surface-variant dark:text-[#8ea9ad] font-label-md text-label-md py-2 hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150 flex items-center gap-1.5" href="#verify">
+<span class="material-symbols-outlined text-[18px]" data-icon="shield">shield</span>
+<span>Verify</span>
+</a>
+<a class="text-on-surface-variant dark:text-[#8ea9ad] font-label-md text-label-md py-2 hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="#institutions">Institutions</a>
+<a class="text-on-surface-variant dark:text-[#8ea9ad] font-label-md text-label-md py-2 hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="#documentation">Documentation</a>
+</div>
+<!-- Interactive Dark/Light Mode Switcher -->
+<button aria-label="Toggle theme" class="flex items-center justify-center p-2 rounded-lg border border-border-subtle dark:border-[#1e2d30] bg-surface-container-low dark:bg-[#151d1f] text-on-surface-variant dark:text-[#00E5FF] hover:text-primary dark:hover:bg-[#1b2629] transition-colors focus:outline-none focus:ring-2 focus:ring-primary" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+<span class="material-symbols-outlined text-[20px] dark:hidden" data-icon="dark_mode">dark_mode</span>
+<span class="material-symbols-outlined text-[20px] hidden dark:inline-block text-[#00E5FF]" data-icon="light_mode">light_mode</span>
+</button>
+<div class="flex items-center gap-3">
+<a class="inline-flex items-center gap-1 text-primary dark:text-[#00E5FF] font-label-md text-label-md px-3 py-2 border border-border-subtle dark:border-[#1e2d30] bg-surface dark:bg-[#151d1f] hover:bg-surface-container dark:hover:bg-[#1e292d] transition-colors duration-150" href="#login">
+<span class="material-symbols-outlined text-[16px]" data-icon="arrow_back">arrow_back</span>
+<span>Back to Login</span>
+</a>
+<a class="hidden sm:inline-flex items-center gap-1 text-on-surface-variant dark:text-[#8ea9ad] font-label-md text-label-md px-2.5 py-2 hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="#support">
+<span class="material-symbols-outlined text-[18px]" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</a>
+</div>
+</div>
+</div>
+</header>
+<!-- PROTOCOL SECURITY STATUS RIBBON -->
+<aside class="w-full bg-surface-container dark:bg-[#0c1416] border-b border-border-subtle dark:border-[#1e2d30] py-2 px-margin-mobile md:px-margin-desktop text-on-surface-variant dark:text-[#8fa8ad] transition-colors">
+<div class="max-w-container-max mx-auto flex flex-wrap items-center justify-between gap-2 font-code-sm text-code-sm">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-status-valid shadow-[0_0_8px_#00703C]"></span>
+<span class="text-on-surface dark:text-[#e1ecee] font-semibold">CRYPTOGRAPHIC LEDGER STATUS:</span>
+<span class="text-on-surface-variant dark:text-[#7ba0a6]">Consensus Nominal (0x9F41…E2)</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant dark:text-[#7ba0a6]">
+<span>Session Entropy: <strong class="text-on-surface dark:text-[#00E5FF] font-code-sm">256-bit SHA-3</strong></span>
+<span class="hidden md:inline">TLS 1.3 Strict Pinning</span>
+</div>
+</div>
+</aside>
+<!-- MAIN VIEW CONTAINER -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<!-- Section Header & Switcher Context -->
+<div class="mb-8 md:mb-10 max-w-3xl">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 bg-surface-container-high dark:bg-[#151d1f] border border-border-subtle dark:border-[#1e2d30] text-primary dark:text-[#00E5FF] font-label-md text-label-md tracking-wider uppercase mb-3">
+<span class="material-symbols-outlined text-[16px]" data-icon="key">key</span>
+<span>Cryptographic Access Recovery Suite</span>
+</div>
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-primary dark:text-[#e4f6f8] tracking-tight">
+        Authenticate &amp; Reclaim Ledger Keys
+      </h1>
+<p class="mt-2 text-body-lg font-body-lg text-on-surface-variant dark:text-[#8ba7ac]">
+        Select a transaction route below to request a time-locked recovery signature or establish new cryptographic keypairs.
+      </p>
+<!-- Protocol Route Tabs -->
+<div class="mt-6 flex flex-wrap items-center gap-2 border-b border-border-subtle dark:border-[#1e2d30] pb-px">
+<button class="px-4 py-2 font-label-md text-label-md border-b-2 border-primary dark:border-[#00E5FF] text-primary dark:text-[#00E5FF] flex items-center gap-2 transition-colors duration-150" id="tab-module-1" onclick="switchRoute('forgot')">
+<span class="material-symbols-outlined text-[18px]" data-icon="mail">mail</span>
+<span>Route: /auth/forgot-password</span>
+</button>
+<button class="px-4 py-2 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant dark:text-[#7f9ea4] hover:text-primary dark:hover:text-[#00E5FF] flex items-center gap-2 transition-colors duration-150" id="tab-module-2" onclick="switchRoute('reset')">
+<span class="material-symbols-outlined text-[18px]" data-icon="lock_reset">lock_reset</span>
+<span>Route: /auth/reset-password</span>
+</button>
+<button class="px-4 py-2 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant dark:text-[#7f9ea4] hover:text-primary dark:hover:text-[#00E5FF] flex items-center gap-2 transition-colors duration-150" id="tab-both" onclick="switchRoute('both')">
+<span class="material-symbols-outlined text-[18px]" data-icon="grid_view">grid_view</span>
+<span>Dual Inspection View</span>
+</button>
+</div>
+</div>
+<!-- WORKSPACE GRID -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start" id="modules-container">
+<!-- ================= MODULE 1: FORGOT PASSWORD ================= -->
+<section class="w-full bg-surface-container-lowest dark:bg-[#151d1f] border border-border-subtle dark:border-[#1e2d30] p-6 md:p-8 flex flex-col justify-between shadow-sm transition-colors" id="module-forgot">
+<div>
+<!-- Module Header Spec -->
+<div class="flex items-center justify-between border-b border-border-subtle dark:border-[#1e2d30] pb-4 mb-6">
+<span class="px-2.5 py-1 bg-surface-container dark:bg-[#101718] text-primary dark:text-[#00E5FF] font-code-sm text-code-sm font-semibold tracking-wider border border-transparent dark:border-[#1d292b]">
+              RECOVERY PROTOCOL
+            </span>
+<span class="font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]">ROUTE: /auth/forgot-password</span>
+</div>
+<h2 class="text-headline-md font-headline-md text-primary dark:text-[#e6f7f9]">
+            Reset your password
+          </h2>
+<p class="mt-2 text-body-sm font-body-sm text-on-surface-variant dark:text-[#8ba7ac]">
+            Enter your email and we'll send you a password reset link.
+          </p>
+<!-- Interactive Form State -->
+<form class="mt-6 space-y-5" id="forgot-form" onsubmit="handleForgotSubmit(event)">
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#d1e0e0] mb-2" for="email-recovery">
+                Email Address
+              </label>
+<div class="relative">
+<input class="w-full h-11 px-3.5 py-2 border border-border-subtle dark:border-[#27383c] bg-surface dark:bg-[#0d1517] text-on-surface dark:text-[#e4f6f8] text-body-sm font-body-sm placeholder:text-outline dark:placeholder:text-[#526f74] focus:border-primary dark:focus:border-[#00E5FF] focus:ring-1 focus:ring-primary dark:focus:ring-[#00E5FF] focus:outline-none transition-colors" id="email-recovery" name="email" placeholder="Enter your registered email address" required="" type="email"/>
+<span class="material-symbols-outlined absolute right-3 top-3 text-outline dark:text-[#5d7f85] text-[18px]" data-icon="mail">mail</span>
+</div>
+<p class="mt-1.5 font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]">
+                Associated credential identity (DID, Institutional, or Personal Ledger ID).
+              </p>
+</div>
+<!-- Protocol Constraints Info Box -->
+<div class="p-3.5 bg-surface-container-low dark:bg-[#0d1517] border border-border-subtle dark:border-[#1e2d30] flex items-start gap-3">
+<span class="material-symbols-outlined text-primary dark:text-[#00E5FF] text-[20px] shrink-0 mt-0.5" data-icon="shield">shield</span>
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-[#8ea9ad]">
+<strong class="text-on-surface dark:text-[#d7eaed]">Time-Lock Envelope:</strong> Recovery hashes expire automatically after 15 minutes of non-settlement to prevent unauthenticated chain replay attacks.
+              </div>
+</div>
+<button class="w-full h-11 bg-primary dark:bg-[#00E5FF] text-on-primary dark:text-[#00383b] font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container dark:hover:bg-[#33ebff] transition-colors duration-150 active:opacity-90 cursor-pointer font-semibold shadow-sm" type="submit">
+<span>Send Reset Link</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- Success Banner State -->
+<div class="hidden mt-6 p-4 bg-surface-container-low dark:bg-[#0d1517] border-l-4 border-status-valid border-y border-r border-border-subtle dark:border-[#1e2d30]" id="forgot-success-banner">
+<div class="flex items-start gap-3">
+<span class="text-status-valid font-bold text-lg leading-tight">✓</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface dark:text-[#e4f6f8]">
+                  Check your email for the password reset link. We've sent a secure recovery link to your inbox.
+                </p>
+<p class="mt-1 font-code-sm text-code-sm text-on-surface-variant dark:text-[#8ba7ac]">
+                  Dispatched from node cluster: <span class="text-primary dark:text-[#00E5FF] font-medium">relay.credchain.net [Nonce: #90384]</span>
+</p>
+<div class="mt-3 flex items-center gap-3">
+<button class="text-secondary dark:text-[#6eb2fe] font-label-md text-label-md hover:underline" onclick="resendRecoveryEmail()" type="button">
+                    Resend link (60s cooldown)
+                  </button>
+<span class="text-border-subtle dark:text-[#27383c]">•</span>
+<button class="text-on-surface-variant dark:text-[#8ea9ad] font-code-sm text-code-sm hover:text-primary dark:hover:text-[#00E5FF]" onclick="resetForgotForm()" type="button">
+                    Edit email address
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Escape Link -->
+<div class="mt-8 pt-6 border-t border-border-subtle dark:border-[#1e2d30] flex items-center justify-between">
+<a class="text-primary dark:text-[#00E5FF] font-label-md text-label-md hover:text-primary-container dark:hover:underline inline-flex items-center gap-1.5 transition-colors" href="#roles">
+<span>← Return to Role Selection</span>
+</a>
+<span class="font-code-sm text-code-sm text-outline dark:text-[#608287]">CredChain v4.18 Auth</span>
+</div>
+</section>
+<!-- ================= MODULE 2: RESET PASSWORD ================= -->
+<section class="w-full bg-surface-container-lowest dark:bg-[#151d1f] border border-border-subtle dark:border-[#1e2d30] p-6 md:p-8 flex flex-col justify-between shadow-sm transition-colors" id="module-reset">
+<div>
+<!-- Module Header Spec -->
+<div class="flex items-center justify-between border-b border-border-subtle dark:border-[#1e2d30] pb-4 mb-6">
+<span class="px-2.5 py-1 bg-surface-container dark:bg-[#101718] text-primary dark:text-[#00E5FF] font-code-sm text-code-sm font-semibold tracking-wider border border-transparent dark:border-[#1d292b]">
+              KEY ROTATION SPECIFICATION
+            </span>
+<span class="font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]">ROUTE: /auth/reset-password</span>
+</div>
+<h2 class="text-headline-md font-headline-md text-primary dark:text-[#e6f7f9]">
+            Create a new password
+          </h2>
+<p class="mt-2 text-body-sm font-body-sm text-on-surface-variant dark:text-[#8ba7ac]">
+            Your new password must be at least 8 characters and include a combination of letters and numbers.
+          </p>
+<!-- Interactive Reset Form -->
+<form class="mt-6 space-y-5" id="reset-form" onsubmit="handleResetSubmit(event)">
+<!-- Input 1: New Password -->
+<div>
+<div class="flex items-center justify-between mb-2">
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#d1e0e0]" for="new-password">
+                  New Password
+                </label>
+<!-- Live Password Strength Badge -->
+<div class="flex items-center gap-1.5">
+<span class="font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]">Entropy:</span>
+<span class="px-2 py-0.5 bg-surface-container dark:bg-[#0d1517] font-code-sm text-code-sm font-semibold text-outline dark:text-[#8ea9ad] border border-transparent dark:border-[#223337]" id="strength-badge">
+                    Awaiting Input
+                  </span>
+</div>
+</div>
+<div class="relative">
+<input class="w-full h-11 px-3.5 py-2 pr-10 border border-border-subtle dark:border-[#27383c] bg-surface dark:bg-[#0d1517] text-on-surface dark:text-[#e4f6f8] text-body-sm font-body-sm placeholder:text-outline dark:placeholder:text-[#526f74] focus:border-primary dark:focus:border-[#00E5FF] focus:ring-1 focus:ring-primary dark:focus:ring-[#00E5FF] focus:outline-none transition-colors" id="new-password" minlength="8" name="new_password" oninput="evaluatePasswordStrength(this.value)" placeholder="Enter new password" required="" type="password"/>
+<button aria-label="Toggle password view" class="absolute right-3 top-3 text-outline dark:text-[#5d7f85] hover:text-primary dark:hover:text-[#00E5FF] transition-colors focus:outline-none" onclick="togglePasswordVisibility('new-password', 'eye-icon-1')" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="visibility" id="eye-icon-1">visibility</span>
+</button>
+</div>
+<!-- Visual 3-Segment Metric Bar -->
+<div class="mt-2 grid grid-cols-3 gap-1.5">
+<div class="h-1 bg-surface-variant dark:bg-[#202c2f]" id="bar-seg-1"></div>
+<div class="h-1 bg-surface-variant dark:bg-[#202c2f]" id="bar-seg-2"></div>
+<div class="h-1 bg-surface-variant dark:bg-[#202c2f]" id="bar-seg-3"></div>
+</div>
+<div class="mt-1 flex items-center justify-between font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]">
+<span>Minimum 8 chars</span>
+<span>Numbers &amp; Letters required</span>
+</div>
+</div>
+<!-- Input 2: Confirm Password -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#d1e0e0] mb-2" for="confirm-password">
+                Confirm Password
+              </label>
+<div class="relative">
+<input class="w-full h-11 px-3.5 py-2 pr-10 border border-border-subtle dark:border-[#27383c] bg-surface dark:bg-[#0d1517] text-on-surface dark:text-[#e4f6f8] text-body-sm font-body-sm placeholder:text-outline dark:placeholder:text-[#526f74] focus:border-primary dark:focus:border-[#00E5FF] focus:ring-1 focus:ring-primary dark:focus:ring-[#00E5FF] focus:outline-none transition-colors" id="confirm-password" name="confirm_password" oninput="checkPasswordMatch()" placeholder="Confirm new password" required="" type="password"/>
+<button aria-label="Toggle password view" class="absolute right-3 top-3 text-outline dark:text-[#5d7f85] hover:text-primary dark:hover:text-[#00E5FF] transition-colors focus:outline-none" onclick="togglePasswordVisibility('confirm-password', 'eye-icon-2')" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="visibility" id="eye-icon-2">visibility</span>
+</button>
+</div>
+<p class="mt-1.5 font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]" id="match-hint">
+                Must match the key entered above exactly.
+              </p>
+</div>
+<button class="w-full h-11 bg-primary dark:bg-[#00E5FF] text-on-primary dark:text-[#00383b] font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container dark:hover:bg-[#33ebff] transition-colors duration-150 active:opacity-90 cursor-pointer font-semibold shadow-sm" type="submit">
+<span>Update Password</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="lock">lock</span>
+</button>
+</form>
+<!-- Update Success Toast State -->
+<div class="hidden mt-6 p-4 bg-surface-container-low dark:bg-[#0d1517] border-l-4 border-status-valid border-y border-r border-border-subtle dark:border-[#1e2d30]" id="reset-success-alert">
+<div class="flex items-start gap-3">
+<span class="text-status-valid font-bold text-lg leading-tight">✓</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface dark:text-[#e4f6f8]">
+                  Password updated and cryptographic signature verified on-chain.
+                </p>
+<p class="mt-1 font-code-sm text-code-sm text-on-surface-variant dark:text-[#8ba7ac]">
+                  Executing automatic redirect to selected institutional workspace...
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Mandatory Redirect Notice Section -->
+<div class="mt-8 pt-6 border-t border-border-subtle dark:border-[#1e2d30]">
+<div class="p-4 bg-surface-container-low dark:bg-[#0d1517] border border-border-subtle dark:border-[#1e2d30] flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary dark:text-[#6eb2fe] text-[20px] shrink-0 mt-0.5" data-icon="info">info</span>
+<div class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#8ea9ad]">
+<span class="font-semibold text-on-surface dark:text-[#d7eaed] block mb-1">Redirect notice:</span>
+<p>
+                After updating, you will be directed to your role-specific dashboard (<code class="font-code-sm text-code-sm text-primary dark:text-[#00E5FF]">/issuer/dashboard</code>, <code class="font-code-sm text-code-sm text-primary dark:text-[#00E5FF]">/holder/dashboard</code>, or <code class="font-code-sm text-code-sm text-primary dark:text-[#00E5FF]">/verifier/dashboard</code>).
+              </p>
+<div class="mt-3 flex flex-wrap gap-2">
+<a class="px-2 py-1 bg-surface-container dark:bg-[#151d1f] border border-border-subtle dark:border-[#27383c] font-code-sm text-code-sm text-on-surface dark:text-[#c4dede] hover:bg-surface-variant dark:hover:bg-[#202c2f]" href="#issuer">/issuer</a>
+<a class="px-2 py-1 bg-surface-container dark:bg-[#151d1f] border border-border-subtle dark:border-[#27383c] font-code-sm text-code-sm text-on-surface dark:text-[#c4dede] hover:bg-surface-variant dark:hover:bg-[#202c2f]" href="#holder">/holder</a>
+<a class="px-2 py-1 bg-surface-container dark:bg-[#151d1f] border border-border-subtle dark:border-[#27383c] font-code-sm text-code-sm text-on-surface dark:text-[#c4dede] hover:bg-surface-variant dark:hover:bg-[#202c2f]" href="#verifier">/verifier</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- RECOVERY AUDIT TRAIL TABLE (Labeled as Mock Demonstration Fixtures) -->
+<section class="mt-12 bg-surface-container-lowest dark:bg-[#151d1f] border border-border-subtle dark:border-[#1e2d30] p-6 md:p-8 transition-colors">
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-border-subtle dark:border-[#1e2d30] gap-2">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-headline-md font-headline-md text-primary dark:text-[#e4f6f8]">Institutional Access &amp; Audit Log</h3>
+<span class="px-2 py-0.5 bg-surface-container dark:bg-[#0d1517] text-on-surface-variant dark:text-[#7ba0a6] text-[11px] font-code-sm uppercase border border-border-subtle dark:border-[#1e2d30]">Mock Demonstration Fixtures</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-[#8ba7ac]">Record of recent identity challenge challenges and cryptographic dispatch receipts.</p>
+</div>
+<div class="flex items-center gap-2 font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]">
+<span class="material-symbols-outlined text-[16px]" data-icon="history">history</span>
+<span>Ledger Synced at Block #19,402,112</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm border-collapse">
+<thead>
+<tr class="bg-surface-container dark:bg-[#0d1517] border-b border-border-subtle dark:border-[#1e2d30] font-label-md text-label-md text-on-surface dark:text-[#d1e0e0]">
+<th class="p-3">Protocol Route</th>
+<th class="p-3">Target DID / Identifier</th>
+<th class="p-3">Challenge Type</th>
+<th class="p-3">Status</th>
+<th class="p-3 text-right">Timestamp (UTC)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle dark:divide-[#1e2d30] font-code-sm text-code-sm">
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#1a2426] transition-colors">
+<td class="p-3 text-primary dark:text-[#00E5FF] font-medium">/auth/forgot-password</td>
+<td class="p-3 text-on-surface-variant dark:text-[#8ea9ad]">did:cred:8f92a…991</td>
+<td class="p-3 text-on-surface dark:text-[#c4dede]">HMAC-SHA256 Token</td>
+<td class="p-3">
+<span class="inline-flex items-center px-2 py-0.5 bg-surface-container dark:bg-[#0d1517] text-status-valid border border-border-subtle dark:border-[#1e2d30] font-label-md text-label-md font-semibold">
+                  Delivered
+                </span>
+</td>
+<td class="p-3 text-right text-on-surface-variant dark:text-[#7ba0a6]">2026-03-30 14:18:02</td>
+</tr>
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#1a2426] transition-colors">
+<td class="p-3 text-primary dark:text-[#00E5FF] font-medium">/auth/reset-password</td>
+<td class="p-3 text-on-surface-variant dark:text-[#8ea9ad]">did:cred:4b01e…31c</td>
+<td class="p-3 text-on-surface dark:text-[#c4dede]">Key Rotation / Ed25519</td>
+<td class="p-3">
+<span class="inline-flex items-center px-2 py-0.5 bg-surface-container dark:bg-[#0d1517] text-status-valid border border-border-subtle dark:border-[#1e2d30] font-label-md text-label-md font-semibold">
+                  Committed
+                </span>
+</td>
+<td class="p-3 text-right text-on-surface-variant dark:text-[#7ba0a6]">2026-03-30 13:54:19</td>
+</tr>
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#1a2426] transition-colors">
+<td class="p-3 text-primary dark:text-[#00E5FF] font-medium">/auth/forgot-password</td>
+<td class="p-3 text-on-surface-variant dark:text-[#8ea9ad]">did:cred:7a33d…55e</td>
+<td class="p-3 text-on-surface dark:text-[#c4dede]">HMAC-SHA256 Token</td>
+<td class="p-3">
+<span class="inline-flex items-center px-2 py-0.5 bg-surface-container dark:bg-[#0d1517] text-status-pending border border-border-subtle dark:border-[#1e2d30] font-label-md text-label-md font-semibold">
+                  Pending Verification
+                </span>
+</td>
+<td class="p-3 text-right text-on-surface-variant dark:text-[#7ba0a6]">2026-03-30 12:40:45</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- FLOATING RETURN TO TOP BUTTON -->
+<button aria-label="Return to top" class="fixed bottom-6 right-6 p-3 bg-surface dark:bg-[#151d1f] text-primary dark:text-[#00E5FF] border border-border-subtle dark:border-[#223337] shadow-lg rounded-full hover:bg-surface-container dark:hover:bg-[#1f2a2e] transition-all duration-200 z-40 focus:outline-none focus:ring-2 focus:ring-primary" id="return-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Return to Top">
+<span class="material-symbols-outlined text-[20px] block" data-icon="arrow_upward">arrow_upward</span>
+</button>
+<!-- FOOTER -->
+<footer class="w-full border-t border-border-subtle dark:border-[#1e2d30] bg-surface-container-low dark:bg-[#080f11] px-margin-mobile md:px-margin-desktop py-base mt-auto transition-colors">
+<div class="max-w-container-max mx-auto py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-[#00E5FF]">CredChain</span>
+<span class="hidden sm:inline text-border-subtle dark:text-[#1e2d30]">|</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#7ba0a6]">
+          © 2026 CredChain Ledger Infrastructure. All credentials cryptographically verifiable on-chain.
+        </p>
+</div>
+<nav class="flex flex-wrap items-center justify-center gap-6">
+<a class="text-on-surface-variant dark:text-[#7ba0a6] font-body-sm text-body-sm hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150 flex items-center gap-1.5" href="#network-status">
+<span class="w-2 h-2 rounded-full bg-status-valid inline-block shadow-[0_0_6px_#00703C]"></span>
+<span>Network Status</span>
+</a>
+<a class="text-on-surface-variant dark:text-[#7ba0a6] font-body-sm text-body-sm hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="#security-policy">Security Policy</a>
+<a class="text-on-surface-variant dark:text-[#7ba0a6] font-body-sm text-body-sm hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="#verification-protocol">Verification Protocol</a>
+<a class="text-on-surface-variant dark:text-[#7ba0a6] font-body-sm text-body-sm hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="#terms-of-trust">Terms of Trust</a>
+</nav>
+</div>
+</footer>
+<!-- Interactive JavaScript Logic -->
+<script>
+    // Theme Toggle Handler
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        html.classList.remove('light');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Tab Route Switching Handler
+    function switchRoute(mode) {
+      const col1 = document.getElementById('module-forgot');
+      const col2 = document.getElementById('module-reset');
+      const tab1 = document.getElementById('tab-module-1');
+      const tab2 = document.getElementById('tab-module-2');
+      const tabBoth = document.getElementById('tab-both');
+      const container = document.getElementById('modules-container');
+
+      // Reset Tab Styles
+      const inactiveClass = "px-4 py-2 font-label-md text-label-md border-b-2 border-transparent text-on-surface-variant dark:text-[#7f9ea4] hover:text-primary dark:hover:text-[#00E5FF] flex items-center gap-2 transition-colors duration-150";
+      const activeClass = "px-4 py-2 font-label-md text-label-md border-b-2 border-primary dark:border-[#00E5FF] text-primary dark:text-[#00E5FF] flex items-center gap-2 transition-colors duration-150";
+
+      [tab1, tab2, tabBoth].forEach(tab => {
+        tab.className = inactiveClass;
+      });
+
+      if (mode === 'forgot') {
+        col1.classList.remove('hidden');
+        col2.classList.add('hidden');
+        container.classList.remove('lg:grid-cols-2');
+        container.classList.add('max-w-2xl', 'mx-auto');
+        tab1.className = activeClass;
+      } else if (mode === 'reset') {
+        col1.classList.add('hidden');
+        col2.classList.remove('hidden');
+        container.classList.remove('lg:grid-cols-2');
+        container.classList.add('max-w-2xl', 'mx-auto');
+        tab2.className = activeClass;
+      } else {
+        col1.classList.remove('hidden');
+        col2.classList.remove('hidden');
+        container.classList.add('lg:grid-cols-2');
+        container.classList.remove('max-w-2xl', 'mx-auto');
+        tabBoth.className = activeClass;
+      }
+    }
+
+    // Module 1 Form Handlers
+    function handleForgotSubmit(e) {
+      e.preventDefault();
+      const form = document.getElementById('forgot-form');
+      const banner = document.getElementById('forgot-success-banner');
+      form.classList.add('opacity-40', 'pointer-events-none');
+      banner.classList.remove('hidden');
+    }
+
+    function resetForgotForm() {
+      const form = document.getElementById('forgot-form');
+      const banner = document.getElementById('forgot-success-banner');
+      form.classList.remove('opacity-40', 'pointer-events-none');
+      banner.classList.add('hidden');
+      document.getElementById('email-recovery').focus();
+    }
+
+    function resendRecoveryEmail() {
+      alert("A refreshed cryptographic recovery token has been broadcast to your registered address.");
+    }
+
+    // Password Strength & Entropy Evaluator
+    function evaluatePasswordStrength(val) {
+      const badge = document.getElementById('strength-badge');
+      const seg1 = document.getElementById('bar-seg-1');
+      const seg2 = document.getElementById('bar-seg-2');
+      const seg3 = document.getElementById('bar-seg-3');
+
+      // Clear segments
+      seg1.className = 'h-1 bg-surface-variant dark:bg-[#202c2f]';
+      seg2.className = 'h-1 bg-surface-variant dark:bg-[#202c2f]';
+      seg3.className = 'h-1 bg-surface-variant dark:bg-[#202c2f]';
+
+      if (!val || val.length === 0) {
+        badge.innerText = 'Awaiting Input';
+        badge.className = 'px-2 py-0.5 bg-surface-container dark:bg-[#0d1517] font-code-sm text-code-sm font-semibold text-outline dark:text-[#8ea9ad] border border-transparent dark:border-[#223337]';
+        return;
+      }
+
+      const hasLength = val.length >= 8;
+      const hasLetters = /[a-zA-Z]/.test(val);
+      const hasNumbers = /[0-9]/.test(val);
+      const hasSpecial = /[^a-zA-Z0-9]/.test(val);
+
+      let score = 0;
+      if (hasLength) score++;
+      if (hasLetters && hasNumbers) score++;
+      if (val.length >= 12 && hasSpecial) score++;
+
+      if (score <= 1) {
+        badge.innerText = 'Weak';
+        badge.className = 'px-2 py-0.5 bg-error-container dark:bg-[#3d1212] text-error dark:text-[#ff8a8a] font-code-sm text-code-sm font-semibold border border-transparent dark:border-[#521c1c]';
+        seg1.className = 'h-1 bg-error';
+      } else if (score === 2) {
+        badge.innerText = 'Medium';
+        badge.className = 'px-2 py-0.5 bg-surface-container dark:bg-[#2c1d12] text-status-pending dark:text-[#ff9c6b] font-code-sm text-code-sm font-semibold border border-transparent dark:border-[#4d2f1a]';
+        seg1.className = 'h-1 bg-status-pending';
+        seg2.className = 'h-1 bg-status-pending';
+      } else {
+        badge.innerText = 'Strong';
+        badge.className = 'px-2 py-0.5 bg-surface-container dark:bg-[#0d2a1b] text-status-valid dark:text-[#4ade80] font-code-sm text-code-sm font-semibold border border-transparent dark:border-[#14472d]';
+        seg1.className = 'h-1 bg-status-valid';
+        seg2.className = 'h-1 bg-status-valid';
+        seg3.className = 'h-1 bg-status-valid';
+      }
+
+      checkPasswordMatch();
+    }
+
+    // Match Confirmation Checker
+    function checkPasswordMatch() {
+      const p1 = document.getElementById('new-password').value;
+      const p2 = document.getElementById('confirm-password').value;
+      const hint = document.getElementById('match-hint');
+
+      if (!p2) {
+        hint.innerText = "Must match the key entered above exactly.";
+        hint.className = "mt-1.5 font-code-sm text-code-sm text-on-surface-variant dark:text-[#7ba0a6]";
+        return;
+      }
+
+      if (p1 === p2) {
+        hint.innerText = "✓ Passwords match cryptographic signature requirements.";
+        hint.className = "mt-1.5 font-code-sm text-code-sm text-status-valid dark:text-[#4ade80] font-medium";
+      } else {
+        hint.innerText = "✕ Passwords do not match.";
+        hint.className = "mt-1.5 font-code-sm text-code-sm text-error dark:text-[#ff8a8a] font-medium";
+      }
+    }
+
+    // Module 2 Form Handlers
+    function handleResetSubmit(e) {
+      e.preventDefault();
+      const p1 = document.getElementById('new-password').value;
+      const p2 = document.getElementById('confirm-password').value;
+
+      if (p1 !== p2) {
+        alert("Verification failed: Passwords do not match.");
+        return;
+      }
+
+      const alertBox = document.getElementById('reset-success-alert');
+      alertBox.classList.remove('hidden');
+      const form = document.getElementById('reset-form');
+      form.classList.add('opacity-40', 'pointer-events-none');
+
+      setTimeout(() => {
+        alert("Redirect protocol initiated. Routing user to designated credential dashboard: /issuer/dashboard");
+      }, 1500);
+    }
+
+    // Toggle Input Visibility
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerText = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.innerText = 'visibility';
+      }
+    }
+  </script>
+</body></html>

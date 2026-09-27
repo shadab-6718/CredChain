@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CredChain — Institutional Issuance Portal</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-secondary-fixed-variant": "#00497e",
+            "on-secondary-container": "#004376",
+            "on-surface-variant": "#3f4949",
+            "background": "#fcf9f8",
+            "surface-container": "#f0eded",
+            "surface-variant": "#e5e2e1",
+            "on-primary-container": "#8fd8dc",
+            "on-error": "#ffffff",
+            "tertiary-container": "#7e4924",
+            "inverse-on-surface": "#f3f0ef",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#a6eff3",
+            "inverse-surface": "#313030",
+            "primary-container": "#006064",
+            "surface-container-high": "#eae7e7",
+            "status-valid": "#00703C",
+            "secondary": "#0061a6",
+            "primary-fixed-dim": "#8ad3d7",
+            "secondary-fixed-dim": "#a0caff",
+            "surface": "#fcf9f8",
+            "on-tertiary": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed": "#311300",
+            "inverse-primary": "#8ad3d7",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "surface-tint": "#14696d",
+            "primary": "#00464a",
+            "surface-container-low": "#f6f3f2",
+            "error-container": "#ffdad6",
+            "tertiary": "#62330f",
+            "on-secondary": "#ffffff",
+            "outline": "#6f7979",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#ffbe95",
+            "status-revoked": "#D4351C",
+            "on-secondary-fixed": "#001c37",
+            "on-tertiary-fixed-variant": "#6b3a16",
+            "tertiary-fixed": "#ffdbc7",
+            "secondary-fixed": "#d2e4ff",
+            "on-primary-fixed": "#002021",
+            "status-pending": "#F47738",
+            "surface-bright": "#fcf9f8",
+            "on-background": "#1c1b1b",
+            "outline-variant": "#bec8c9",
+            "border-subtle": "#D1D5DB",
+            "on-surface": "#1c1b1b",
+            "secondary-container": "#6eb2fe",
+            "on-primary-fixed-variant": "#004f53",
+            "tertiary-fixed-dim": "#ffb688",
+            "surface-container-highest": "#e5e2e1"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "base": "8px",
+            "margin-mobile": "16px",
+            "gutter": "16px",
+            "margin-desktop": "32px",
+            "container-max": "1280px"
+          },
+          fontFamily: {
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "code-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          fontSize: {
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+
+    /* Pulse Glow Animation for Logo in Dark Mode */
+    @keyframes pulseGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.45)) drop-shadow(0 0 16px rgba(0, 96, 100, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.85)) drop-shadow(0 0 28px rgba(0, 172, 193, 0.7));
+      }
+    }
+
+    .dark .logo-glow-pulse {
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+</style>
+<script>
+    // Initialize theme right away to prevent flash of wrong mode
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+</script>
+</head>
+<body class="bg-background dark:bg-[#080f11] text-on-surface dark:text-[#e1e9ea] antialiased min-h-screen flex flex-col justify-between font-body-sm selection:bg-primary selection:text-white transition-colors duration-200">
+<!-- TOP APP BAR -->
+<header class="w-full border-b border-border-subtle dark:border-[#1c2c30] bg-surface dark:bg-[#0d171a] px-margin-mobile md:px-margin-desktop py-3 sticky top-0 z-50">
+<div class="max-w-[1280px] mx-auto flex items-center justify-between">
+<!-- Left: Logo & Context -->
+<div class="flex items-center gap-6">
+<a class="flex items-center gap-3 group" href="/">
+<img alt="CredChain Brand Mark" class="w-8 h-8 object-contain logo-glow-pulse transition-all duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA"/>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-[#38e1ea] tracking-tight">CredChain</span>
+</a>
+<div class="hidden lg:flex items-center gap-2 border-l border-border-subtle dark:border-[#21353a] pl-4 py-1 text-on-surface-variant dark:text-[#94a9ac] font-code-sm text-code-sm">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 dark:bg-emerald-400/10 text-[#00703c] dark:text-[#34d399] font-medium border border-emerald-500/20">
+<span class="w-2 h-2 rounded-full bg-[#00703c] dark:bg-[#34d399] inline-block animate-pulse"></span>
+<span>Mainnet v2.4.1 (Sync 100%)</span>
+</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-[#94a9ac] font-label-md text-label-md py-2 hover:text-primary dark:hover:text-[#38e1ea] transition-colors duration-150" href="/verify">Verify</a>
+<a class="text-primary dark:text-[#38e1ea] border-b-2 border-primary dark:border-[#38e1ea] font-label-md text-label-md py-2 font-semibold" href="/institutions">Institutions</a>
+<a class="text-on-surface-variant dark:text-[#94a9ac] font-label-md text-label-md py-2 hover:text-primary dark:hover:text-[#38e1ea] transition-colors duration-150" href="/documentation">Documentation</a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-3">
+<a class="hidden sm:inline-flex items-center gap-1 text-on-surface-variant dark:text-[#94a9ac] hover:text-primary dark:hover:text-[#38e1ea] font-label-md text-label-md px-3 py-1.5 transition-colors" href="/support">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+<span>Support</span>
+</a>
+<!-- Dark/Light Mode Interactive Toggle Button -->
+<button aria-label="Toggle visual theme" class="px-2.5 py-1.5 text-on-surface-variant dark:text-[#a0c2c6] hover:text-primary dark:hover:text-[#38e1ea] transition-colors border border-border-subtle dark:border-[#21353a] bg-surface-container-low dark:bg-[#142124] hover:bg-surface-container dark:hover:bg-[#1c2d31] flex items-center gap-1.5 font-code-sm text-code-sm" id="themeToggleBtn">
+<span class="material-symbols-outlined text-[18px]" id="themeIcon">dark_mode</span>
+<span class="hidden sm:inline font-medium" id="themeLabel">Dark Mode</span>
+</button>
+<button class="inline-flex items-center gap-1.5 bg-surface-container dark:bg-[#142124] border border-border-subtle dark:border-[#21353a] text-primary dark:text-[#38e1ea] font-label-md text-label-md px-3.5 py-1.5 hover:bg-surface-variant dark:hover:bg-[#1a2b2f] transition-colors duration-150" type="button">
+<span class="material-symbols-outlined text-[16px]">shield</span>
+<span>Security Ledger</span>
+</button>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="flex-grow flex items-center justify-center px-margin-mobile md:px-margin-desktop py-8 md:py-12" id="mainContent">
+<div class="w-full max-w-[1240px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+<!-- LEFT COLUMN: Institutional Trust & Cryptographic Grounding (5 Cols) -->
+<section class="lg:col-span-5 bg-surface-container-low dark:bg-[#111c1f] border border-border-subtle dark:border-[#1e3035] p-6 md:p-8 flex flex-col justify-between relative overflow-hidden transition-colors">
+<div>
+<!-- Role Context Tag -->
+<div class="inline-flex items-center gap-2 bg-surface-container-highest dark:bg-[#19282c] px-2.5 py-1 border border-border-subtle dark:border-[#24393f] mb-6 text-on-surface-variant dark:text-[#9bb1b5] font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[16px] text-primary dark:text-[#38e1ea]">account_balance</span>
+<span class="uppercase tracking-wider font-semibold">Authorized Authority Portal</span>
+</div>
+<!-- Title & Brand Core -->
+<div class="flex items-center gap-3 mb-4">
+<img alt="CredChain Emblem" class="w-10 h-10 object-contain logo-glow-pulse" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA"/>
+<h1 class="text-headline-lg font-headline-lg text-primary dark:text-[#38e1ea] tracking-tight">Institutional Issuance</h1>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#9db2b5] mb-6 leading-relaxed">
+          Cryptographic ledger portal for accredited degree-granting universities, state testing boards, and municipal land registries to anchor tamper-proof W3C Verifiable Credentials.
+        </p>
+<!-- Wrong Role Alert Banner -->
+<div class="bg-surface-container dark:bg-[#152327] border-l-4 border-secondary dark:border-[#38bdf8] p-4 mb-6">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary dark:text-[#38bdf8] text-[20px] shrink-0 mt-0.5">info</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface dark:text-[#f0f8f9] font-semibold">Looking for your issued certificates?</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#93a7ab] mt-0.5">
+                This portal is reserved for registrar &amp; authority officers. Students and property holders should use the Holder Vault.
+              </p>
+<a class="inline-flex items-center gap-1 text-secondary dark:text-[#38bdf8] font-label-md text-label-md hover:underline mt-2 font-medium" href="/auth/holder">
+                Go to Holder Dashboard
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Feature Ledger Specs -->
+<div class="space-y-3 pt-2">
+<div class="flex items-start gap-3 p-3 bg-surface dark:bg-[#162327] border border-border-subtle dark:border-[#21353a]">
+<div class="bg-primary/10 dark:bg-[#00E5FF]/10 text-primary dark:text-[#38e1ea] p-1.5 shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div>
+<h2 class="font-label-md text-label-md text-on-surface dark:text-[#e4eff1] font-semibold">W3C Verifiable Credentials 2.0</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#8ea6aa]">Decentralized identifiers (DIDs) mapped to sovereign institutional public keys.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 bg-surface dark:bg-[#162327] border border-border-subtle dark:border-[#21353a]">
+<div class="bg-primary/10 dark:bg-[#00E5FF]/10 text-primary dark:text-[#38e1ea] p-1.5 shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+</div>
+<div>
+<h2 class="font-label-md text-label-md text-on-surface dark:text-[#e4eff1] font-semibold">Tamper-Evident Batch Merkle Roots</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#8ea6aa]">Anchor up to 50,000 academic degrees or property titles in a single immutable rollup.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Security Indicator (Bottom of Left Column) -->
+<div class="mt-8 pt-6 border-t border-border-subtle dark:border-[#1e3035]">
+<div class="bg-surface dark:bg-[#162327] border border-border-subtle dark:border-[#21353a] p-3 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-valid dark:bg-[#34d399] opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-status-valid dark:bg-[#34d399]"></span>
+</span>
+<span class="font-code-sm text-code-sm text-on-surface dark:text-[#e4eff1] font-medium">Ed25519 Signatures &amp; Merkle Verifier Active</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline dark:text-[#7d999d] uppercase tracking-wider">TLS 1.3 FIPS</span>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: Authentication Card (7 Cols) -->
+<section class="lg:col-span-7 bg-surface dark:bg-[#131d20] border border-border-subtle dark:border-[#1e3035] p-6 md:p-10 flex flex-col justify-between transition-colors">
+<div>
+<!-- Header Cluster with Issuer Pill -->
+<div class="flex items-center justify-between mb-4">
+<span class="inline-flex items-center gap-1.5 bg-primary-container dark:bg-[#093539] text-on-primary-container dark:text-[#7ce3e8] font-label-md text-label-md px-3 py-1 font-mono tracking-wider font-bold border border-transparent dark:border-[#145258]">
+<span class="w-1.5 h-1.5 bg-on-primary-container dark:bg-[#7ce3e8]"></span>
+            ISSUER
+          </span>
+<div class="flex items-center gap-1 text-code-sm font-code-sm text-on-surface-variant dark:text-[#95abaf] bg-surface-container dark:bg-[#1a272b] px-2 py-0.5 border border-border-subtle dark:border-[#25393e]">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>Encrypted Node Session</span>
+</div>
+</div>
+<div class="mb-6">
+<h2 class="text-headline-lg font-headline-lg text-on-background dark:text-[#e6f2f4] tracking-tight" id="authHeading">Issuer Login</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#92a8ac] mt-1" id="authSubtext">
+            Sign in to issue, revoke, and manage cryptographic credentials on-chain.
+          </p>
+</div>
+<!-- Google OAuth Action -->
+<button class="w-full bg-white dark:bg-[#1a262a] hover:bg-surface-container dark:hover:bg-[#223237] border border-border-subtle dark:border-[#273d42] text-on-surface dark:text-[#e1ecf0] font-label-md text-label-md py-3 px-4 flex items-center justify-center gap-3 transition-colors duration-150" id="googleAuthBtn" type="button">
+<!-- Google Official Logo Vector -->
+<svg class="w-4 h-4 shrink-0" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24Z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" fill="#EA4335"></path>
+</svg>
+<span class="font-medium">Continue with Google</span>
+</button>
+<!-- Divider -->
+<div class="relative my-6 text-center">
+<div aria-hidden="true" class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-border-subtle dark:border-[#21353a]"></div>
+</div>
+<div class="relative flex justify-center">
+<span class="bg-surface dark:bg-[#131d20] px-4 text-code-sm font-code-sm text-outline dark:text-[#7f999d] uppercase tracking-wider">OR INSTITUTIONAL SSO</span>
+</div>
+</div>
+<!-- Alert / Status feedback banner -->
+<div class="hidden mb-5 p-3 border text-body-sm font-body-sm flex items-start gap-2.5" id="feedbackBanner">
+<span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5" id="feedbackIcon">error</span>
+<div class="font-medium" id="feedbackText"></div>
+</div>
+<!-- Main Auth Form -->
+<form class="space-y-4" id="authForm" onsubmit="return false;">
+<!-- Institutional Email Field -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#e4eff1] mb-1.5" for="institutionalEmail">
+              Institutional Email
+            </label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest dark:bg-[#19272b] border border-border-subtle dark:border-[#2a4046] px-3.5 py-2.5 text-on-surface dark:text-[#eaf4f6] placeholder:text-outline dark:placeholder:text-[#6a8488] font-body-sm text-body-sm focus:outline-none focus:border-primary dark:focus:border-[#38e1ea] focus:ring-1 focus:ring-primary dark:focus:ring-[#38e1ea] rounded-none transition-colors" id="institutionalEmail" name="email" placeholder="registrar@university.edu or landrecords@gov.in" required="" type="email"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline dark:text-[#759196] pointer-events-none text-[20px]">
+                mail
+              </span>
+</div>
+</div>
+<!-- Organization Name Field (Shown only on signup) -->
+<div class="hidden" id="orgFieldContainer">
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#e4eff1] mb-1.5" for="orgName">
+              Institution / Agency Name
+            </label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest dark:bg-[#19272b] border border-border-subtle dark:border-[#2a4046] px-3.5 py-2.5 text-on-surface dark:text-[#eaf4f6] placeholder:text-outline dark:placeholder:text-[#6a8488] font-body-sm text-body-sm focus:outline-none focus:border-primary dark:focus:border-[#38e1ea] focus:ring-1 focus:ring-primary dark:focus:ring-[#38e1ea] rounded-none transition-colors" id="orgName" name="orgName" placeholder="e.g. State Polytechnic Registry or National Land Board" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline dark:text-[#759196] pointer-events-none text-[20px]">
+                domain
+              </span>
+</div>
+</div>
+<!-- Password Field with Interactive Visibility Toggle -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#e4eff1]" for="password">Password</label>
+<a class="font-body-sm text-body-sm text-secondary dark:text-[#38bdf8] hover:underline" href="/auth/forgot-password" id="forgotPasswordLink">
+                Forgot password?
+              </a>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest dark:bg-[#19272b] border border-border-subtle dark:border-[#2a4046] px-3.5 py-2.5 pr-10 text-on-surface dark:text-[#eaf4f6] placeholder:text-outline dark:placeholder:text-[#6a8488] font-body-sm text-body-sm focus:outline-none focus:border-primary dark:focus:border-[#38e1ea] focus:ring-1 focus:ring-primary dark:focus:ring-[#38e1ea] rounded-none transition-colors" id="password" name="password" placeholder="Enter your password" required="" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-2.5 text-outline dark:text-[#759196] hover:text-on-surface dark:hover:text-[#eaf4f6] focus:outline-none" id="togglePasswordBtn" type="button">
+<span class="material-symbols-outlined text-[20px]" id="eyeIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Confirm Password Field (Dynamic signup) -->
+<div class="hidden" id="confirmPasswordContainer">
+<label class="block font-label-md text-label-md text-on-surface dark:text-[#e4eff1] mb-1.5" for="confirmPassword">
+              Confirm Password
+            </label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest dark:bg-[#19272b] border border-border-subtle dark:border-[#2a4046] px-3.5 py-2.5 text-on-surface dark:text-[#eaf4f6] placeholder:text-outline dark:placeholder:text-[#6a8488] font-body-sm text-body-sm focus:outline-none focus:border-primary dark:focus:border-[#38e1ea] focus:ring-1 focus:ring-primary dark:focus:ring-[#38e1ea] rounded-none transition-colors" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" type="password"/>
+</div>
+</div>
+<!-- Primary Submit Button -->
+<button class="w-full bg-primary hover:bg-[#00383b] dark:bg-[#006064] dark:hover:bg-[#007378] text-on-primary font-label-md text-label-md py-3 px-4 font-semibold flex items-center justify-center gap-2 transition-colors duration-150 rounded-none cursor-pointer" id="primarySubmitBtn" type="button">
+<span class="hidden animate-spin h-4 w-4 border-2 border-white border-t-transparent" id="btnSpinner"></span>
+<span id="submitBtnLabel">Sign In</span>
+</button>
+</form>
+<!-- Toggle Auth Mode -->
+<div class="mt-4 pt-4 border-t border-border-subtle dark:border-[#21353a] flex flex-col sm:flex-row sm:items-center sm:justify-between text-body-sm font-body-sm gap-2">
+<span class="text-on-surface-variant dark:text-[#95abaf]" id="toggleHelperText">New accredited institution?</span>
+<button class="text-primary dark:text-[#38e1ea] font-semibold hover:underline inline-flex items-center gap-1" id="toggleAuthModeBtn" type="button">
+<span id="toggleBtnText">Create Issuer Account</span>
+<span class="material-symbols-outlined text-[16px]">arrow_right_alt</span>
+</button>
+</div>
+<!-- Vault Notice -->
+<div class="mt-4 p-3 bg-surface-container-low dark:bg-[#162327] border border-border-subtle dark:border-[#21353a] flex items-center gap-2.5 text-on-surface-variant dark:text-[#95abaf] font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-[18px] text-outline dark:text-[#729298]">key</span>
+<span>Wallet connection is not required for login. Connect your institutional vault inside the dashboard.</span>
+</div>
+<!-- Dedicated Test Fixtures & State Simulation (Clearly labeled demonstration utility) -->
+<div class="mt-5 p-3.5 bg-surface-container dark:bg-[#162428] border border-dashed border-border-subtle dark:border-[#2d474e]">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[11px] font-mono tracking-wider font-semibold text-outline dark:text-[#88a9af] uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">science</span>
+              Test Fixtures &amp; State Simulation (Demo)
+            </span>
+<span class="text-[10px] text-outline dark:text-[#73949a] font-mono">Mock Auth Only</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+<button class="text-left px-2.5 py-1.5 bg-surface dark:bg-[#1b2b2f] hover:bg-surface-variant dark:hover:bg-[#23383e] border border-border-subtle dark:border-[#2a4047] text-xs font-code-sm text-on-surface dark:text-[#d3e5e8] transition-colors" onclick="loadFixture('university')" type="button">
+<div class="font-semibold text-primary dark:text-[#38e1ea]">1. Univ Registrar</div>
+<div class="text-[11px] text-outline dark:text-[#7f9e103] truncate">registrar@oxford-demo.edu</div>
+</button>
+<button class="text-left px-2.5 py-1.5 bg-surface dark:bg-[#1b2b2f] hover:bg-surface-variant dark:hover:bg-[#23383e] border border-border-subtle dark:border-[#2a4047] text-xs font-code-sm text-on-surface dark:text-[#d3e5e8] transition-colors" onclick="loadFixture('landboard')" type="button">
+<div class="font-semibold text-primary dark:text-[#38e1ea]">2. Municipal Land</div>
+<div class="text-[11px] text-outline dark:text-[#7f9e103] truncate">deeds@cadastre-gov.in</div>
+</button>
+<button class="text-left px-2.5 py-1.5 bg-surface dark:bg-[#1b2b2f] hover:bg-surface-variant dark:hover:bg-[#23383e] border border-border-subtle dark:border-[#2a4047] text-xs font-code-sm text-on-surface dark:text-[#d3e5e8] transition-colors" onclick="loadFixture('testing')" type="button">
+<div class="font-semibold text-primary dark:text-[#38e1ea]">3. Testing Board</div>
+<div class="text-[11px] text-outline dark:text-[#7f9e103] truncate">cert@med-board.org</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Role-Switch Navigation (Bottom of Right Card) -->
+<div class="mt-6 pt-5 border-t border-border-subtle dark:border-[#21353a]">
+<p class="font-code-sm text-code-sm text-on-surface-variant dark:text-[#95abaf] mb-2 font-medium">Not an issuer? Are you a student or landowner?</p>
+<div class="flex flex-wrap items-center gap-4 text-label-md font-label-md">
+<a class="inline-flex items-center gap-1.5 text-secondary dark:text-[#38bdf8] hover:underline" href="/auth/holder">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>Holder Login</span>
+</a>
+<span class="text-border-subtle dark:text-[#2a4047]">|</span>
+<a class="inline-flex items-center gap-1.5 text-secondary dark:text-[#38bdf8] hover:underline" href="/auth/verifier">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Verifier Login</span>
+</a>
+<span class="text-border-subtle dark:text-[#2a4047]">|</span>
+<a class="inline-flex items-center gap-1.5 text-outline dark:text-[#88a9af] hover:text-on-surface dark:hover:text-[#e4eff1]" href="/docs/onboarding">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>Accreditation Guide</span>
+</a>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FLOATING RETURN TO TOP BUTTON -->
+<button aria-label="Return to top of page" class="fixed bottom-6 right-6 p-2.5 bg-surface dark:bg-[#142226] hover:bg-surface-variant dark:hover:bg-[#1c3035] text-primary dark:text-[#38e1ea] border border-border-subtle dark:border-[#274046] shadow-lg transition-all duration-200 z-40 flex items-center justify-center group" id="returnToTopBtn" type="button">
+<span class="material-symbols-outlined text-[22px] group-hover:-translate-y-0.5 transition-transform">arrow_upward</span>
+</button>
+<!-- FOOTER -->
+<footer class="w-full border-t border-border-subtle dark:border-[#1c2c30] bg-surface-container-low dark:bg-[#0d171a] px-margin-mobile md:px-margin-desktop py-base transition-colors">
+<div class="max-w-[1280px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-[#38e1ea]">CredChain</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant dark:text-[#8aa2a6] hidden sm:inline">
+        © 2026 CredChain Ledger Infrastructure. All credentials cryptographically verifiable on-chain.
+      </span>
+</div>
+<div class="flex flex-wrap items-center gap-6 text-body-sm font-body-sm text-on-surface-variant dark:text-[#8aa2a6]">
+<a class="hover:text-primary dark:hover:text-[#38e1ea] transition-colors duration-150" href="/status">Network Status</a>
+<a class="hover:text-primary dark:hover:text-[#38e1ea] transition-colors duration-150" href="/security">Security Policy</a>
+<a class="hover:text-primary dark:hover:text-[#38e1ea] transition-colors duration-150" href="/protocol">Verification Protocol</a>
+<a class="hover:text-primary dark:hover:text-[#38e1ea] transition-colors duration-150" href="/terms">Terms of Trust</a>
+</div>
+</div>
+<div class="max-w-[1280px] mx-auto sm:hidden text-center mt-2 text-body-sm font-body-sm text-on-surface-variant dark:text-[#8aa2a6]">
+    © 2026 CredChain Ledger Infrastructure.
+  </div>
+</footer>
+<!-- Interactive Scripts -->
+<script>
+    // State management
+    let isSignUp = false;
+    let isPasswordVisible = false;
+
+    const authHeading = document.getElementById('authHeading');
+    const authSubtext = document.getElementById('authSubtext');
+    const submitBtnLabel = document.getElementById('submitBtnLabel');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const primarySubmitBtn = document.getElementById('primarySubmitBtn');
+    const confirmPasswordContainer = document.getElementById('confirmPasswordContainer');
+    const orgFieldContainer = document.getElementById('orgFieldContainer');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const toggleAuthModeBtn = document.getElementById('toggleAuthModeBtn');
+    const toggleBtnText = document.getElementById('toggleBtnText');
+    const toggleHelperText = document.getElementById('toggleHelperText');
+    const emailInput = document.getElementById('institutionalEmail');
+    const passwordInput = document.getElementById('password');
+    const orgNameInput = document.getElementById('orgName');
+    const feedbackBanner = document.getElementById('feedbackBanner');
+    const feedbackText = document.getElementById('feedbackText');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const eyeIcon = document.getElementById('eyeIcon');
+    const googleAuthBtn = document.getElementById('googleAuthBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    const returnToTopBtn = document.getElementById('returnToTopBtn');
+
+    // Synchronize UI with active theme state
+    function updateThemeUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      if (themeLabel) {
+        themeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+      }
+    }
+
+    // Interactive Theme Toggle with LocalStorage persistence
+    themeToggleBtn.addEventListener('click', () => {
+      const htmlEl = document.documentElement;
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        htmlEl.classList.add('light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        htmlEl.classList.remove('light');
+        htmlEl.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+      updateThemeUI();
+    });
+
+    // Run initial theme icon check
+    updateThemeUI();
+
+    // Toggle Sign In vs Sign Up mode
+    function toggleMode() {
+      isSignUp = !isSignUp;
+      feedbackBanner.classList.add('hidden');
+
+      if (isSignUp) {
+        authHeading.textContent = "Create your Issuer Account";
+        authSubtext.textContent = "Register your university or state agency for sovereign credential issuance.";
+        submitBtnLabel.textContent = "Create your Issuer Account";
+        toggleBtnText.textContent = "Sign In instead";
+        toggleHelperText.textContent = "Already registered an institutional node?";
+        confirmPasswordContainer.classList.remove('hidden');
+        orgFieldContainer.classList.remove('hidden');
+        forgotPasswordLink.classList.add('hidden');
+      } else {
+        authHeading.textContent = "Issuer Login";
+        authSubtext.textContent = "Sign in to issue, revoke, and manage cryptographic credentials on-chain.";
+        submitBtnLabel.textContent = "Sign In";
+        toggleBtnText.textContent = "Create Issuer Account";
+        toggleHelperText.textContent = "New accredited institution?";
+        confirmPasswordContainer.classList.add('hidden');
+        orgFieldContainer.classList.add('hidden');
+        forgotPasswordLink.classList.remove('hidden');
+      }
+    }
+
+    toggleAuthModeBtn.addEventListener('click', toggleMode);
+
+    // Password Visibility Toggle
+    togglePasswordBtn.addEventListener('click', () => {
+      isPasswordVisible = !isPasswordVisible;
+      passwordInput.type = isPasswordVisible ? 'text' : 'password';
+      eyeIcon.textContent = isPasswordVisible ? 'visibility_off' : 'visibility';
+    });
+
+    // Test Fixtures Simulation Helper
+    window.loadFixture = function(type) {
+      if (type === 'university') {
+        emailInput.value = "registrar@oxford-demo.edu";
+        passwordInput.value = "GenesisSigner#2026";
+        if (isSignUp) orgNameInput.value = "University of Oxford Credential Registry";
+      } else if (type === 'landboard') {
+        emailInput.value = "deeds@cadastre-gov.in";
+        passwordInput.value = "LandRegistryNode!99";
+        if (isSignUp) orgNameInput.value = "Department of Land Records & Cadastre";
+      } else if (type === 'testing') {
+        emailInput.value = "cert@med-board.org";
+        passwordInput.value = "PhysicianAccred#44";
+        if (isSignUp) orgNameInput.value = "National Board of Medical Examiners";
+      }
+      showFeedback("success", `Loaded fixture for ${emailInput.value}. Ready to simulate submission.`);
+    };
+
+    // Simulated Authentication Processing
+    primarySubmitBtn.addEventListener('click', () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      // Basic front-end validation
+      if (!email || !password) {
+        showFeedback("error", "Please provide both institutional email and password.");
+        return;
+      }
+
+      // Show spinner state
+      btnSpinner.classList.remove('hidden');
+      submitBtnLabel.textContent = isSignUp ? "Generating Keypair..." : "Signing you in...";
+      primarySubmitBtn.disabled = true;
+      primarySubmitBtn.classList.add('opacity-90');
+      feedbackBanner.classList.add('hidden');
+
+      setTimeout(() => {
+        btnSpinner.classList.add('hidden');
+        primarySubmitBtn.disabled = false;
+        primarySubmitBtn.classList.remove('opacity-90');
+        submitBtnLabel.textContent = isSignUp ? "Create your Issuer Account" : "Sign In";
+
+        // Simulation branch
+        if (email.includes('holder') || email.includes('student')) {
+          showFeedback("error", "This account belongs to a Holder role. Please switch to Holder Login below.");
+        } else if (password.length < 6) {
+          showFeedback("error", "Incorrect email or password. Verify credentials or contact administrator.");
+        } else {
+          showFeedback("success", `Authorized. Initializing DID session for ${email}...`);
+          setTimeout(() => {
+            feedbackBanner.classList.add('hidden');
+          }, 4000);
+        }
+      }, 1100);
+    });
+
+    function showFeedback(type, message) {
+      feedbackBanner.classList.remove('hidden');
+      if (type === 'error') {
+        feedbackBanner.className = "mb-5 p-3 border border-status-revoked bg-error-container text-on-error-container dark:bg-[#341215] dark:text-[#ffb4ab] dark:border-[#93000a] flex items-start gap-2.5";
+        feedbackIcon.textContent = "warning";
+      } else {
+        feedbackBanner.className = "mb-5 p-3 border border-status-valid bg-surface-container-high text-status-valid dark:bg-[#122e26] dark:text-[#34d399] dark:border-[#00703c] flex items-start gap-2.5";
+        feedbackIcon.textContent = "check_circle";
+      }
+      feedbackText.textContent = message;
+    }
+
+    // Google OAuth Handler
+    googleAuthBtn.addEventListener('click', () => {
+      googleAuthBtn.classList.add('opacity-80');
+      const textSpan = googleAuthBtn.querySelector('span');
+      textSpan.textContent = "Connecting to Identity Provider...";
+      setTimeout(() => {
+        googleAuthBtn.classList.remove('opacity-80');
+        textSpan.textContent = "Continue with Google";
+        showFeedback("success", "Redirecting to institutional Google Workspace SSO...");
+      }, 800);
+    });
+
+    // Return to Top Floating Button
+    returnToTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+</script>
+</body></html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CredChain - Technical Approach Slide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #f1f5f9;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      color: #0f172a;
+    }
+
+    /* 16:9 Slide Canvas */
+    .slide-canvas {
+      width: 1333px;
+      height: 750px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(15, 23, 42, 0.08);
+      padding: 36px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top Header */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .title-area h1 {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #0b2545;
+      line-height: 1.1;
+    }
+    .title-area p {
+      font-size: 15px;
+      font-weight: 600;
+      color: #134074;
+      margin-top: 4px;
+      letter-spacing: -0.01em;
+    }
+    .core-idea-card {
+      background: #eef4fc;
+      border: 1px solid #c9ddf8;
+      border-radius: 10px;
+      padding: 10px 16px;
+      max-width: 480px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #1e3a8a;
+    }
+    .core-idea-card strong {
+      color: #0b2545;
+      font-weight: 700;
+    }
+
+    /* Main Grid: Left Personas + Right Workflows */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    /* Left Sidebar: Personas */
+    .personas-column {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .persona-card {
+      border-radius: 10px;
+      padding: 9px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border: 1px solid transparent;
+    }
+    .persona-card.issuer {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .persona-card.holder {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .persona-card.verifier {
+      background: #fff7ed;
+      border-color: #fed7aa;
+    }
+    .persona-card.admin {
+      background: #faf5ff;
+      border-color: #e9d5ff;
+    }
+
+    .persona-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .issuer .persona-icon { background: #1e40af; color: #fff; }
+    .holder .persona-icon { background: #15803d; color: #fff; }
+    .verifier .persona-icon { background: #c2410c; color: #fff; }
+    .admin .persona-icon { background: #6b21a8; color: #fff; }
+
+    .persona-text h4 {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .issuer .persona-text h4 { color: #1e3a8a; }
+    .holder .persona-text h4 { color: #14532d; }
+    .verifier .persona-text h4 { color: #7c2d12; }
+    .admin .persona-text h4 { color: #581c87; }
+
+    .persona-text span.sub {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .persona-text p {
+      font-size: 10px;
+      color: #475569;
+      line-height: 1.3;
+    }
+
+    /* Right Section */
+    .workflow-section {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Top Row: 4 Workflow Steps */
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      position: relative;
+    }
+    .step-card {
+      border-radius: 12px;
+      padding: 12px 14px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid transparent;
+    }
+    .step-card.step-1 { background: #f0f7ff; border-color: #cfe3fe; }
+    .step-card.step-2 { background: #f0fdf4; border-color: #c4f3d2; }
+    .step-card.step-3 { background: #faf5ff; border-color: #eadcf8; }
+    .step-card.step-4 { background: #eff6ff; border-color: #d2e4fc; }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .step-illus {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .step-illus svg {
+      height: 30px;
+      width: auto;
+    }
+
+    .step-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .step-bullets li {
+      font-size: 10.5px;
+      color: #334155;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      line-height: 1.35;
+    }
+    .step-bullets li::before {
+      content: "✓";
+      color: #2563eb;
+      font-weight: bold;
+      font-size: 10px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Connecting Arrows between top steps */
+    .step-arrow {
+      position: absolute;
+      top: 50%;
+      right: -9px;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 2;
+    }
+
+    /* Bottom Row: 4 Architecture Blocks */
+    .arch-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      position: relative;
+    }
+    .arch-card {
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+    }
+    .arch-card.ipfs { background: #f0fdf4; border-color: #bbf7d0; }
+    .arch-card.blockchain { background: #fff1f2; border-color: #fecdd3; }
+    .arch-card.backend { background: #f1f5f9; border-color: #cbd5e1; }
+    .arch-card.frontend { background: #eff6ff; border-color: #bfdbfe; }
+
+    .arch-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .arch-card-header svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .arch-card-header h5 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .arch-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .arch-bullets li {
+      font-size: 10px;
+      color: #475569;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      line-height: 1.35;
+    }
+    .arch-bullets li::before {
+      content: "✓";
+      color: #0284c7;
+      font-weight: bold;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Connecting labels between blocks */
+    .flow-tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #64748b;
+      text-align: center;
+      position: absolute;
+    }
+
+    /* Footer: Security & Privacy Banner */
+    .security-banner {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+    .security-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .security-label svg {
+      width: 16px;
+      height: 16px;
+      color: #2563eb;
+    }
+    .security-items {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #334155;
+    }
+    .security-items span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .security-items span::before {
+      content: "✓";
+      color: #16a34a;
+      font-weight: 800;
+    }
+
+    /* UI Helper controls (visible on browser) */
+    .download-bar {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      background: #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- THE SLIDE CANVAS (16:9 PROPORTIONS) -->
+  <div class="slide-canvas" id="slide">
+    
+    <!-- Header -->
+    <div class="header-row">
+      <div class="title-area">
+        <h1>Technical Approach</h1>
+        <p>CredChain – Progressive, Decentralized and Verifiable Credentials</p>
+      </div>
+      <div class="core-idea-card">
+        <strong>Core Idea:</strong> Store the cryptographic trail on blockchain, keep encrypted documents on decentralized storage, and enable secure, consent-based access.
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+      
+      <!-- Left Column: Personas / Actors -->
+      <div class="personas-column">
+        
+        <!-- Issuer -->
+        <div class="persona-card issuer">
+          <div class="persona-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 2L2 7v2h20V7L12 2zm-7 9v8h3v-8H5zm5 0v8h3v-8h-3zm5 0v8h3v-8h-3zM2 21v2h20v-2H2z"/>
+            </svg>
+          </div>
+          <div class="persona-text">
+            <h4>Issuer</h4>
+            <span class="sub">(University / Land Board)</span>
+            <p>Issues progressive milestones & final credentials</p>
+          </div>
+        </div>
+
+        <!-- Holder -->
+        <div class="persona-card holder">
+          <div class="persona-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+          <div class="persona-text">
+            <h4>Holder</h4>
+            <span class="sub">(Student / Landowner)</span>
+            <p>Controls sovereign access to documents & consent</p>
+          </div>
+        </div>
+
+        <!-- Verifier -->
+        <div class="persona-card verifier">
+          <div class="persona-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+          </div>
+          <div class="persona-text">
+            <h4>Verifier</h4>
+            <span class="sub">(Employer / Bank / Govt)</span>
+            <p>Verifies credentials & views trail with consent</p>
+          </div>
+        </div>
+
+        <!-- Admin -->
+        <div class="persona-card admin">
+          <div class="persona-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+          </div>
+          <div class="persona-text">
+            <h4>Admin</h4>
+            <span class="sub">(Platform Governance)</span>
+            <p>Onboards & manages verified issuing institutions</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Workflow Section -->
+      <div class="workflow-section">
+        
+        <!-- Top 4 Numbered Steps -->
+        <div class="steps-row">
+          
+          <!-- Step 1 -->
+          <div class="step-card step-1">
+            <div class="step-header">
+              <div class="step-num">1</div>
+              <div class="step-title">Issue Credential</div>
+            </div>
+            <div class="step-illus">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <ul class="step-bullets">
+              <li>Upload document PDF</li>
+              <li>Select type (milestone/final)</li>
+              <li>Generate QR commitment</li>
+            </ul>
+            <span class="step-arrow">➔</span>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card step-2">
+            <div class="step-header">
+              <div class="step-num">2</div>
+              <div class="step-title">Store Document</div>
+            </div>
+            <div class="step-illus">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.8">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <ul class="step-bullets">
+              <li>Encrypt document (client-side)</li>
+              <li>Upload to IPFS</li>
+              <li>Obtain content CID</li>
+            </ul>
+            <span class="step-arrow">➔</span>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card step-3">
+            <div class="step-header">
+              <div class="step-num">3</div>
+              <div class="step-title">Record on Blockchain</div>
+            </div>
+            <div class="step-illus">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="1.8">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </div>
+            <ul class="step-bullets">
+              <li>Store on-chain record</li>
+              <li>Link previous event (trail)</li>
+              <li>Save IPFS Content CID</li>
+              <li>Set status (VALID)</li>
+            </ul>
+            <span class="step-arrow">➔</span>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="step-card step-4">
+            <div class="step-header">
+              <div class="step-num">4</div>
+              <div class="step-title">Verify / Access</div>
+            </div>
+            <div class="step-illus">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="1.8">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </div>
+            <ul class="step-bullets">
+              <li>Scan QR / Submit document</li>
+              <li>Fetch record & audit trail</li>
+              <li>Request time-boxed access</li>
+              <li>Decrypt & inspect with consent</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Bottom Row: 4 Architecture Blocks -->
+        <div class="arch-row">
+          
+          <!-- IPFS -->
+          <div class="arch-card ipfs">
+            <div class="arch-card-header">
+              <svg viewBox="0 0 24 24" fill="#16a34a">
+                <path d="M12 2l9 5.2v10.4L12 22l-9-5.2V7.2L12 2zm0 2.3L5 8.3v7.4l7 4 7-4V8.3L12 4.3z"/>
+              </svg>
+              <h5>Decentralized Storage</h5>
+            </div>
+            <ul class="arch-bullets">
+              <li>Stores AES-256 encrypted documents</li>
+              <li>Returns tamper-proof Content ID (CID)</li>
+              <li>Zero raw plaintext stored</li>
+            </ul>
+          </div>
+
+          <!-- Blockchain Network -->
+          <div class="arch-card blockchain">
+            <div class="arch-card-header">
+              <svg viewBox="0 0 24 24" fill="#e11d48">
+                <path d="M4.5 10.5C3.67 10.5 3 11.17 3 12s.67 1.5 1.5 1.5h15c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5h-15zM7 6c0-.83.67-1.5 1.5-1.5h7c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-7C7.67 7.5 7 6.83 7 6zm0 12c0-.83.67-1.5 1.5-1.5h7c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-7c-.83 0-1.5-.67-1.5-1.5z"/>
+              </svg>
+              <h5>Blockchain Network</h5>
+            </div>
+            <ul class="arch-bullets">
+              <li>Polygon Amoy consensus (80002)</li>
+              <li>Stores milestone linked-list trail</li>
+              <li>Manages immutable revocation</li>
+              <li>Enforces time-boxed expiration</li>
+            </ul>
+          </div>
+
+          <!-- Backend API -->
+          <div class="arch-card backend">
+            <div class="arch-card-header">
+              <svg viewBox="0 0 24 24" fill="#475569">
+                <path d="M4 6h16V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 10h-4v-7h4v7z"/>
+              </svg>
+              <h5>Backend API</h5>
+            </div>
+            <ul class="arch-bullets">
+              <li>Handles business logic & auth</li>
+              <li>Streaming SHA-256 calculation</li>
+              <li>Brokers verifier access handshake</li>
+              <li>Connects with Supabase RLS</li>
+            </ul>
+          </div>
+
+          <!-- Frontend (Web App) -->
+          <div class="arch-card frontend">
+            <div class="arch-card-header">
+              <svg viewBox="0 0 24 24" fill="#2563eb">
+                <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2H0c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2h-4zM4 5h16v11H4V5z"/>
+              </svg>
+              <h5>Frontend (Web App)</h5>
+            </div>
+            <ul class="arch-bullets">
+              <li>Role dashboards (Issuer/Holder/Verifier)</li>
+              <li>Web3 Ethers.js integration</li>
+              <li>Visual milestone trail inspector</li>
+              <li>Time-box consent manager</li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Security & Privacy Footer Banner -->
+    <div class="security-banner">
+      <div class="security-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Security &amp; Privacy</span>
+      </div>
+      <div class="security-items">
+        <span>Client-side AES-256 encryption</span>
+        <span>Zero PII on blockchain</span>
+        <span>Holder-controlled sovereign consent</span>
+        <span>Tamper-proof &amp; transparent audit trail</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Download / Print helper -->
+  <div class="download-bar">
+    <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <span style="font-size: 13px; color: #64748b;">Or take a full-screen screenshot to paste directly into your PPT slide.</span>
+  </div>
+
+</body>
+</html>

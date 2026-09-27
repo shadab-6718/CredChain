@@ -1,0 +1,661 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CredChain — Verify Credential or Milestone Trail</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#00464a",
+            "status-revoked": "#D4351C",
+            "surface": "#fcf9f8",
+            "on-secondary-fixed-variant": "#00497e",
+            "primary-fixed": "#a6eff3",
+            "inverse-surface": "#313030",
+            "on-tertiary-fixed": "#311300",
+            "on-tertiary-fixed-variant": "#6b3a16",
+            "on-tertiary-container": "#ffbe95",
+            "on-primary-fixed-variant": "#004f53",
+            "secondary-fixed": "#d2e4ff",
+            "on-tertiary": "#ffffff",
+            "border-subtle": "#D1D5DB",
+            "secondary-container": "#6eb2fe",
+            "surface-container-high": "#eae7e7",
+            "secondary-fixed-dim": "#a0caff",
+            "surface-container-highest": "#e5e2e1",
+            "on-error": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "error": "#ba1a1a",
+            "inverse-primary": "#8ad3d7",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed": "#001c37",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#3f4949",
+            "tertiary-fixed": "#ffdbc7",
+            "tertiary-fixed-dim": "#ffb688",
+            "surface-container-low": "#f6f3f2",
+            "status-pending": "#F47738",
+            "status-valid": "#00703C",
+            "surface-container": "#f0eded",
+            "primary-fixed-dim": "#8ad3d7",
+            "primary-container": "#006064",
+            "on-secondary-container": "#004376",
+            "on-primary-fixed": "#002021",
+            "surface-variant": "#e5e2e1",
+            "on-background": "#1c1b1b",
+            "secondary": "#0061a6",
+            "on-error-container": "#93000a",
+            "tertiary-container": "#7e4924",
+            "outline": "#6f7979",
+            "background": "#fcf9f8",
+            "surface-bright": "#fcf9f8",
+            "outline-variant": "#bec8c9",
+            "on-primary": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#8fd8dc",
+            "inverse-on-surface": "#f3f0ef",
+            "tertiary": "#62330f",
+            "surface-tint": "#14696d",
+            "on-surface": "#1c1b1b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "16px",
+            "margin-desktop": "32px",
+            "container-max": "1280px",
+            "base": "8px",
+            "margin-mobile": "16px"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "code-sm": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    @keyframes scanbeam {
+      0% { top: 10%; opacity: 0.8; }
+      50% { top: 85%; opacity: 1; }
+      100% { top: 10%; opacity: 0.8; }
+    }
+    .scanner-line {
+      animation: scanbeam 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+  </style>
+<script>
+  // Immediate dark mode initialization before paint
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+  }
+</script>
+</head>
+<body class="bg-background dark:bg-[#0b1315] text-on-surface dark:text-slate-100 font-body-lg text-body-lg min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed transition-colors duration-200">
+<!-- TopNavBar (Shared Component from JSON) -->
+<header class="w-full bg-surface dark:bg-[#101b1e] border-b border-outline-variant dark:border-slate-800 docked full-width top-0 z-50 sticky transition-colors duration-200">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-8">
+<!-- Standalone logo as specified (Height 56px, no text label beside logo) -->
+<a class="flex items-center" href="#">
+<img alt="CredChain Ledger Protocol" class="h-10 md:h-12 w-auto object-contain transition-all duration-200" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</a>
+<nav class="hidden md:flex items-center gap-6 font-body-lg text-body-lg">
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 font-medium hover:bg-surface-container-low dark:hover:bg-[#192b30] transition-colors px-2 py-1" href="#">Explorer</a>
+<a class="text-on-surface-variant dark:text-slate-300 hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-[#192b30] transition-colors px-2 py-1" href="#">Wallet</a>
+<a class="text-on-surface-variant dark:text-slate-300 hover:text-primary dark:hover:text-primary-fixed hover:bg-surface-container-low dark:hover:bg-[#192b30] transition-colors px-2 py-1" href="#">Dashboard</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-container dark:bg-[#162428] text-primary dark:text-primary-fixed text-xs font-code-sm border border-border-subtle dark:border-slate-700">
+<span class="w-2 h-2 bg-status-valid rounded-full"></span>LEDGER ONLINE
+</span>
+<button aria-label="Search credentials" class="p-2 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#162428] hover:bg-surface-container dark:hover:bg-[#1e3238] text-on-surface-variant dark:text-slate-300 hover:text-primary dark:hover:text-primary-fixed transition-colors flex items-center justify-center" onclick="openSearchModal()" title="Quick Search (Ctrl+K)" type="button">
+<span class="material-symbols-outlined text-base">search</span>
+</button>
+<button aria-label="Toggle color mode" class="p-2 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#162428] hover:bg-surface-container dark:hover:bg-[#1e3238] text-on-surface-variant dark:text-slate-300 hover:text-primary dark:hover:text-primary-fixed transition-colors flex items-center justify-center" id="theme-toggle-btn" onclick="toggleDarkMode()" title="Toggle Dark Mode" type="button">
+<span class="material-symbols-outlined text-base" id="theme-icon">dark_mode</span>
+</button>
+<button class="bg-primary dark:bg-primary-container text-on-primary font-label-md text-label-md px-4 py-2 hover:bg-primary-container dark:hover:bg-[#007b80] transition-colors active:opacity-80" type="button">Connect Wallet</button>
+</div>
+</div>
+</header>
+<!-- Breadcrumbs & Status Bar -->
+<section class="w-full bg-surface-container-low dark:bg-[#0f1719] border-b border-border-subtle dark:border-slate-800 transition-colors duration-200">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-base">
+<nav class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Home</a>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-on-surface dark:text-white font-semibold">Verify Credential</span>
+</nav>
+</div>
+</section>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<!-- Title & Subtitle Section -->
+<div class="max-w-3xl mb-8 md:mb-12">
+<div class="inline-flex items-center gap-2 px-2 py-1 bg-surface-container dark:bg-[#152327] border border-border-subtle dark:border-slate-700 mb-4">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-sm">verified</span>
+<span class="font-label-md text-label-md text-primary dark:text-primary-fixed tracking-wide">ZERO-KNOWLEDGE DECENTRALIZED AUDIT</span>
+</div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface dark:text-white tracking-tight mb-3">
+        Verify Credential or Milestone Trail
+      </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 leading-relaxed">
+        Instant cryptographic proof verification for academic diplomas and land records directly from the distributed ledger.
+      </p>
+</div>
+<!-- Verification Methods Dual-Panel Interface with Tabs -->
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 shadow-sm mb-16 transition-colors duration-200">
+<!-- Method Switcher Tab Strip -->
+<div class="flex flex-wrap border-b border-border-subtle dark:border-slate-700 bg-surface-container-low dark:bg-[#0e171a]">
+<button class="flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md bg-surface-container-lowest border-r border-border-subtle text-primary border-b-2 border-b-primary font-bold transition-colors" id="tab-btn-scan" onclick="switchTab('scan')">
+<span class="material-symbols-outlined text-lg">qr_code_scanner</span>
+<span class="">Scan QR Code</span>
+</button>
+<button class="flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md border-r border-border-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" id="tab-btn-lookup" onclick="switchTab('lookup')">
+<span class="material-symbols-outlined text-lg">manage_search</span>
+<span class="">Manual Lookup</span>
+</button>
+<button class="flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md border-r border-border-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" id="tab-btn-json" onclick="switchTab('json')">
+<span class="material-symbols-outlined text-lg">file_present</span>
+<span class="">Upload Signed Proof JSON</span>
+</button>
+</div>
+<!-- Tab Content Area -->
+<div class="p-6 md:p-8">
+<!-- Tab 1: Dual-Panel Primary View (Scan View Active) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start" id="content-scan">
+<!-- Left Panel: Interactive Simulated Camera Viewport -->
+<div class="lg:col-span-7 bg-surface-container-low dark:bg-[#17262a] border border-border-subtle dark:border-slate-700 p-6">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-valid opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-status-valid"></span>
+</span>
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-200">Optical Reader (Active)</span>
+</div>
+<!-- Camera Switcher Dropdown/Button -->
+<div class="flex items-center gap-2"><label class="sr-only" for="camera-select">Select Video Camera</label><div class="relative"><select class="bg-surface-container-lowest dark:bg-[#111c1e] border border-border-subtle dark:border-slate-700 text-on-surface dark:text-slate-200 font-body-sm text-body-sm py-1 pl-2.5 pr-8 focus:outline-none focus:border-primary" id="camera-select"><option>HD WebCam 01 (Frontal)</option><option>Ultra-Res Document Lens (Rear)</option><option>External USB Optical Sensor</option></select></div><button class="px-2.5 py-1 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#111c1e] text-xs font-label-md text-on-surface dark:text-slate-200 hover:bg-surface-container dark:hover:bg-[#1e3238] transition-colors inline-flex items-center gap-1" id="cam-toggle-btn" onclick="toggleCameraStream()" type="button"><span class="material-symbols-outlined text-sm text-status-valid" id="cam-status-icon">videocam</span><span class="" id="cam-btn-text">Pause</span></button></div>
+</div>
+<!-- Viewport Screen Frame -->
+<div class="relative bg-inverse-surface dark:bg-[#070d0e] h-[340px] md:h-[380px] flex items-center justify-center overflow-hidden border border-outline dark:border-slate-700">
+<!-- Grid Backdrop pattern simulation -->
+<div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+<!-- Scanning Target Frame with Glowing Corners -->
+<div class="relative w-56 h-56 md:w-64 md:h-64 border border-outline-variant/40 flex items-center justify-center">
+<!-- Glowing corner brackets -->
+<span class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-primary-fixed"></span>
+<span class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-primary-fixed"></span>
+<span class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-primary-fixed"></span>
+<span class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-primary-fixed"></span>
+<!-- Animated Laser Beam -->
+<div class="absolute w-full h-0.5 bg-primary-fixed scanner-line shadow-[0_0_8px_#a6eff3]"></div>
+<!-- Guidance Mock QR Graphic inside frame -->
+<div class="opacity-25 text-surface-container-lowest flex flex-col items-center">
+<span class="material-symbols-outlined text-6xl">qr_code_2</span>
+<span class="font-code-sm text-code-sm mt-1 text-slate-200">ALIGN LEDGER MATRIX</span>
+</div>
+</div>
+<!-- Viewport Status Indicator Overlay -->
+<div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-inverse-surface/90 dark:bg-black/75 border border-outline-variant/30 dark:border-slate-700 px-3.5 py-2 text-surface text-xs">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-base">center_focus_strong</span>
+<span class="font-code-sm text-code-sm text-surface-bright">Align QR code within frame</span>
+</div>
+<span class="font-code-sm text-code-sm text-primary-fixed font-semibold">60 FPS • 1080P</span>
+</div>
+</div>
+<!-- Upload QR Alternative Action -->
+<div class="mt-4 pt-4 border-t border-border-subtle dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300">Having trouble scanning the screen or physical paper?</span>
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 border border-primary dark:border-primary-fixed text-primary dark:text-primary-fixed font-label-md text-label-md bg-surface-container-lowest dark:bg-[#111c1e] hover:bg-surface-container dark:hover:bg-[#1e3238] transition-colors" type="button">
+<span class="material-symbols-outlined text-base">upload</span>
+<span class="">Upload QR Code Image</span>
+</button>
+</div>
+</div>
+<!-- Right Side: Fast Manual Direct Hash Entry -->
+<div class="lg:col-span-5 bg-surface-container-low dark:bg-[#17262a] border border-border-subtle dark:border-slate-700 p-6 flex flex-col justify-between h-full">
+<div>
+<div class="flex items-center justify-between pb-3 border-b border-border-subtle dark:border-slate-700 mb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-white">Quick Ledger Dispatch</h2>
+<span class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400">SHA-256 / Ed25519</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300 mb-6">
+                Paste directly from verifiable transcript headers, diploma metadata PDFs, or physical registry stamp serials.
+              </p>
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="block font-label-md text-label-md text-on-surface dark:text-slate-200" for="quick-id">Credential Identifier or Hash</label>
+<button class="text-xs text-primary dark:text-primary-fixed hover:underline font-code-sm inline-flex items-center gap-1" onclick="copySampleHash('CRED-2026-94812')" type="button">
+<span class="material-symbols-outlined text-xs">content_copy</span>
+<span class="">Sample</span>
+</button>
+</div>
+<input class="w-full font-code-sm text-code-sm border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#111c1e] text-on-surface dark:text-white px-3 py-2.5 focus:border-primary focus:ring-0" id="quick-id" oninput="validateQuickInput(this)" placeholder="" type="text" value="">
+<p class="hidden text-xs text-error dark:text-red-400 font-body-sm mt-1 flex items-center gap-1" id="quick-validation-msg">
+<span class="material-symbols-outlined text-xs">error</span>
+<span class="">Please provide a valid 0x hash or CRED identifier.</span>
+</p>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-slate-200 mb-1.5" for="quick-network">Cryptographic Ledger Network</label>
+<select class="w-full font-body-sm text-body-sm border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#111c1e] text-on-surface dark:text-white px-3 py-2.5 focus:border-primary focus:ring-0" id="quick-network"><option value="" disabled="" selected="" class="">— Select ledger verification network —</option><option value="mainnet" class="">Mainnet Ledger (Immutable Academic &amp; Land Anchor)</option><option value="devnet" class="">Devnet Sanction Sandbox</option><option value="ebsi" class="">European Trust Node Consensus (EBSI)</option></select>
+</div>
+<div class="pt-2">
+<button class="w-full flex items-center justify-center gap-2 bg-primary dark:bg-primary-container text-on-primary py-3 px-4 font-label-md text-label-md hover:bg-primary-container dark:hover:bg-[#007b80] transition-colors" id="dispatch-submit-btn" onclick="triggerVerificationModal()" type="button">
+<span class="material-symbols-outlined text-base">gavel</span>
+<span class="">Verify on Blockchain</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Ledger Status Indicator Note -->
+<div class="mt-8 p-3 bg-surface-container dark:bg-[#121f22] border border-border-subtle dark:border-slate-700">
+<div class="flex items-start gap-2.5 text-xs text-on-surface-variant dark:text-slate-300 font-body-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-base">info</span>
+<span class="">Verification requires zero gas fee and queries the cryptographic state without recording personal identification records.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tab 2: Manual Lookup Panel (Hidden by default, interactive) -->
+<div class="hidden" id="content-lookup">
+<div class="max-w-2xl mx-auto py-4">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-white mb-2">Manual Identifier &amp; Hash Search</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300 mb-6">
+              Search by globally unique W3C Decentralized Identifier (DID), on-chain transaction hash, or standard credential registration code.
+            </p>
+<div class="space-y-5 bg-surface-container-low dark:bg-[#17262a] border border-border-subtle dark:border-slate-700 p-6">
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-slate-200 mb-2" for="full-input-id">
+                  Credential ID, TxHash, or Holder DID
+                </label>
+<div class="relative">
+<input class="w-full font-code-sm text-code-sm border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#111c1e] px-3 py-3 text-on-surface dark:text-white focus:border-primary focus:ring-0 placeholder:text-outline dark:placeholder:text-slate-500" id="full-input-id" placeholder="" type="text">
+<button class="absolute right-2 top-2 p-1.5 text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed" type="button">
+<span class="material-symbols-outlined text-base">content_paste</span>
+</button>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface dark:text-slate-200 mb-2" for="manual-network-select">
+                  Target Verification Network
+                </label>
+<select class="w-full font-body-sm text-body-sm border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#111c1e] px-3 py-2.5 text-on-surface dark:text-white focus:border-primary focus:ring-0" id="manual-network-select">
+<option selected="">Mainnet Ledger</option>
+<option>EVM Proof Bridge (L2 Rollup)</option>
+<option>National Land Title Consortium Network</option>
+</select>
+</div>
+<div class="flex items-center gap-3">
+<input class="border-border-subtle dark:border-slate-700 text-primary dark:bg-[#111c1e] focus:ring-0" id="deep-trail" type="checkbox">
+<label class="font-body-sm text-body-sm text-on-surface dark:text-slate-300 cursor-pointer" for="deep-trail">Perform complete milestone lineage crawl (inspect recursive course credit stamps)</label>
+</div>
+<button class="w-full bg-primary dark:bg-primary-container text-on-primary py-3.5 px-6 font-label-md text-label-md hover:bg-primary-container dark:hover:bg-[#007b80] transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+<span class="">Verify on Blockchain</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Tab 3: Upload Signed Proof JSON (Drag & Drop zone) -->
+<div class="hidden" id="content-json">
+<div class="max-w-2xl mx-auto py-4">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-white mb-2">Upload Signed Proof JSON</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300 mb-6">
+              Verify cryptographically encapsulated JSON-LD proofs without revealing raw underlying data. Supported standards: W3C VC 2.0 &amp; OpenCerts.
+            </p>
+<div class="border-2 border-dashed border-border-subtle dark:border-slate-600 hover:border-primary dark:hover:border-primary-fixed p-12 text-center bg-surface-container-low dark:bg-[#17262a] transition-colors cursor-pointer">
+<div class="w-14 h-14 mx-auto mb-4 bg-surface-container dark:bg-[#101b1e] border border-border-subtle dark:border-slate-700 flex items-center justify-center text-primary dark:text-primary-fixed">
+<span class="material-symbols-outlined text-3xl">cloud_upload</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface dark:text-slate-200 mb-1">Drag and drop signed credential file here</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mb-4">Accepts valid .json, .vpld, and .zkproof files up to 10MB</p>
+<button class="px-4 py-2 border border-primary dark:border-primary-fixed text-primary dark:text-primary-fixed font-label-md text-label-md bg-surface-container-lowest dark:bg-[#111c1e] hover:bg-surface-container dark:hover:bg-[#1e3238] transition-colors" type="button">
+                Browse Local Files
+              </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Verification Showcase: Explanatory Feature Cards -->
+<div class="mb-14"><div class="mb-6 p-4 bg-surface-container dark:bg-[#162428] border-l-4 border-primary dark:border-primary-fixed border border-border-subtle dark:border-slate-700"><div class="flex flex-wrap items-center justify-between gap-3 mb-1.5"><div class="flex flex-wrap items-center gap-3"><span class="px-2.5 py-1 bg-secondary text-on-secondary text-xs font-label-md uppercase tracking-wider">Zone 2</span><h2 class="font-headline-md text-headline-md text-on-surface dark:text-white">Expected Verification Result &amp; Audit Preview (Mock Demonstration)</h2></div><span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-lowest dark:bg-[#101b1e] border border-border-subtle dark:border-slate-700 text-status-pending text-xs font-label-md font-bold"><span class="material-symbols-outlined text-xs">science</span>MOCK PREVIEW (EXACTLY 3 EXAMPLES)</span></div><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300">The sections below demonstrate mock proof safeguards and sample attestation stream records illustrating how verification data renders upon successful audit completion.</p></div>
+<div class="flex items-center justify-between mb-6 pb-2 border-b border-border-subtle dark:border-slate-700">
+<h2 class="font-headline-md text-headline-md text-on-surface dark:text-white">Ledger Verification Safeguards</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">Protocol Standard v4.21</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Card 1: Tamper Detection -->
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 p-6 flex flex-col justify-between transition-colors duration-200">
+<div>
+<div class="w-10 h-10 bg-surface-container dark:bg-[#1a2d32] border border-border-subtle dark:border-slate-700 flex items-center justify-center text-primary dark:text-primary-fixed mb-4">
+<span class="material-symbols-outlined text-2xl">fingerprint</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface dark:text-white">Tamper Detection</h3>
+<span class="px-2 py-0.5 bg-status-valid text-on-primary text-[11px] font-label-md">ENFORCED</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300 leading-relaxed">
+              Instantly detects modified hashes or altered grades, credentials, and deed boundary vectors down to a single flipped bit.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-border-subtle dark:border-slate-700 flex items-center justify-between font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400">
+<span class="">Proof Architecture</span>
+<span class="font-semibold text-primary dark:text-primary-fixed">Merkle Mountain Range</span>
+</div>
+</div>
+<!-- Card 2: Revocation Registry -->
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 p-6 flex flex-col justify-between transition-colors duration-200">
+<div>
+<div class="w-10 h-10 bg-surface-container dark:bg-[#1a2d32] border border-border-subtle dark:border-slate-700 flex items-center justify-center text-primary dark:text-primary-fixed mb-4">
+<span class="material-symbols-outlined text-2xl">history_toggle_off</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface dark:text-white">Revocation Registry</h3>
+<span class="px-2 py-0.5 bg-secondary text-on-secondary text-[11px] font-label-md">LIVE BITMAP</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300 leading-relaxed">
+              Cross-checks against real-time issuer revocation index status lists, blocking canceled diplomas, disputes, or voided deeds.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-border-subtle dark:border-slate-700 flex items-center justify-between font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400">
+<span class="">Latency</span>
+<span class="font-semibold text-primary dark:text-primary-fixed">&lt; 140ms Consensus Query</span>
+</div>
+</div>
+<!-- Card 3: Milestone Trail Audit -->
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 p-6 flex flex-col justify-between transition-colors duration-200">
+<div>
+<div class="w-10 h-10 bg-surface-container dark:bg-[#1a2d32] border border-border-subtle dark:border-slate-700 flex items-center justify-center text-primary dark:text-primary-fixed mb-4">
+<span class="material-symbols-outlined text-2xl">route</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface dark:text-white">Milestone Trail Audit</h3>
+<span class="px-2 py-0.5 bg-primary-container text-on-primary text-[11px] font-label-md">RECURSIVE</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300 leading-relaxed">
+              Validates every intermediate checkpoint, prerequisite course completion, and surveyor zoning sign-off—not just the final award.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-border-subtle dark:border-slate-700 flex items-center justify-between font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400">
+<span class="">Trail Depth</span>
+<span class="font-semibold text-primary dark:text-primary-fixed">N-Depth Cryptographic Tree</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Recent Public Attestations Mock Ledger Stream -->
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 p-6 transition-colors duration-200">
+<div class="mb-4 pb-4 border-b border-border-subtle dark:border-slate-700"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2"><div class="flex flex-wrap items-center gap-2.5"><h3 class="font-headline-md text-headline-md text-on-surface dark:text-white">Expected Output Preview (Mock Demonstration) — Sample Output</h3><span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-surface-container dark:bg-[#1a2d32] border border-border-subtle dark:border-slate-700 text-status-pending dark:text-status-pending text-xs font-label-md font-bold"><span class="material-symbols-outlined text-xs">science</span>MOCK PREVIEW (EXACTLY 3 EXAMPLES)</span></div><span class="inline-flex items-center gap-1 font-code-sm text-code-sm text-status-valid"><span class="w-1.5 h-1.5 bg-status-valid rounded-full"></span> Block #19,842,091</span></div><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300">Active operational inputs in Zone 1 remain empty above. Verified cryptographic attestations and Merkle proofs stream into this section once checked on-chain.</p></div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm border-collapse"><thead><tr class="bg-surface-container-low dark:bg-[#0f171a] border-b border-border-subtle dark:border-slate-700 text-on-surface dark:text-slate-200 font-label-md"><th class="py-2.5 px-3">RECORD TYPE</th><th class="py-2.5 px-3">CREDENTIAL ID / HASH</th><th class="py-2.5 px-3">RECIPIENT / ISSUING AUTHORITY</th><th class="py-2.5 px-3">TIMESTAMP</th><th class="py-2.5 px-3">STATUS</th><th class="py-2.5 px-3 text-right">ACTION</th></tr></thead><tbody class="divide-y divide-border-subtle dark:divide-slate-700 font-code-sm text-code-sm"><tr class="hover:bg-surface-container-low dark:hover:bg-[#17262a] transition-colors"><td class="py-3 px-3 font-body-sm flex items-center gap-2 text-on-surface dark:text-slate-200"><span class="material-symbols-outlined text-primary dark:text-primary-fixed text-base">school</span><span class="">Doctor of Medicine (M.D.)</span></td><td class="py-3 px-3 text-on-surface-variant dark:text-slate-300"><div class="inline-flex items-center gap-1.5"><span class="">0x4a91...38d2</span><button class="p-1 text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed" onclick="copySampleHash('0x4a9188bf2c38d2')" title="Copy full hash" type="button"><span class="material-symbols-outlined text-xs">content_copy</span></button></div></td><td class="py-3 px-3 font-body-sm text-on-surface dark:text-slate-200">Oxford Academic Registry</td><td class="py-3 px-3 text-on-surface-variant dark:text-slate-400">2 mins ago</td><td class="py-3 px-3"><span class="px-2 py-0.5 bg-status-valid text-on-primary text-xs font-label-md">VALIDATED</span></td><td class="py-3 px-3 text-right"><button class="inline-flex items-center gap-1 px-2.5 py-1 border border-primary dark:border-primary-fixed text-primary dark:text-primary-fixed bg-surface-container-lowest dark:bg-[#111c1e] hover:bg-surface-container dark:hover:bg-[#1e3238] text-xs font-label-md transition-colors" onclick="inspectMockProof('Doctor of Medicine (M.D.)', 'Merkle Tree Root #88bf2c38d2 - Depth 14 Verified on Mainnet')" type="button"><span class="material-symbols-outlined text-xs">account_tree</span><span class="">View Merkle Tree</span></button></td></tr><tr class="hover:bg-surface-container-low dark:hover:bg-[#17262a] transition-colors"><td class="py-3 px-3 font-body-sm flex items-center gap-2 text-on-surface dark:text-slate-200"><span class="material-symbols-outlined text-primary dark:text-primary-fixed text-base">domain</span><span class="">Title Deed #7749-B</span></td><td class="py-3 px-3 text-on-surface-variant dark:text-slate-300"><div class="inline-flex items-center gap-1.5"><span class="">0x992b...e01a</span><button class="p-1 text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed" onclick="copySampleHash('0x992be72c6e01a8')" title="Copy full hash" type="button"><span class="material-symbols-outlined text-xs">content_copy</span></button></div></td><td class="py-3 px-3 font-body-sm text-on-surface dark:text-slate-200">National Land Cadastre</td><td class="py-3 px-3 text-on-surface-variant dark:text-slate-400">8 mins ago</td><td class="py-3 px-3"><span class="px-2 py-0.5 bg-status-valid text-on-primary text-xs font-label-md">VALIDATED</span></td><td class="py-3 px-3 text-right"><button class="inline-flex items-center gap-1 px-2.5 py-1 border border-primary dark:border-primary-fixed text-primary dark:text-primary-fixed bg-surface-container-lowest dark:bg-[#111c1e] hover:bg-surface-container dark:hover:bg-[#1e3238] text-xs font-label-md transition-colors" onclick="inspectMockProof('Title Deed #7749-B', 'Cadastre Geographic Anchor Block #19,842,091 - Polygon Hash Match')" type="button"><span class="material-symbols-outlined text-xs">anchor</span><span class="">Inspect On-Chain Anchor</span></button></td></tr><tr class="hover:bg-surface-container-low dark:hover:bg-[#17262a] transition-colors"><td class="py-3 px-3 font-body-sm flex items-center gap-2 text-on-surface dark:text-slate-200"><span class="material-symbols-outlined text-status-revoked text-base">warning</span><span class="">Structural Engineering License</span></td><td class="py-3 px-3 text-on-surface-variant dark:text-slate-300"><div class="inline-flex items-center gap-1.5"><span class="">0x12bb...87ef</span><button class="p-1 text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed" onclick="copySampleHash('0x12bb51f287ef93')" title="Copy full hash" type="button"><span class="material-symbols-outlined text-xs">content_copy</span></button></div></td><td class="py-3 px-3 font-body-sm text-on-surface dark:text-slate-200">Chamber of Engineers</td><td class="py-3 px-3 text-on-surface-variant dark:text-slate-400">19 mins ago</td><td class="py-3 px-3"><span class="px-2 py-0.5 bg-status-revoked text-on-primary text-xs font-label-md">REVOKED</span></td><td class="py-3 px-3 text-right"><button class="inline-flex items-center gap-1 px-2.5 py-1 border border-status-revoked text-status-revoked bg-surface-container-lowest dark:bg-[#111c1e] hover:bg-surface-container dark:hover:bg-[#1e3238] text-xs font-label-md transition-colors" onclick="inspectMockProof('Structural Engineering License', 'Revocation Bitmap Index #4810 Flagged on Chamber of Engineers Nullifier List')" type="button"><span class="material-symbols-outlined text-xs">report</span><span class="">View Revocation Entry</span></button></td></tr></tbody></table>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component from JSON) -->
+<footer class="w-full bg-surface-container dark:bg-[#101b1e] border-t border-outline-variant dark:border-slate-800 mt-auto transition-colors duration-200">
+<div class="w-full py-base px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-base max-w-container-max mx-auto font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">
+<div class="flex items-center gap-4">
+<span class="font-label-md text-label-md font-bold text-on-surface dark:text-white">CredChain</span>
+<span class="">© 2026 CredChain Ledger. Built on open standards.</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="hover:text-primary dark:hover:text-primary-fixed underline transition-opacity duration-150" href="#">Privacy</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed underline transition-opacity duration-150" href="#">Terms</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed underline transition-opacity duration-150" href="#">API Docs</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed underline transition-opacity duration-150" href="#">Source</a>
+</div>
+</div>
+</footer>
+<!-- Modals & Overlays -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/80 dark:bg-black/80 p-4" id="verify-modal">
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 max-w-md w-full p-6 space-y-4 shadow-xl">
+<div class="flex items-center justify-between border-b border-border-subtle dark:border-slate-700 pb-3">
+<div class="flex items-center gap-2 text-primary dark:text-primary-fixed">
+<span class="material-symbols-outlined">verified_user</span>
+<h3 class="font-headline-md text-headline-md text-on-surface dark:text-white">Confirm Query Dispatch</h3>
+</div>
+<button class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-white" onclick="closeVerificationModal()" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300">You are about to initiate an on-chain zero-knowledge audit against the consensus ledger. No personal metadata will be disclosed.</p>
+<div class="bg-surface-container dark:bg-[#0e171a] p-3 border border-border-subtle dark:border-slate-700 space-y-1.5 font-code-sm text-code-sm">
+<div class="flex justify-between text-on-surface-variant dark:text-slate-300"><span class="">Target Identifier:</span><span class="text-primary dark:text-primary-fixed font-semibold" id="modal-target-id">CRED-2026-94812</span></div>
+<div class="flex justify-between text-on-surface-variant dark:text-slate-300"><span class="">Network:</span><span class="" id="modal-target-net">Mainnet</span></div>
+<div class="flex justify-between text-on-surface-variant dark:text-slate-300"><span class="">Estimated Fee:</span><span class="text-status-valid font-semibold">0.0000 ZK-GAS</span></div>
+</div>
+<div class="flex justify-end gap-3 pt-2">
+<button class="px-4 py-2 border border-border-subtle dark:border-slate-700 font-label-md text-label-md text-on-surface dark:text-slate-200 hover:bg-surface-container dark:hover:bg-[#1a2c32] transition-colors" onclick="closeVerificationModal()" type="button">Cancel</button>
+<button class="px-4 py-2 bg-primary dark:bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary-container dark:hover:bg-[#007b80] transition-colors flex items-center gap-1.5" onclick="confirmVerification()" type="button">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span class="">Execute Audit</span>
+</button>
+</div>
+</div>
+</div>
+<div class="hidden fixed inset-0 z-50 flex items-start justify-center pt-20 bg-inverse-surface/80 dark:bg-black/80 p-4" id="search-modal">
+<div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 max-w-lg w-full p-5 space-y-3 shadow-2xl">
+<div class="flex items-center justify-between border-b border-border-subtle dark:border-slate-700 pb-2">
+<span class="font-label-md text-label-md text-on-surface dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed">search</span>
+<span class="">Universal Ledger Search</span>
+</span>
+<button class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-white" onclick="closeSearchModal()" type="button">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<input class="w-full font-body-sm text-body-sm border border-border-subtle dark:border-slate-700 bg-surface-container-low dark:bg-[#0e171a] px-3 py-2 text-on-surface dark:text-white focus:border-primary focus:ring-0" id="search-quick-box" onkeyup="handleSearch(event)" placeholder="Type hash, DID, or institution name..." type="text">
+<div class="flex justify-between text-xs text-on-surface-variant dark:text-slate-400 font-code-sm">
+<span class="">Press ESC to exit</span>
+<span class="">Supports W3C DID, Oxford, Cadastre</span>
+</div>
+</div>
+</div>
+<div class="hidden fixed bottom-6 right-6 z-50 bg-inverse-surface dark:bg-[#1b2b30] text-surface dark:text-slate-100 px-4 py-2.5 border border-outline-variant dark:border-slate-600 text-body-sm flex items-center gap-2 font-code-sm shadow-lg" id="toast-box">
+<span class="material-symbols-outlined text-primary-fixed text-base">check_circle</span>
+<span class="" id="toast-msg">Copied to clipboard!</span>
+</div><script>function inspectMockProof(name, details) { document.getElementById('inspect-title').textContent = name; document.getElementById('inspect-details').textContent = details; document.getElementById('inspect-modal').classList.remove('hidden'); }<\/script></script><div class="hidden fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/80 dark:bg-black/80 p-4" id="inspect-modal"><div class="bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-700 max-w-md w-full p-6 space-y-4 shadow-xl"><div class="flex items-center justify-between border-b border-border-subtle dark:border-slate-700 pb-3"><div class="flex items-center gap-2 text-primary dark:text-primary-fixed"><span class="material-symbols-outlined">account_tree</span><h3 class="font-headline-md text-headline-md text-on-surface dark:text-white" id="inspect-title">Proof Audit Inspection</h3></div><button class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-white" onclick="document.getElementById('inspect-modal').classList.add('hidden')" type="button"><span class="material-symbols-outlined">close</span></button></div><div class="bg-surface-container dark:bg-[#0e171a] p-3.5 border border-border-subtle dark:border-slate-700 space-y-2 font-code-sm text-code-sm"><div class="text-xs text-on-surface-variant dark:text-slate-400 uppercase tracking-wider font-label-md">Cryptographic State</div><p class="text-on-surface dark:text-slate-200" id="inspect-details">Details</p></div><div class="flex justify-end pt-2"><button class="px-4 py-2 bg-primary dark:bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary-container dark:hover:bg-[#007b80] transition-colors" onclick="document.getElementById('inspect-modal').classList.add('hidden')" type="button">Close Inspection</button></div></div></div>
+<!-- Interactive Scripts -->
+<script>
+    // Theme sync & toggle
+    function updateThemeIcon() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const icon = document.getElementById('theme-icon');
+      if (icon) {
+        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      }
+    }
+
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+      updateThemeIcon();
+      updateTabStyles();
+    }
+
+    let currentActiveTab = 'scan';
+
+    function updateTabStyles() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const tabs = ['scan', 'lookup', 'json'];
+      
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        if (!btn) return;
+        if (t === currentActiveTab) {
+          btn.className = isDark
+            ? "flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md bg-[#132024] border-r border-slate-700 text-primary-fixed border-b-2 border-b-primary-fixed font-bold transition-colors"
+            : "flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md bg-surface-container-lowest border-r border-border-subtle text-primary border-b-2 border-b-primary font-bold transition-colors";
+        } else {
+          btn.className = isDark
+            ? "flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md border-r border-slate-700 text-slate-400 hover:text-primary-fixed hover:bg-[#1a2c32] transition-colors"
+            : "flex items-center gap-2.5 px-6 py-3.5 font-label-md text-label-md border-r border-border-subtle text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors";
+        }
+      });
+    }
+
+    function switchTab(tab) {
+      currentActiveTab = tab;
+      const scanContent = document.getElementById('content-scan');
+      const lookupContent = document.getElementById('content-lookup');
+      const jsonContent = document.getElementById('content-json');
+
+      scanContent.classList.add('hidden');
+      lookupContent.classList.add('hidden');
+      jsonContent.classList.add('hidden');
+
+      if (tab === 'scan') scanContent.classList.remove('hidden');
+      else if (tab === 'lookup') lookupContent.classList.remove('hidden');
+      else if (tab === 'json') jsonContent.classList.remove('hidden');
+
+      updateTabStyles();
+    }
+
+    let cameraStreaming = true;
+    function toggleCameraStream() {
+      cameraStreaming = !cameraStreaming;
+      const icon = document.getElementById('cam-status-icon');
+      const text = document.getElementById('cam-btn-text');
+      if (cameraStreaming) {
+        icon.textContent = 'videocam';
+        icon.className = 'material-symbols-outlined text-sm text-status-valid';
+        text.textContent = 'Pause';
+      } else {
+        icon.textContent = 'videocam_off';
+        icon.className = 'material-symbols-outlined text-sm text-status-pending';
+        text.textContent = 'Resume';
+      }
+    }
+
+    function copySampleHash(str) {
+      navigator.clipboard?.writeText(str);
+      const input = document.getElementById('quick-id');
+      if (input) input.value = str;
+      showToast('Copied ' + str + ' to clipboard!');
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      const text = document.getElementById('toast-msg');
+      text.textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 2400);
+    }
+
+    function validateQuickInput(input) {
+      const msg = document.getElementById('quick-validation-msg');
+      if (!input.value.trim()) {
+        msg.classList.remove('hidden');
+      } else {
+        msg.classList.add('hidden');
+      }
+    }
+
+    function triggerVerificationModal() {
+      const idVal = document.getElementById('quick-id').value || 'CRED-2026-94812';
+      const netVal = document.getElementById('quick-network').value.split(' ')[0];
+      document.getElementById('modal-target-id').textContent = idVal;
+      document.getElementById('modal-target-net').textContent = netVal;
+      document.getElementById('verify-modal').classList.remove('hidden');
+    }
+
+    function closeVerificationModal() {
+      document.getElementById('verify-modal').classList.add('hidden');
+    }
+
+    function confirmVerification() {
+      closeVerificationModal();
+      showToast('Consensus proof query initiated on-chain');
+    }
+
+    function openSearchModal() {
+      const modal = document.getElementById('search-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('search-quick-box').focus(), 50);
+    }
+
+    function closeSearchModal() {
+      document.getElementById('search-modal').classList.add('hidden');
+    }
+
+    function handleSearch(e) {
+      if (e.key === 'Escape') closeSearchModal();
+      if (e.key === 'Enter') {
+        showToast('Searching ledger for: ' + e.target.value);
+        closeSearchModal();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openSearchModal();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateThemeIcon();
+      updateTabStyles();
+    });
+  </script>
+
+
+
+
+
+
+
+
+
+
+</body></html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sign In to CredChain - Supabase Auth</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary": "#00464a",
+          "status-revoked": "#D4351C",
+          "surface": "#fcf9f8",
+          "on-secondary-fixed-variant": "#00497e",
+          "primary-fixed": "#a6eff3",
+          "inverse-surface": "#313030",
+          "on-tertiary-fixed": "#311300",
+          "on-tertiary-fixed-variant": "#6b3a16",
+          "on-tertiary-container": "#ffbe95",
+          "on-primary-fixed-variant": "#004f53",
+          "secondary-fixed": "#d2e4ff",
+          "on-tertiary": "#ffffff",
+          "border-subtle": "#D1D5DB",
+          "secondary-container": "#6eb2fe",
+          "surface-container-high": "#eae7e7",
+          "secondary-fixed-dim": "#a0caff",
+          "surface-container-highest": "#e5e2e1",
+          "on-error": "#ffffff",
+          "surface-dim": "#dcd9d9",
+          "error": "#ba1a1a",
+          "inverse-primary": "#8ad3d7",
+          "surface-container-lowest": "#ffffff",
+          "on-secondary-fixed": "#001c37",
+          "on-secondary": "#ffffff",
+          "on-surface-variant": "#3f4949",
+          "tertiary-fixed": "#ffdbc7",
+          "tertiary-fixed-dim": "#ffb688",
+          "surface-container-low": "#f6f3f2",
+          "status-pending": "#F47738",
+          "status-valid": "#00703C",
+          "surface-container": "#f0eded",
+          "primary-fixed-dim": "#8ad3d7",
+          "primary-container": "#006064",
+          "on-secondary-container": "#004376",
+          "on-primary-fixed": "#002021",
+          "surface-variant": "#e5e2e1",
+          "on-background": "#1c1b1b",
+          "secondary": "#0061a6",
+          "on-error-container": "#93000a",
+          "tertiary-container": "#7e4924",
+          "outline": "#6f7979",
+          "background": "#fcf9f8",
+          "surface-bright": "#fcf9f8",
+          "outline-variant": "#bec8c9",
+          "on-primary": "#ffffff",
+          "error-container": "#ffdad6",
+          "on-primary-container": "#8fd8dc",
+          "inverse-on-surface": "#f3f0ef",
+          "tertiary": "#62330f",
+          "surface-tint": "#14696d",
+          "on-surface": "#1c1b1b"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter": "16px",
+          "margin-desktop": "32px",
+          "container-max": "1280px",
+          "base": "8px",
+          "margin-mobile": "16px"
+        },
+        "fontFamily": {
+          "headline-lg-mobile": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Inter"
+          ],
+          "code-sm": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "headline-lg-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "body-sm": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "14px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "code-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }
+</script>
+<script>
+  // Apply saved theme early to avoid FOUC
+  if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+</style>
+</head>
+<body class="bg-background dark:bg-[#0d1518] text-on-surface dark:text-slate-100 font-body-lg text-body-lg min-h-screen flex flex-col antialiased selection:bg-primary selection:text-on-primary transition-colors duration-200">
+<!-- TopNavBar Header -->
+<header class="bg-surface dark:bg-[#111a1e] border-b border-outline dark:border-slate-800 w-full sticky top-0 z-50 transition-colors duration-200">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-base">
+<!-- Standalone Logo -->
+<a class="flex items-center" href="#">
+<img alt="CredChain platform logo" class="h-12 w-auto object-contain transition-all duration-200" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</a>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 font-body-lg text-body-lg">
+<a class="text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors py-1 px-2 rounded" href="#">Explorer</a>
+<a class="text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors py-1 px-2 rounded" href="#">Wallet</a>
+<a class="text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors py-1 px-2 rounded" href="#">Dashboard</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-3">
+<!-- Dark Mode Toggle Button -->
+<button aria-label="Toggle dark mode" class="p-2 text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 border border-border-subtle dark:border-slate-700 transition-colors flex items-center justify-center" id="theme-toggle" type="button">
+<span class="material-symbols-outlined dark:hidden text-[20px]">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:inline text-[20px] text-amber-300">light_mode</span>
+</button>
+<button class="border border-outline dark:border-slate-700 bg-surface-container-lowest dark:bg-slate-800 text-primary dark:text-primary-fixed font-label-md text-label-md px-4 py-2 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-base">account_balance_wallet</span>
+          Connect Wallet
+        </button>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 flex items-center justify-center py-12 px-margin-mobile md:px-margin-desktop bg-surface-container-low dark:bg-[#0d1518] transition-colors duration-200">
+<div class="w-full max-w-[620px] bg-surface-container-lowest dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-6 md:p-8 shadow-sm transition-colors duration-200">
+<!-- Auth Header -->
+<div class="text-center mb-8">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container dark:bg-slate-800/80 border border-border-subtle dark:border-slate-700 mb-4">
+<span class="w-2 h-2 rounded-full bg-status-valid"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-300">Ledger Node Status: Online</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface dark:text-white mb-2">Sign In to CredChain</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">Secure role-based access powered by Supabase Authentication</p>
+</div>
+<!-- Segmented Role Selector -->
+<div class="mb-6">
+<label class="block font-label-md text-label-md text-on-surface-variant dark:text-slate-300 mb-2">Select Portal Role</label>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="roleSelector" role="tablist">
+<!-- Issuer Role Button (Active by default) -->
+<button class="role-btn text-left p-3 border-2 border-primary dark:border-primary-fixed bg-surface-container-low dark:bg-slate-800 transition-colors flex flex-col justify-between" id="role-issuer" onclick="setRole('Issuer')" type="button">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="apartment">apartment</span>
+<span class="px-1.5 py-0.5 text-xs font-semibold bg-primary dark:bg-primary text-on-primary">Active</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-bold text-primary dark:text-primary-fixed">Issuer</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 line-clamp-1">Institutions &amp; Registrars</div>
+</div>
+</button>
+<!-- Holder Role Button -->
+<button class="role-btn text-left p-3 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-slate-900/60 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors flex flex-col justify-between" id="role-holder" onclick="setRole('Holder')" type="button">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-on-surface-variant dark:text-slate-400" data-icon="school">school</span>
+<span class="px-1.5 py-0.5 text-xs font-semibold bg-surface-container dark:bg-slate-800 text-on-surface-variant dark:text-slate-300">Role</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-bold text-on-surface dark:text-white">Holder</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 line-clamp-1">Students &amp; Owners</div>
+</div>
+</button>
+<!-- Verifier Role Button -->
+<button class="role-btn text-left p-3 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-slate-900/60 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors flex flex-col justify-between" id="role-verifier" onclick="setRole('Verifier')" type="button">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-on-surface-variant dark:text-slate-400" data-icon="verified">verified</span>
+<span class="px-1.5 py-0.5 text-xs font-semibold bg-surface-container dark:bg-slate-800 text-on-surface-variant dark:text-slate-300">Role</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-bold text-on-surface dark:text-white">Verifier</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 line-clamp-1">Auditors &amp; Employers</div>
+</div>
+</button>
+</div>
+</div>
+<!-- Supabase Auth Form -->
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Floating Label Email Input -->
+<div class="relative">
+<input class="peer block w-full px-3 pt-6 pb-2 border border-border-subtle dark:border-slate-700 text-on-surface dark:text-white bg-surface-container-lowest dark:bg-slate-900 focus:outline-none focus:ring-0 focus:border-primary dark:focus:border-primary-fixed font-body-lg text-body-lg placeholder-transparent" id="email" placeholder=" " required="" type="email">
+<label class="absolute font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 duration-150 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-3 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary dark:peer-focus:text-primary-fixed" for="email">Email Address</label>
+</div>
+<!-- Floating Label Password Input with toggle -->
+<div class="relative">
+<input class="peer block w-full px-3 pt-6 pb-2 pr-10 border border-border-subtle dark:border-slate-700 text-on-surface dark:text-white bg-surface-container-lowest dark:bg-slate-900 focus:outline-none focus:ring-0 focus:border-primary dark:focus:border-primary-fixed font-body-lg text-body-lg placeholder-transparent" id="password" placeholder=" " required="" type="password">
+<label class="absolute font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 duration-150 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-3 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary dark:peer-focus:text-primary-fixed" for="password">Account Password</label>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-white focus:outline-none" onclick="togglePasswordVisibility()" type="button">
+<span class="material-symbols-outlined text-[20px]" id="password-visibility-icon">visibility</span>
+</button>
+</div>
+<!-- Session & Recovery Options -->
+<div class="flex items-center justify-between pt-1">
+<label class="flex items-center gap-2 cursor-pointer select-none">
+<input checked="" class="w-4 h-4 text-primary dark:text-primary-container rounded-none border-border-subtle dark:border-slate-700 dark:bg-slate-900 focus:ring-0 focus:ring-offset-0" type="checkbox">
+<span class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300">Remember this session</span>
+</label>
+<a class="font-body-sm text-body-sm text-primary dark:text-primary-fixed hover:underline font-medium" href="#">Forgot password?</a>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full bg-primary hover:bg-[#00383b] dark:bg-primary-container dark:hover:bg-[#004f53] text-on-primary py-3 px-4 font-label-md text-label-md font-bold transition-colors flex items-center justify-center gap-2" id="submitBtn" type="submit">
+<span class="material-symbols-outlined text-base">login</span>
+<span class="" id="submitRoleText">Sign In as Issuer</span>
+</button>
+<div class="relative flex py-2 items-center">
+<div class="flex-grow border-t border-border-subtle dark:border-slate-700"></div>
+<span class="flex-shrink mx-4 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 bg-surface-container-lowest dark:bg-[#132024] px-2">OR ALTERNATE CREDENTIAL</span>
+<div class="flex-grow border-t border-border-subtle dark:border-slate-700"></div>
+</div>
+<!-- Google OAuth -->
+<button class="w-full border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-slate-900 text-on-surface dark:text-slate-200 py-2.5 px-4 font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2" type="button">
+<svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"></path>
+</svg>
+<span class="">Continue with Google</span>
+</button>
+<!-- GitHub OAuth -->
+<button class="w-full border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-slate-900 text-on-surface dark:text-slate-200 py-2.5 px-4 font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2" type="button">
+<svg class="w-4 h-4 flex-shrink-0 fill-current text-on-surface dark:text-slate-200" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" fill-rule="evenodd"></path>
+</svg>
+<span class="">Continue with GitHub</span>
+</button>
+</form>
+<!-- Supabase PKCE and Security Ledger Notice -->
+<div class="mt-6 pt-4 border-t border-border-subtle dark:border-slate-800 flex items-start gap-2.5 bg-surface-container-low dark:bg-slate-900/60 p-3">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-lg mt-0.5" data-icon="shield">shield</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">
+          End-to-end encrypted sessions managed by Supabase Auth with PKCE and hardware token support.
+        </p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-[#111a1e] border-t border-outline dark:border-slate-800 w-full mt-auto transition-colors duration-200">
+<div class="w-full py-base px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-base max-w-container-max mx-auto">
+<p class="font-body-sm text-body-sm text-on-surface dark:text-slate-400">© 2026 CredChain Ledger. Built on open standards.</p>
+<div class="flex items-center gap-6 font-body-sm text-body-sm">
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed underline" href="#">Privacy</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed underline" href="#">Terms</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed underline" href="#">API Docs</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed underline" href="#">Source</a>
+</div>
+</div>
+</footer>
+<script>
+    let currentRole = 'Issuer';
+
+    function setRole(roleName) {
+      currentRole = roleName;
+      const roles = ['Issuer', 'Holder', 'Verifier'];
+      roles.forEach(r => {
+        const btn = document.getElementById('role-' + r.toLowerCase());
+        const badge = btn.querySelector('span:nth-child(2)');
+        const icon = btn.querySelector('.material-symbols-outlined');
+        const title = btn.querySelector('.font-label-md');
+
+        if (r === roleName) {
+          btn.className = 'role-btn text-left p-3 border-2 border-primary dark:border-primary-fixed bg-surface-container-low dark:bg-slate-800 transition-colors flex flex-col justify-between';
+          badge.className = 'px-1.5 py-0.5 text-xs font-semibold bg-primary dark:bg-primary text-on-primary';
+          badge.innerText = 'Active';
+          icon.className = 'material-symbols-outlined text-primary dark:text-primary-fixed';
+          title.className = 'font-label-md text-label-md font-bold text-primary dark:text-primary-fixed';
+        } else {
+          btn.className = 'role-btn text-left p-3 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-slate-900/60 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors flex flex-col justify-between';
+          badge.className = 'px-1.5 py-0.5 text-xs font-semibold bg-surface-container dark:bg-slate-800 text-on-surface-variant dark:text-slate-300';
+          badge.innerText = 'Role';
+          icon.className = 'material-symbols-outlined text-on-surface-variant dark:text-slate-400';
+          title.className = 'font-label-md text-label-md font-bold text-on-surface dark:text-white';
+        }
+      });
+      document.getElementById('submitRoleText').innerText = 'Sign In as ' + roleName;
+    }
+
+    // Password Visibility Toggle
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('password');
+      const icon = document.getElementById('password-visibility-icon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.innerText = 'visibility_off';
+      } else {
+        passwordInput.type = 'password';
+        icon.innerText = 'visibility';
+      }
+    }
+
+    // Dark Mode Toggle Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn.addEventListener('click', function() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('color-theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('color-theme', 'dark');
+      }
+      // Re-apply role styling so active highlights match current theme
+      setRole(currentRole);
+    });
+  </script>
+
+
+
+
+</body></html>

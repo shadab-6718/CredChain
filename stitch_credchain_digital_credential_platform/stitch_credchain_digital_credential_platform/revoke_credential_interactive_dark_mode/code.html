@@ -1,0 +1,342 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Revoke or Invalidate Credential | CredChain</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#00464a",
+            "primary-container": "#006064",
+            "status-revoked": "#D4351C",
+            "status-valid": "#00703C",
+            "border-subtle": "#D1D5DB"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @media print {
+      header, footer, #theme-toggle, #back-to-top, .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .shadow-sm, .shadow-md {
+        box-shadow: none !important;
+      }
+      main {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+<script>
+    // Initialize theme prior to render to avoid flash
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+<body class="bg-[#fcf9f8] dark:bg-[#0b1315] text-[#191c1d] dark:text-[#e0e3e3] font-sans min-h-screen flex flex-col antialiased transition-colors duration-200 selection:bg-primary selection:text-white">
+<!-- Header Navigation Component -->
+<header class="w-full bg-white dark:bg-[#0e1a1d] border-b border-gray-200 dark:border-[#1e2f34] sticky top-0 z-50 transition-colors duration-200">
+<div class="flex justify-between items-center w-full px-4 md:px-8 max-w-7xl mx-auto h-16">
+<!-- Standalone Logo & Mobile Menu Toggle -->
+<div class="flex items-center space-x-3">
+<button aria-label="Toggle Navigation Menu" class="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none" id="mobile-menu-btn" type="button">
+<span class="material-symbols-outlined text-[24px]">menu</span>
+</button>
+<style>
+    @keyframes darkLogoGlowPulse {
+      0%, 100% {
+        filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(245, 158, 11, 0.4));
+      }
+      50% {
+        filter: brightness(0) invert(1) drop-shadow(0 0 16px rgba(245, 158, 11, 0.75));
+      }
+    }
+    .dark .logo-glow-pulse {
+      animation: darkLogoGlowPulse 3.5s ease-in-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dark .logo-glow-pulse {
+        animation: none !important;
+      }
+    }
+  </style><a aria-label="CredChain Home" class="flex items-center" href="#">
+<img alt="CredChain Logo" class="h-10 w-auto object-contain transition-all duration-200" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</a>
+</div>
+<!-- Desktop Nav Links -->
+<nav aria-label="Main Navigation" class="hidden md:flex items-center space-x-8">
+<a class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium" href="#">Explorer</a>
+<a class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium" href="#">Wallet</a>
+<a aria-current="page" class="text-primary dark:text-[#8ad3d7] border-b-2 border-primary dark:border-[#8ad3d7] pb-1 text-sm font-semibold" href="#">Dashboard</a>
+</nav>
+<!-- Trailing Actions: Search Shortcut, Theme Toggle, Connect Wallet -->
+<div class="flex items-center space-x-3">
+<!-- Search Button Cmd+K -->
+<button aria-label="Search records" class="hidden sm:flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#16272c] hover:bg-gray-200 dark:hover:bg-[#1d333a] border border-gray-200 dark:border-[#22373d] px-3 py-1.5 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">search</span>
+<span class="">Search</span>
+<kbd class="font-mono bg-white dark:bg-[#0c1619] border border-gray-300 dark:border-[#22353a] px-1.5 py-0.5 rounded text-[10px]">⌘K</kbd>
+</button>
+<!-- Theme Toggle Button -->
+<button aria-label="Toggle Theme" class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#17272c] rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-teal-400" id="theme-toggle" type="button">
+<span class="material-symbols-outlined text-[20px] hidden dark:inline" id="sun-icon">light_mode</span>
+<span class="material-symbols-outlined text-[20px] inline dark:hidden" id="moon-icon">dark_mode</span>
+</button>
+<button class="bg-primary hover:bg-[#003639] dark:bg-[#006064] dark:hover:bg-[#004f53] text-white text-sm font-semibold px-4 py-2 rounded-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-[#0b1315]" type="button">
+      Connect Wallet
+    </button>
+</div>
+</div>
+<!-- Mobile navigation drawer (toggleable) -->
+<div class="hidden border-t border-gray-200 dark:border-[#1e2f34] px-4 py-3 bg-white dark:bg-[#0e1a1d] md:hidden space-y-2" id="mobile-menu">
+<a class="block py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium" href="#">Explorer</a>
+<a class="block py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium" href="#">Wallet</a>
+<a class="block py-1.5 text-sm font-semibold text-primary dark:text-[#8ad3d7]" href="#">Dashboard</a>
+</div>
+</header>
+<!-- Main Content Container -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 py-8">
+<!-- Breadcrumbs -->
+<nav aria-label="Breadcrumb" class="flex items-center space-x-2 text-gray-500 dark:text-gray-400 text-sm mb-6">
+<a class="hover:text-primary dark:hover:text-[#8ad3d7] transition-colors" href="#">Home</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="hover:text-primary dark:hover:text-[#8ad3d7] transition-colors" href="#">Issuer Dashboard</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span aria-current="page" class="text-gray-900 dark:text-white font-semibold">Revoke Credential</span>
+</nav>
+<!-- Page Title & Header -->
+<div class="mb-6">
+<h1 class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+  Revoke or Invalidate Credential
+</h1>
+<p class="text-base text-gray-600 dark:text-gray-300 max-w-3xl">
+  Permanently mark a credential or milestone record as revoked on the public cryptographic registry.
+</p>
+</div>
+<!-- Irreversible Warning Banner -->
+<div class="border-l-4 border-[#D4351C] bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-800 dark:text-red-300 p-4 mb-8 flex items-start space-x-3 rounded-none shadow-sm">
+<span class="material-symbols-outlined text-[#D4351C] select-none flex-shrink-0">warning</span>
+<div class="text-sm font-semibold">
+<span class="font-bold">Irreversible Ledger Action:</span> Once published to the smart contract revocation registry, status cannot be undone without re-issuing.
+</div>
+</div>
+<!-- Multi-Step Execution Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+<!-- Primary Form Columns -->
+<div class="lg:col-span-8 space-y-8">
+<!-- STEP 1: Select or Lookup Credential -->
+<section class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] p-6 rounded-none shadow-sm transition-colors duration-200">
+<div class="flex items-center justify-between pb-4 mb-6 border-b border-gray-200 dark:border-[#22353a]">
+<div class="flex items-center space-x-3">
+<span class="w-6 h-6 bg-[#006064] text-white text-sm font-semibold flex items-center justify-center">1</span>
+<h2 class="text-xl font-semibold text-gray-900 dark:text-white">Select or Lookup Credential to Revoke</h2>
+</div>
+<span class="font-mono text-xs text-gray-500 dark:text-gray-400">REG-SEARCH-v2</span>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2" for="cred-search">
+      Credential Identifier / Subject
+    </label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-3 pr-10 text-sm focus:outline-none focus:border-primary dark:focus:border-[#8ad3d7] focus:ring-1 focus:ring-primary dark:focus:ring-[#8ad3d7] rounded-none transition-colors" id="cred-search" placeholder="Enter Credential ID, Hash, or DID to revoke..." type="text" value="">
+<span class="material-symbols-outlined absolute right-3 top-3 text-gray-400 dark:text-gray-500 select-none">search</span>
+</div>
+</div>
+<!-- Selected Credential Card Preview -->
+
+<div class="border border-dashed border-gray-300 dark:border-[#24393f] p-4 text-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#0e1a1d] flex items-center justify-center gap-2"><span class="material-symbols-outlined text-gray-400 text-[18px]">info</span><span class="">Enter an ID above to inspect a credential before revocation</span></div></div>
+</section>
+<!-- STEP 2: Reason for Revocation -->
+<section class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] p-6 rounded-none shadow-sm transition-colors duration-200">
+<div class="flex items-center space-x-3 pb-4 mb-6 border-b border-gray-200 dark:border-[#22353a]">
+<span class="w-6 h-6 bg-[#006064] text-white text-sm font-semibold flex items-center justify-center">2</span>
+<h2 class="text-xl font-semibold text-gray-900 dark:text-white">Reason for Revocation</h2>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2" for="revocation-reason">
+      Revocation Category <span class="text-[#D4351C]">*</span>
+</label>
+<select class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 p-3 text-sm focus:outline-none focus:border-primary dark:focus:border-[#8ad3d7] focus:ring-1 focus:ring-primary dark:focus:ring-[#8ad3d7] rounded-none transition-colors" id="revocation-reason"><option value="" disabled="" selected="" class="">Select a revocation reason category...</option><option value="clerical" class="">Clerical / Data Entry Error</option><option value="fraud" class="">Fraudulent Application</option><option value="superseded" class="">Superseded by New Milestone</option><option value="regulatory" class="">Regulatory Order</option><option value="other" class="">Other</option></select>
+</div>
+<div>
+<label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2" for="detailed-reason">
+      Detailed Justification &amp; Ledger Notes <span class="text-[#D4351C]">*</span>
+</label>
+<textarea class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-3 text-sm focus:outline-none focus:border-primary dark:focus:border-[#8ad3d7] focus:ring-1 focus:ring-primary dark:focus:ring-[#8ad3d7] rounded-none transition-colors" id="detailed-reason" placeholder="State the explicit institutional reasoning for invalidating this record on-chain..." rows="4"></textarea>
+<span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">This text will be encrypted and committed to the verification index.</span>
+</div>
+<div>
+<label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2" for="effective-date">
+      Effective Invalidation Date
+    </label>
+<input class="w-full md:w-1/2 bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 p-3 text-sm focus:outline-none focus:border-primary dark:focus:border-[#8ad3d7] focus:ring-1 focus:ring-primary dark:focus:ring-[#8ad3d7] rounded-none transition-colors" id="effective-date" type="date" value="">
+</div>
+</div>
+</section>
+<!-- STEP 3: Authorization & Cryptographic Proof -->
+<section class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] p-6 rounded-none shadow-sm transition-colors duration-200">
+<div class="flex items-center space-x-3 pb-4 mb-6 border-b border-gray-200 dark:border-[#22353a]">
+<span class="w-6 h-6 bg-[#006064] text-white text-sm font-semibold flex items-center justify-center">3</span>
+<h2 class="text-xl font-semibold text-gray-900 dark:text-white">Authorization &amp; Cryptographic Proof</h2>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2" for="signer-select">
+      Multi-Sig Signer Authority
+    </label>
+<select class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 p-3 text-sm focus:outline-none focus:border-primary dark:focus:border-[#8ad3d7] focus:ring-1 focus:ring-primary dark:focus:ring-[#8ad3d7] rounded-none transition-colors" id="signer-select">
+<option value="signer-1">Key #1: 0x8a92...F192 (Authorized Registrar - Real Estate Board)</option>
+<option value="signer-2">Key #2: 0x110c...3B81 (Legal Compliance Authority)</option>
+</select>
+</div>
+<!-- Cryptographic Payload Hash Preview Box -->
+<div>
+<span class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+      Cryptographic Payload Hash Preview
+    </span>
+<div class="bg-gray-50 dark:bg-[#0c1619] p-4 border border-gray-200 dark:border-[#1d2e33] text-gray-700 dark:text-gray-300 font-mono text-xs overflow-x-auto rounded-none space-y-2">
+<p class=""><span class="text-gray-900 dark:text-white font-semibold">METHOD:</span> REVOKE_CREDENTIAL_V2</p>
+<p class=""><span class="text-gray-900 dark:text-white font-semibold">TARGET_HASH:</span> 0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>
+<p class=""><span class="text-gray-900 dark:text-white font-semibold">SIGNATURE_DIGEST:</span> 0xfa719b02a7c8...918230aa</p>
+<p class=""><span class="text-gray-900 dark:text-white font-semibold">NONCE:</span> 1084209 · <span class="text-emerald-700 dark:text-emerald-400 font-medium">Gas Estimate: 0.0021 ETH</span></p>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-4 border-t border-gray-200 dark:border-[#22353a] flex flex-col sm:flex-row items-center gap-4">
+<button class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-6 py-3 rounded-none flex items-center justify-center space-x-2 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600" type="button">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+<span class="">Sign &amp; Broadcast Revocation to Ledger</span>
+</button>
+<button class="w-full sm:w-auto bg-gray-100 dark:bg-[#1a2b30] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#20363d] border border-gray-200 dark:border-[#22353a] text-sm font-semibold px-6 py-3 rounded-none transition-colors" type="button">
+      Keep Active / Discard
+    </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Institutional Revocation Ledger Timeline & Rules -->
+<aside class="lg:col-span-4 space-y-6">
+<!-- Verification Ledger Policy Box -->
+<div class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] p-6 rounded-none shadow-sm transition-colors duration-200">
+<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary dark:text-[#8ad3d7]">policy</span>
+<span class="">Revocation Protocol</span>
+</h3>
+<p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+    Under W3C Decentralized Identifier and Verifiable Credentials (VC) specifications, revocations are published into an append-only cryptographic accumulator.
+  </p>
+<ul class="text-sm space-y-2 text-gray-600 dark:text-gray-300 list-disc pl-4">
+<li class="">Zero-knowledge proof verify status instantaneously.</li>
+<li class="">Wallet holders are dispatched a webhook notification upon ledger inclusion.</li>
+<li class="">Records cannot be erased; state is changed to <code class="text-red-600 dark:text-red-400 bg-gray-100 dark:bg-[#0c1619] px-1 py-0.5 font-mono text-xs">REVOKED</code>.</li>
+</ul>
+</div>
+<!-- Ledger State Audit Mini-Card -->
+<div class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] p-6 rounded-none shadow-sm transition-colors duration-200">
+<h4 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Network Status</h4>
+<div class="space-y-3 text-sm">
+<div class="flex justify-between items-center border-b border-gray-100 dark:border-[#1c2d32] pb-2">
+<span class="text-gray-500 dark:text-gray-400">Registry Contract:</span>
+<span class="font-mono text-xs font-semibold text-gray-900 dark:text-white">CredChain-v4.2</span>
+</div>
+<div class="flex justify-between items-center border-b border-gray-100 dark:border-[#1c2d32] pb-2">
+<span class="text-gray-500 dark:text-gray-400">Block Height:</span>
+<span class="font-mono text-xs font-semibold text-gray-900 dark:text-white">#19,401,942</span>
+</div>
+<div class="flex justify-between items-center border-b border-gray-100 dark:border-[#1c2d32] pb-2">
+<span class="text-gray-500 dark:text-gray-400">Consensus:</span>
+<span class="px-2 py-0.5 text-xs font-semibold text-emerald-800 bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-none">Synced (Finalized)</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Recently Revoked Credentials Summary Table -->
+<section class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] p-6 rounded-none shadow-sm mb-8 transition-colors duration-200"><div class="bg-gray-100 dark:bg-[#16272c] border-l-4 border-primary dark:border-[#8ad3d7] p-4 mb-6"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div class="flex items-center space-x-2"><span class="material-symbols-outlined text-[20px] text-primary dark:text-[#8ad3d7]">preview</span><h2 class="text-lg font-bold text-gray-900 dark:text-white">Expected Output Preview (Mock Example) — How Results Will Look After Completion</h2></div><span class="font-mono text-[10px] uppercase font-semibold text-primary dark:text-[#8ad3d7] bg-white dark:bg-[#0f1b1e] px-2.5 py-1 border border-primary dark:border-[#8ad3d7] self-start sm:self-auto">MOCK REVOCATION PREVIEW</span></div><p class="text-xs text-gray-600 dark:text-gray-300 mt-2">Active form inputs remain empty above. This zone displays a simulated demonstration of the verified on-chain result and updated audit log once revocation is committed.</p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"><div class="border border-gray-200 dark:border-[#22373d] bg-gray-50 dark:bg-[#0f1b1e] p-4"><div class="flex items-center justify-between mb-2"><span class="font-mono text-xs font-semibold text-gray-900 dark:text-white">Sample Revoked Target (Post-Execution)</span><span class="bg-red-600 text-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">Revoked</span></div><h4 class="text-sm font-semibold text-gray-900 dark:text-white">Land Deed Parcel #402-A (CRED-84920)</h4><p class="text-xs text-gray-600 dark:text-gray-400 font-mono mt-1">Target Hash: 0xe3b0c44298fc...7852b855</p><p class="text-xs text-gray-500 dark:text-gray-400 mt-2">State updated on-chain to non-verifiable. Dependent applications and wallet verifiers receive instantaneous revocation signals.</p></div><div class="border border-gray-200 dark:border-[#22373d] bg-gray-50 dark:bg-[#0f1b1e] p-4"><div class="flex items-center justify-between mb-2"><span class="font-mono text-xs font-semibold text-gray-900 dark:text-white">Cryptographic Proof Receipt</span><span class="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-semibold uppercase">Included in Block</span></div><div class="space-y-1 font-mono text-xs text-gray-600 dark:text-gray-400"><p class=""><span class="text-gray-900 dark:text-gray-200 font-sans font-medium">Tx Hash:</span> <a href="#" class="text-teal-600 dark:text-teal-400 hover:underline">0x7bf8...390a</a></p><p class=""><span class="text-gray-900 dark:text-gray-200 font-sans font-medium">Accumulator Proof:</span> Validated (0ms latency)</p><p class=""><span class="text-gray-900 dark:text-gray-200 font-sans font-medium">Notification Webhook:</span> Dispatched to Holder DID</p></div></div></div><div class="pb-4 mb-4 border-b border-gray-200 dark:border-[#22353a]"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div><h3 class="text-base font-semibold text-gray-900 dark:text-white">Public Revocation Audit Log</h3><p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Historical and simulated revocation records registered by authorized institution keys.</p></div><button class="text-primary dark:text-teal-400 hover:underline text-xs font-semibold flex items-center space-x-1 self-start sm:self-auto" type="button"><span class="material-symbols-outlined text-[16px]">download</span><span class="">Export Audit Log</span></button></div></div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-gray-50 dark:bg-[#16272c] border-b border-gray-200 dark:border-[#1c2d32] text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-200"><tr><th class="p-3">Credential ID</th><th class="p-3">Title / Type</th><th class="p-3">Recipient DID</th><th class="p-3">Reason</th><th class="p-3">Revoked At</th><th class="p-3">Ledger Proof</th></tr></thead><tbody class="divide-y divide-gray-100 dark:divide-[#1c2d32]"><tr class="hover:bg-gray-50 dark:hover:bg-[#17272c] transition-colors"><td class="p-3 font-mono text-xs font-semibold text-[#D4351C]">CRED-81902</td><td class="p-3 text-gray-900 dark:text-gray-200">Commercial Broker License #88</td><td class="p-3 font-mono text-xs text-gray-500 dark:text-gray-400">did:ion:0x981...021</td><td class="p-3 text-gray-600 dark:text-gray-300">Regulatory Order</td><td class="p-3 text-gray-500 dark:text-gray-400">Mar 24, 2026</td><td class="p-3"><a class="text-teal-600 dark:text-teal-400 hover:underline font-mono text-xs" href="#">0x629...41a</a></td></tr><tr class="hover:bg-gray-50 dark:hover:bg-[#17272c] transition-colors"><td class="p-3 font-mono text-xs font-semibold text-[#D4351C]">CRED-79410</td><td class="p-3 text-gray-900 dark:text-gray-200">Civil Engineering Stamp - Ph 1</td><td class="p-3 font-mono text-xs text-gray-500 dark:text-gray-400">did:ion:0x442...99f</td><td class="p-3 text-gray-600 dark:text-gray-300">Clerical / Data Entry Error</td><td class="p-3 text-gray-500 dark:text-gray-400">Mar 19, 2026</td><td class="p-3"><a class="text-teal-600 dark:text-teal-400 hover:underline font-mono text-xs" href="#">0x3b1...88c</a></td></tr><tr class="hover:bg-gray-50 dark:hover:bg-[#17272c] transition-colors"><td class="p-3 font-mono text-xs font-semibold text-[#D4351C]">CRED-74019</td><td class="p-3 text-gray-900 dark:text-gray-200">Corporate Identity Attestation</td><td class="p-3 font-mono text-xs text-gray-500 dark:text-gray-400">did:ion:0x701...12b</td><td class="p-3 text-gray-600 dark:text-gray-300">Fraudulent Application</td><td class="p-3 text-gray-500 dark:text-gray-400">Feb 28, 2026</td><td class="p-3"><a class="text-teal-600 dark:text-teal-400 hover:underline font-mono text-xs" href="#">0x992...11d</a></td></tr></tbody></table></div></section>
+</main>
+<!-- Floating Return to Top Button -->
+<button aria-label="Return to top" class="fixed bottom-6 right-6 p-3 bg-primary dark:bg-[#006064] text-white shadow-lg hover:bg-opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-primary z-40 hidden" id="back-to-top" type="button">
+<span class="material-symbols-outlined text-[20px] block">arrow_upward</span>
+</button>
+<!-- Footer Component -->
+<footer class="w-full bg-white dark:bg-[#0b1315] border-t border-gray-200 dark:border-[#1e2f34] transition-colors duration-200">
+<div class="w-full py-4 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 max-w-7xl mx-auto">
+<div class="text-sm text-gray-500 dark:text-gray-400">
+    © 2026 CredChain Ledger. Built on open standards.
+  </div>
+<div class="flex items-center space-x-6 text-sm">
+<a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-[#8ad3d7] underline transition-colors" href="#">Privacy</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-[#8ad3d7] underline transition-colors" href="#">Terms</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-[#8ad3d7] underline transition-colors" href="#">API Docs</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-[#8ad3d7] underline transition-colors" href="#">Source</a>
+</div>
+</div>
+</footer>
+<!-- Interactive Scripts -->
+<script>
+  // Theme toggle functionality
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle.addEventListener('click', () => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Floating Back to Top Button
+  const backToTopBtn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+      backToTopBtn.classList.remove('hidden');
+    } else {
+      backToTopBtn.classList.add('hidden');
+    }
+  });
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+
+
+
+
+
+
+
+</body></html>

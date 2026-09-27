@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CredChain - Technical Approach (Authentic Mermaid Architecture)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #080f11;
+      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .slide-wrapper {
+      width: 1440px;
+      background: #0b1315;
+      border: 1px solid #1e2f34;
+      border-radius: 14px;
+      padding: 22px 26px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85);
+    }
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #1e2f34;
+      padding-bottom: 10px;
+    }
+    .slide-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #00e5ff;
+      letter-spacing: -0.02em;
+    }
+    .slide-header p {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+    .core-idea {
+      background: #0e1e24;
+      border: 1px solid #005a60;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      color: #a6eff3;
+      max-width: 520px;
+      line-height: 1.4;
+    }
+    .mermaid-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .mermaid {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="slide-wrapper" id="slide-wrapper">
+    <div class="slide-header">
+      <div>
+        <h1>Technical Approach: CredChain</h1>
+        <p>Progressive, Decentralized and Verifiable Credentials with Two-Zone Privacy</p>
+      </div>
+      <div class="core-idea">
+        <strong>Core Idea:</strong> Store verifiable audit trail on blockchain, keep encrypted payloads on IPFS, and enforce sovereign consent.
+      </div>
+    </div>
+
+    <div class="mermaid-container">
+      <div class="mermaid">
+flowchart LR
+    %% Developer Dark Theme Palette
+    classDef actor fill:#0e2229,stroke:#00e5ff,stroke-width:1.5px,color:#e0f7fa;
+    classDef step fill:#101e26,stroke:#38bdf8,stroke-width:1.5px,color:#ffffff;
+    classDef arch fill:#131d24,stroke:#818cf8,stroke-width:1.5px,color:#ffffff;
+    classDef sec fill:#08241e,stroke:#10b981,stroke-width:1.5px,color:#ecfdf5;
+
+    %% LEFT SIDEBAR: 4 SYSTEM ACTORS
+    subgraph LEFT ["👥 SYSTEM PARTICIPANTS"]
+        direction TB
+        P1["🏛️ <b>Issuer</b><br/>(University / Land Board)<br/>Issues milestones & final certs"]:::actor
+        P2["👤 <b>Holder</b><br/>(Student / Landowner)<br/>Controls access & sovereign consent"]:::actor
+        P3["🔍 <b>Verifier</b><br/>(Employer / Bank / Govt)<br/>Audits credentials via QR"]:::actor
+        P4["⚙️ <b>Admin</b><br/>(Platform Governance)<br/>Onboards verified institutions"]:::actor
+        P1 --- P2 --- P3 --- P4
+    end
+
+    %% RIGHT MAIN WORKSPACE
+    subgraph RIGHT ["ENGINEERING PIPELINE & MULTI-TIER ARCHITECTURE"]
+        direction TB
+
+        %% TOP: 4 WORKFLOW STEPS
+        subgraph STEPS ["🔄 PROGRESSIVE CREDENTIAL LIFECYCLE"]
+            direction LR
+            S1["<b>1. Issue Credential</b><br/>• Upload PDF document<br/>• Select milestone / final<br/>• Generate QR commitment"]:::step
+            S2["<b>2. Store Document</b><br/>• Encrypt client-side (AES-256)<br/>• Push to Pinata IPFS<br/>• Obtain Content ID (CID)"]:::step
+            S3["<b>3. Record on Blockchain</b><br/>• Anchor hash on Polygon Amoy<br/>• Link previous milestone (trail)<br/>• Save CID & set status: VALID"]:::step
+            S4["<b>4. Verify / Access</b><br/>• Scan QR / fetch on-chain proof<br/>• Audit prerequisite milestone chain<br/>• Request time-boxed 48h decryption"]:::step
+            
+            S1 ==>|"Encrypted Payload"| S2
+            S2 ==>|"Anchors CID & Hash"| S3
+            S3 ==>|"Audits On-Chain Trail"| S4
+        end
+
+        %% MIDDLE: 4 ARCHITECTURE BLOCKS
+        subgraph ARCH ["🏗️ MULTI-TIER SYSTEM ARCHITECTURE"]
+            direction LR
+            A1["📦 <b>Decentralized Storage (IPFS)</b><br/>• Stores AES-256 encrypted files<br/>• Content Addressing (CID)<br/>• Zero plaintext PII stored"]:::arch
+            A2["⛓️ <b>Blockchain (Polygon Amoy 80002)</b><br/>• Immutable milestone linked-list trail<br/>• Smart contract revocation registry<br/>• Time-boxed access expiration"]:::arch
+            A3["🖥️ <b>Backend API Engine</b><br/>• Business logic & RBAC role auth<br/>• Streaming SHA-256 calculation<br/>• Brokers verifier access handshake"]:::arch
+            A4["💻 <b>Frontend Client (React + Web3)</b><br/>• Role dashboards (Issuer/Holder/Verifier)<br/>• Ethers.js wallet interaction<br/>• Visual milestone trail visualizer"]:::arch
+
+            A1 <==>|"CID Reference"| A2
+            A2 <==>|"Web3 JSON-RPC"| A3
+            A3 <==>|"REST / JWT"| A4
+        end
+
+        %% BOTTOM: SECURITY BANNER
+        subgraph SEC ["🛡️ SECURITY & PRIVACY GUARANTEES (DPDP & GDPR COMPLIANT)"]
+            direction LR
+            G1["✓ Client-Side AES-256-GCM Encryption"]:::sec
+            G2["✓ Zero PII Stored on Blockchain"]:::sec
+            G3["✓ Holder-Controlled Sovereign Consent"]:::sec
+            G4["✓ Time-Boxed Self-Expiring Access"]:::sec
+            G1 --- G2 --- G3 --- G4
+        end
+
+        STEPS ==> ARCH
+        ARCH ==> SEC
+    end
+
+    LEFT ==> RIGHT
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      }
+    });
+  </script>
+</body>
+</html>

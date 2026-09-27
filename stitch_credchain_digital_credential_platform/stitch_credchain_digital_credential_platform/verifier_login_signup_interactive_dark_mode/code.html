@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CredChain Verifier Authentication</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed-variant": "#00497e",
+            "on-secondary-container": "#004376",
+            "on-surface-variant": "#3f4949",
+            "background": "#fcf9f8",
+            "surface-container": "#f0eded",
+            "surface-variant": "#e5e2e1",
+            "on-primary-container": "#8fd8dc",
+            "on-error": "#ffffff",
+            "tertiary-container": "#7e4924",
+            "inverse-on-surface": "#f3f0ef",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#a6eff3",
+            "inverse-surface": "#313030",
+            "primary-container": "#006064",
+            "surface-container-high": "#eae7e7",
+            "status-valid": "#00703C",
+            "secondary": "#0061a6",
+            "primary-fixed-dim": "#8ad3d7",
+            "secondary-fixed-dim": "#a0caff",
+            "surface": "#fcf9f8",
+            "on-tertiary": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed": "#311300",
+            "inverse-primary": "#8ad3d7",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "surface-tint": "#14696d",
+            "primary": "#00464a",
+            "surface-container-low": "#f6f3f2",
+            "error-container": "#ffdad6",
+            "tertiary": "#62330f",
+            "on-secondary": "#ffffff",
+            "outline": "#6f7979",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#ffbe95",
+            "status-revoked": "#D4351C",
+            "on-secondary-fixed": "#001c37",
+            "on-tertiary-fixed-variant": "#6b3a16",
+            "tertiary-fixed": "#ffdbc7",
+            "secondary-fixed": "#d2e4ff",
+            "on-primary-fixed": "#002021",
+            "status-pending": "#F47738",
+            "surface-bright": "#fcf9f8",
+            "on-background": "#1c1b1b",
+            "outline-variant": "#bec8c9",
+            "border-subtle": "#D1D5DB",
+            "on-surface": "#1c1b1b",
+            "secondary-container": "#6eb2fe",
+            "on-primary-fixed-variant": "#004f53",
+            "tertiary-fixed-dim": "#ffb688",
+            "surface-container-highest": "#e5e2e1",
+            // Dark Mode Slate & Teal palette extensions
+            "dark-bg": "#080f11",
+            "dark-surface": "#0d1517",
+            "dark-card": "#151d1f",
+            "dark-card-soft": "#192427",
+            "dark-border": "#22353a",
+            "dark-text": "#e1e7e8",
+            "dark-text-muted": "#91a3a6",
+            "cyan-glow": "#00E5FF"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "base": "8px",
+            "margin-mobile": "16px",
+            "gutter": "16px",
+            "margin-desktop": "32px",
+            "container-max": "1280px"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "code-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "code-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "label-md": ["14px", { lineHeight: "16px", fontWeight: "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Flat functional styling rules */
+    input:focus {
+      outline: 2px solid #00464a !important;
+      outline-offset: 0px;
+      border-color: #00464a !important;
+    }
+    .dark input:focus {
+      outline: 2px solid #00E5FF !important;
+      outline-offset: 0px;
+      border-color: #00E5FF !important;
+    }
+
+    /* Keyframe Pulse Glow for Logo in Dark Mode */
+    @keyframes pulseGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 3px rgba(0, 229, 255, 0.4)) drop-shadow(0 0 10px rgba(0, 96, 100, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.85)) drop-shadow(0 0 18px rgba(0, 229, 255, 0.45));
+      }
+    }
+    .dark .logo-glow-pulse {
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+<script>
+    // Initialize Theme immediately to prevent flash
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+<body class="bg-background dark:bg-dark-bg text-on-surface dark:text-dark-text min-h-screen flex flex-col font-body-sm selection:bg-primary-fixed selection:text-on-primary-fixed transition-colors duration-200">
+<!-- TOP APP BAR -->
+<header class="w-full border-b border-border-subtle dark:border-dark-border bg-surface dark:bg-dark-surface px-margin-mobile md:px-margin-desktop py-3 z-30 transition-colors duration-200">
+<div class="max-w-container-max mx-auto flex items-center justify-between">
+<!-- Brand Cluster -->
+<div class="flex items-center space-x-6">
+<a class="flex items-center space-x-3 text-primary dark:text-[#00E5FF] font-bold tracking-tight" href="/">
+<div class="w-8 h-8 flex-shrink-0 logo-glow-pulse transition-all duration-300">
+https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA
+</div>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-[#f3f9f9]">CredChain</span>
+</a>
+<div class="hidden md:flex items-center space-x-1 pl-4 border-l border-border-subtle dark:border-dark-border">
+<span class="text-on-surface-variant dark:text-dark-text-muted font-label-md text-label-md px-3 py-1">Ledger Gateway</span>
+</div>
+</div>
+<!-- Trailing Action Badges & Utilities -->
+<div class="flex items-center space-x-3 sm:space-x-4">
+<!-- System Status Indicator -->
+<div class="hidden sm:flex items-center text-on-surface-variant dark:text-dark-text-muted text-code-sm font-code-sm bg-surface-container-low dark:bg-dark-card px-2.5 py-1 border border-border-subtle dark:border-dark-border">
+<span class="w-2 h-2 rounded-full bg-status-valid mr-2 inline-block shadow-[0_0_6px_rgba(0,112,60,0.6)]"></span>
+<span class="font-medium text-on-surface dark:text-dark-text">Mainnet v2.4.1 (Sync 100%)</span>
+</div>
+<!-- Dark / Light Mode Toggle Button -->
+<button aria-label="Toggle dark mode" class="p-1.5 sm:px-2.5 sm:py-1 border border-border-subtle dark:border-dark-border bg-surface-container-low dark:bg-dark-card hover:bg-surface-container dark:hover:bg-dark-card-soft text-on-surface dark:text-dark-text flex items-center gap-1.5 transition-colors duration-150" id="theme-toggle-btn" title="Toggle Dark/Light Mode" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary dark:text-[#00E5FF]" id="theme-icon">dark_mode</span>
+<span class="hidden sm:inline text-code-sm font-code-sm font-semibold" id="theme-text">Dark</span>
+</button>
+<a class="flex items-center text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] font-label-md text-label-md transition-colors duration-150" href="/support">
+<span class="material-symbols-outlined text-[18px] mr-1">help_outline</span>
+<span>Support</span>
+</a>
+</div>
+</div>
+</header>
+<!-- MAIN VIEWPORT CONTAINER -->
+<main class="flex-grow flex items-stretch">
+<div class="w-full max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-125px)]">
+<!-- LEFT COLUMN: BRANDING & TRUST VERIFICATION RATIONALE -->
+<section class="lg:col-span-6 bg-surface-container-low dark:bg-dark-surface border-b lg:border-b-0 lg:border-r border-border-subtle dark:border-dark-border p-6 md:p-12 lg:p-16 flex flex-col justify-between transition-colors duration-200">
+<div>
+<!-- System Status Tag -->
+<div class="inline-flex items-center gap-2 border border-border-subtle dark:border-dark-border bg-surface dark:bg-dark-card px-3 py-1 mb-8">
+<span class="material-symbols-outlined text-primary dark:text-[#00E5FF] text-[18px]">verified_user</span>
+<span class="text-primary dark:text-[#00E5FF] font-label-md text-label-md uppercase tracking-wide">Decentralized Trust Protocol</span>
+</div>
+<!-- Headline & Context -->
+<div class="mb-10">
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-primary dark:text-white tracking-tight mb-4">
+              Zero-Trust Verification Gateway
+            </h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant dark:text-dark-text-muted leading-relaxed">
+              Engineered exclusively for employers, banking institutions, and government verifiers conducting deterministic checks across academic degrees, professional licenses, and certified land registry titles.
+            </p>
+</div>
+<!-- Utilitarian Feature Specs (High Information Density) -->
+<div class="space-y-6">
+<!-- Item 1 -->
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 flex-shrink-0 bg-surface dark:bg-dark-card border border-border-subtle dark:border-dark-border flex items-center justify-center text-primary dark:text-[#00E5FF] font-bold">
+<span class="material-symbols-outlined text-[18px]">key</span>
+</div>
+<div>
+<h2 class="text-label-md font-label-md text-on-surface dark:text-dark-text">Cryptographic Proof Validation</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted mt-1">
+                  Instant mathematical verification of Ed25519 and ECDSA signatures evaluated directly against immutable on-chain state anchors.
+                </p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 flex-shrink-0 bg-surface dark:bg-dark-card border border-border-subtle dark:border-dark-border flex items-center justify-center text-primary dark:text-[#00E5FF] font-bold">
+<span class="material-symbols-outlined text-[18px]">visibility_off</span>
+</div>
+<div>
+<h2 class="text-label-md font-label-md text-on-surface dark:text-dark-text">Zero-Knowledge Attribute Checks</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted mt-1">
+                  Verify selective claim predicates (e.g. valid license status or degree graduation) without storing sensitive PII or retaining local custody.
+                </p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 flex-shrink-0 bg-surface dark:bg-dark-card border border-border-subtle dark:border-dark-border flex items-center justify-center text-primary dark:text-[#00E5FF] font-bold">
+<span class="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+</div>
+<div>
+<h2 class="text-label-md font-label-md text-on-surface dark:text-dark-text">QR Inspection &amp; Webhook Pipeline</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted mt-1">
+                  Automated ingress parsing for physical credentials and high-throughput real-time validation via authenticated HMAC webhooks.
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Infrastructure Badge -->
+<div class="mt-12 pt-6 border-t border-border-subtle dark:border-dark-border">
+<div class="flex items-center gap-3 bg-surface dark:bg-dark-card p-3 border border-border-subtle dark:border-dark-border">
+<span class="material-symbols-outlined text-primary dark:text-[#00E5FF] text-[20px]">shield</span>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface dark:text-dark-text">Supabase JWT Auth &amp; Merkle Proof Validator</span>
+<span class="text-code-sm font-code-sm text-on-surface-variant dark:text-dark-text-muted">Standardized RFC 7519 compliance with SHA-256 state tracking</span>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: AUTH CARD CANVAS -->
+<section class="lg:col-span-6 bg-surface dark:bg-dark-bg p-6 md:p-12 lg:p-16 flex flex-col justify-center transition-colors duration-200">
+<div class="w-full max-w-[440px] mx-auto">
+<!-- Role Pill & Mode Header -->
+<div class="flex items-center justify-between mb-4">
+<span class="inline-block px-2.5 py-0.5 text-xs font-bold tracking-wider uppercase border border-primary dark:border-[#00E5FF] text-primary dark:text-[#00E5FF] bg-surface-container-lowest dark:bg-dark-card">
+              VERIFIER
+            </span>
+<button class="text-secondary dark:text-secondary-container hover:text-on-secondary-fixed-variant dark:hover:text-[#00E5FF] font-label-md text-label-md underline underline-offset-2 transition-colors" id="toggle-auth-mode-btn" type="button">
+              Create your Verifier Account
+            </button>
+</div>
+<!-- Dynamic Header -->
+<h2 class="text-headline-md font-headline-md text-on-surface dark:text-white tracking-tight" id="auth-title">
+            Verifier Login
+          </h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted mt-1 mb-6" id="auth-subtitle">
+            Verify credentials with trusted blockchain-backed proof.
+          </p>
+<!-- Interactive Error Alert Container (Simulated Session Misconfiguration) -->
+<div class="hidden mb-6 border border-status-revoked bg-error-container/30 dark:bg-error/20 p-3 text-on-surface dark:text-white flex items-start gap-2.5" id="role-mismatch-banner">
+<span class="material-symbols-outlined text-error dark:text-error-container text-[20px] flex-shrink-0 mt-0.5">error</span>
+<div class="text-body-sm font-body-sm">
+<span>This account is registered as a Holder. </span>
+<a class="font-label-md text-primary dark:text-[#00E5FF] underline font-semibold" href="/auth/holder">Go to Holder Dashboard →</a>
+</div>
+</div>
+<!-- Loading Progress Banner (Hidden by default) -->
+<div class="hidden mb-6 border border-border-subtle dark:border-dark-border bg-surface-container-low dark:bg-dark-card p-3 items-center justify-between" id="loading-state-banner">
+<div class="flex items-center gap-3">
+<svg class="animate-spin h-4 w-4 text-primary dark:text-[#00E5FF]" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8v8H4z" fill="currentColor"></path>
+</svg>
+<span class="text-code-sm font-code-sm text-primary dark:text-[#00E5FF] font-semibold">Signing you in...</span>
+</div>
+<span class="text-code-sm font-code-sm text-on-surface-variant dark:text-dark-text-muted">Connecting RPC Node</span>
+</div>
+<!-- OAuth Provider Option -->
+<button class="w-full flex items-center justify-center gap-3 bg-surface-container-lowest dark:bg-dark-card border border-border-subtle dark:border-dark-border hover:bg-surface-container-low dark:hover:bg-dark-card-soft text-on-surface dark:text-dark-text py-2.5 px-4 font-label-md text-label-md transition-colors duration-150 active:opacity-90 shadow-sm" id="google-auth-btn" type="button">
+<svg class="w-4 h-4 flex-shrink-0" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
+</svg>
+<span class="font-medium">Continue with Google</span>
+</button>
+<!-- Divider -->
+<div class="relative my-6">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-border-subtle dark:border-dark-border"></div>
+</div>
+<div class="relative flex justify-center text-xs">
+<span class="bg-surface dark:bg-dark-bg px-3 text-on-surface-variant dark:text-dark-text-muted font-code-sm font-semibold uppercase">OR</span>
+</div>
+</div>
+<!-- Main Auth Form -->
+<form class="space-y-4" id="verifier-auth-form" onsubmit="return handleFormSubmit(event)">
+<!-- Conditional Signup Field: Organization Name -->
+<div class="hidden space-y-1" id="field-org">
+<label class="block text-label-md font-label-md text-on-surface dark:text-dark-text" for="org_name">
+                Organization / Institution Name
+              </label>
+<input class="w-full bg-surface-container-lowest dark:bg-dark-card border border-border-subtle dark:border-dark-border px-3 py-2.5 text-body-sm font-body-sm text-on-surface dark:text-dark-text rounded-none placeholder:text-outline/70 dark:placeholder:text-dark-text-muted/60" id="org_name" name="org_name" placeholder="e.g. Department of Land Records, Standard Bank" type="text"/>
+</div>
+<!-- Email Field -->
+<div class="space-y-1">
+<label class="block text-label-md font-label-md text-on-surface dark:text-dark-text" for="work_email">
+                Work Email
+              </label>
+<input class="w-full bg-surface-container-lowest dark:bg-dark-card border border-border-subtle dark:border-dark-border px-3 py-2.5 text-body-sm font-body-sm text-on-surface dark:text-dark-text rounded-none placeholder:text-outline/70 dark:placeholder:text-dark-text-muted/60" id="work_email" name="work_email" placeholder="Enter your company or organization email (e.g. hr@company.com)" required="" type="email"/>
+</div>
+<!-- Password Field with Visibility Toggle -->
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<label class="block text-label-md font-label-md text-on-surface dark:text-dark-text" for="account_password">
+                  Password
+                </label>
+<a class="text-secondary dark:text-secondary-container hover:text-on-secondary-fixed-variant dark:hover:text-[#00E5FF] text-code-sm font-code-sm underline underline-offset-2" href="/auth/forgot-password" id="forgot-password-link">
+                  Forgot password?
+                </a>
+</div>
+<div class="relative flex items-center">
+<input class="w-full bg-surface-container-lowest dark:bg-dark-card border border-border-subtle dark:border-dark-border pl-3 pr-10 py-2.5 text-body-sm font-body-sm text-on-surface dark:text-dark-text rounded-none placeholder:text-outline/70 dark:placeholder:text-dark-text-muted/60" id="account_password" name="account_password" placeholder="Enter your password" required="" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-2.5 p-1 text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] transition-colors" id="toggle-password-btn" title="Show/Hide Password" type="button">
+<span class="material-symbols-outlined text-[18px]" id="password-eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Conditional Signup Field: Confirm Password -->
+<div class="hidden space-y-1" id="field-confirm-password">
+<label class="block text-label-md font-label-md text-on-surface dark:text-dark-text" for="confirm_password">
+                Confirm Password
+              </label>
+<div class="relative flex items-center">
+<input class="w-full bg-surface-container-lowest dark:bg-dark-card border border-border-subtle dark:border-dark-border pl-3 pr-10 py-2.5 text-body-sm font-body-sm text-on-surface dark:text-dark-text rounded-none placeholder:text-outline/70 dark:placeholder:text-dark-text-muted/60" id="confirm_password" name="confirm_password" placeholder="Repeat your password" type="password"/>
+<button aria-label="Toggle confirm password visibility" class="absolute right-2.5 p-1 text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] transition-colors" id="toggle-confirm-password-btn" title="Show/Hide Password" type="button">
+<span class="material-symbols-outlined text-[18px]" id="confirm-password-eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full bg-primary hover:bg-primary-container dark:bg-[#006064] dark:hover:bg-[#00838F] text-on-primary font-label-md text-label-md py-3 px-4 transition-colors duration-150 active:opacity-90 mt-2 text-center" id="primary-auth-button" type="submit">
+              Sign In
+            </button>
+</form>
+<!-- System Note -->
+<div class="mt-4 flex items-center justify-center gap-1.5 text-on-surface-variant dark:text-dark-text-muted text-code-sm font-code-sm">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span>Wallet connection is not required for login.</span>
+</div>
+<!-- Bottom Role Pivot Navigation -->
+<div class="mt-8 pt-6 border-t border-border-subtle dark:border-dark-border text-center text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted space-y-2">
+<div>Not a verifier? Need to issue or manage records?</div>
+<div class="flex items-center justify-center gap-3 text-label-md font-label-md text-secondary dark:text-secondary-container">
+<a class="hover:text-primary dark:hover:text-[#00E5FF] underline underline-offset-2" href="/auth/issuer">Issuer Login</a>
+<span class="text-border-subtle dark:text-dark-border">|</span>
+<a class="hover:text-primary dark:hover:text-[#00E5FF] underline underline-offset-2" href="/auth/holder">Holder Login</a>
+</div>
+</div>
+<!-- Isolated Test Fixtures & State Simulation Controls -->
+<div class="mt-8 p-3 bg-surface-container-low dark:bg-dark-card border border-border-subtle dark:border-dark-border">
+<div class="text-code-sm font-code-sm text-on-surface dark:text-dark-text font-semibold mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary dark:text-[#00E5FF]">tune</span>
+<span>Test Fixtures &amp; State Simulation:</span>
+</div>
+<div class="flex flex-wrap gap-2 text-xs">
+<button class="px-2 py-1 bg-surface dark:bg-dark-surface border border-border-subtle dark:border-dark-border hover:bg-surface-container dark:hover:bg-dark-card-soft text-on-surface dark:text-dark-text transition-colors" onclick="triggerHolderRoleError()" type="button">
+                Simulate "Holder" Collision Error
+              </button>
+<button class="px-2 py-1 bg-surface dark:bg-dark-surface border border-border-subtle dark:border-dark-border hover:bg-surface-container dark:hover:bg-dark-card-soft text-on-surface dark:text-dark-text transition-colors" onclick="triggerLoadingSimulation()" type="button">
+                Simulate Loading State
+              </button>
+<button class="px-2 py-1 bg-surface dark:bg-dark-surface border border-border-subtle dark:border-dark-border hover:bg-surface-container dark:hover:bg-dark-card-soft text-on-surface dark:text-dark-text transition-colors" onclick="clearSimulatedAlerts()" type="button">
+                Reset Alerts
+              </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FLOATING RETURN TO TOP BUTTON -->
+<button aria-label="Return to top" class="fixed bottom-6 right-6 z-40 bg-surface dark:bg-dark-card border border-border-subtle dark:border-dark-border text-primary dark:text-[#00E5FF] hover:bg-surface-container dark:hover:bg-dark-card-soft p-3 shadow-lg flex items-center justify-center transition-all duration-200" id="return-to-top-btn" title="Return to Top" type="button">
+<span class="material-symbols-outlined text-[20px]">arrow_upward</span>
+</button>
+<!-- FOOTER (Synchronized 2026 CredChain footer) -->
+<footer class="w-full border-t border-border-subtle dark:border-dark-border bg-surface-container-low dark:bg-dark-surface px-margin-mobile md:px-margin-desktop py-base transition-colors duration-200">
+<div class="max-w-container-max mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted text-center md:text-left">
+        © 2026 CredChain Ledger Infrastructure. All credentials cryptographically verifiable on-chain.
+      </div>
+<nav class="flex flex-wrap items-center justify-center gap-6">
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="/status">Network Status</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="/security">Security Policy</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="/protocol">Verification Protocol</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-dark-text-muted hover:text-primary dark:hover:text-[#00E5FF] transition-colors duration-150" href="/terms">Terms of Trust</a>
+</nav>
+</div>
+</footer>
+<!-- INTERACTION SCRIPTS -->
+<script>
+    // 1. Dark Mode Toggle & Persistence Logic
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+
+    function syncThemeUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        themeIcon.textContent = 'light_mode';
+        if (themeText) themeText.textContent = 'Light';
+      } else {
+        themeIcon.textContent = 'dark_mode';
+        if (themeText) themeText.textContent = 'Dark';
+      }
+    }
+
+    syncThemeUI();
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      syncThemeUI();
+    });
+
+    // 2. Auth Mode Switcher (Login / Signup)
+    let isSignupMode = false;
+    const toggleAuthModeBtn = document.getElementById('toggle-auth-mode-btn');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const fieldOrg = document.getElementById('field-org');
+    const fieldConfirmPassword = document.getElementById('field-confirm-password');
+    const primaryAuthButton = document.getElementById('primary-auth-button');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const roleMismatchBanner = document.getElementById('role-mismatch-banner');
+    const loadingStateBanner = document.getElementById('loading-state-banner');
+
+    function updateViewMode() {
+      if (isSignupMode) {
+        authTitle.textContent = "Create Verifier Account";
+        authSubtitle.textContent = "Register your organization to inspect and verify verifiable credentials.";
+        toggleAuthModeBtn.textContent = "Already have an account? Sign In";
+        primaryAuthButton.textContent = "Create Account";
+        fieldOrg.classList.remove('hidden');
+        fieldConfirmPassword.classList.remove('hidden');
+        forgotPasswordLink.classList.add('hidden');
+        document.getElementById('org_name').setAttribute('required', 'true');
+        document.getElementById('confirm_password').setAttribute('required', 'true');
+      } else {
+        authTitle.textContent = "Verifier Login";
+        authSubtitle.textContent = "Verify credentials with trusted blockchain-backed proof.";
+        toggleAuthModeBtn.textContent = "Create your Verifier Account";
+        primaryAuthButton.textContent = "Sign In";
+        fieldOrg.classList.add('hidden');
+        fieldConfirmPassword.classList.add('hidden');
+        forgotPasswordLink.classList.remove('hidden');
+        document.getElementById('org_name').removeAttribute('required');
+        document.getElementById('confirm_password').removeAttribute('required');
+      }
+      roleMismatchBanner.classList.add('hidden');
+      loadingStateBanner.classList.add('hidden');
+    }
+
+    toggleAuthModeBtn.addEventListener('click', () => {
+      isSignupMode = !isSignupMode;
+      updateViewMode();
+    });
+
+    // 3. Password Visibility Toggles
+    const togglePasswordBtn = document.getElementById('toggle-password-btn');
+    const passwordInput = document.getElementById('account_password');
+    const passwordEyeIcon = document.getElementById('password-eye-icon');
+
+    togglePasswordBtn.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordEyeIcon.textContent = 'visibility_off';
+      } else {
+        passwordInput.type = 'password';
+        passwordEyeIcon.textContent = 'visibility';
+      }
+    });
+
+    const toggleConfirmPasswordBtn = document.getElementById('toggle-confirm-password-btn');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const confirmPasswordEyeIcon = document.getElementById('confirm-password-eye-icon');
+
+    if (toggleConfirmPasswordBtn) {
+      toggleConfirmPasswordBtn.addEventListener('click', () => {
+        if (confirmPasswordInput.type === 'password') {
+          confirmPasswordInput.type = 'text';
+          confirmPasswordEyeIcon.textContent = 'visibility_off';
+        } else {
+          confirmPasswordInput.type = 'password';
+          confirmPasswordEyeIcon.textContent = 'visibility';
+        }
+      });
+    }
+
+    // 4. Test Fixtures & Simulation Functions
+    function triggerHolderRoleError() {
+      roleMismatchBanner.classList.remove('hidden');
+      loadingStateBanner.classList.add('hidden');
+      roleMismatchBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function triggerLoadingSimulation() {
+      roleMismatchBanner.classList.add('hidden');
+      loadingStateBanner.classList.remove('hidden');
+      loadingStateBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => {
+        loadingStateBanner.classList.add('hidden');
+      }, 3000);
+    }
+
+    function clearSimulatedAlerts() {
+      roleMismatchBanner.classList.add('hidden');
+      loadingStateBanner.classList.add('hidden');
+    }
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      roleMismatchBanner.classList.add('hidden');
+      loadingStateBanner.classList.remove('hidden');
+      primaryAuthButton.disabled = true;
+      primaryAuthButton.classList.add('opacity-70');
+
+      // Emulate auth pipeline response
+      setTimeout(() => {
+        loadingStateBanner.classList.add('hidden');
+        primaryAuthButton.disabled = false;
+        primaryAuthButton.classList.remove('opacity-70');
+        
+        const emailVal = document.getElementById('work_email').value;
+        if (emailVal.includes('holder') || emailVal.includes('student')) {
+          triggerHolderRoleError();
+        } else {
+          alert(`[Verification Gateway]: Authenticated successfully as ${emailVal}. Redirecting to /verifier/dashboard...`);
+        }
+      }, 1200);
+
+      return false;
+    }
+
+    // Google OAuth Trigger simulation
+    document.getElementById('google-auth-btn').addEventListener('click', () => {
+      loadingStateBanner.classList.remove('hidden');
+      setTimeout(() => {
+        loadingStateBanner.classList.add('hidden');
+        alert("[Supabase Auth]: Triggered supabase.auth.signInWithOAuth({ provider: 'google', redirectTo: '/verifier/callback' })");
+      }, 800);
+    });
+
+    // 5. Floating Return to Top Handler
+    const returnToTopBtn = document.getElementById('return-to-top-btn');
+    returnToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body></html>

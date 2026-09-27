@@ -1,0 +1,455 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Issue Credential | CredChain</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#006064",
+          "primary-hover": "#004d40",
+          "primary-dark": "#00796b",
+          "primary-dark-hover": "#00695c",
+          "status-valid": "#00703C",
+          "status-pending": "#F47738",
+          "status-revoked": "#D4351C"
+        },
+        fontFamily: {
+          sans: ["Inter", "sans-serif"],
+          mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* Subtle functionalist grid lines adapt to light and dark theme */
+  .grid-bg {
+    background-color: #fcf9f8;
+    background-image: 
+      linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .dark .grid-bg {
+    background-color: #0b1315;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  @media print {
+    nav, footer, #scrollToTopBtn, #toggleKeyVisibility, #cmdKModal, #confirmationModal, button { display: none !important; }
+    body { background: #ffffff !important; color: #000000 !important; }
+    .grid-bg { background-image: none !important; }
+    #successPanel { display: block !important; border: 1px solid #000000 !important; }
+  }
+</style>
+<script>
+  // Apply theme immediately to prevent flashing
+  if (localStorage.getItem('credchain-theme') === 'dark' || (!localStorage.getItem('credchain-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
+</head>
+<body class="min-h-screen flex flex-col grid-bg font-sans text-gray-800 dark:text-gray-100 antialiased transition-colors duration-200">
+<!-- Sticky Navigation Header -->
+<nav class="sticky top-0 bg-white/90 dark:bg-[#101b1e]/90 backdrop-blur-md border-b border-gray-200 dark:border-[#1e2f34] z-50 transition-colors duration-200">
+<div class="flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto h-16">
+<div class="flex items-center gap-8">
+<a aria-label="CredChain Home" class="flex items-center h-14" href="#">
+<img alt="CredChain" class="h-10 w-auto object-contain transition-all duration-200" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</a>
+<!-- Desktop Nav Links -->
+<div class="hidden md:flex items-center gap-6 text-sm font-medium">
+<a class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors py-1" href="#">Explorer</a>
+<a class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors py-1" href="#">Wallet</a>
+<a class="text-teal-700 dark:text-teal-400 font-semibold border-b-2 border-teal-700 dark:border-teal-400 pb-1 py-1" href="#">Dashboard</a>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<!-- Cmd+K Quick Search Button -->
+<button class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-500 dark:text-gray-400 text-xs rounded-lg hover:border-teal-600 dark:hover:border-teal-400 transition-colors cursor-pointer" id="searchTriggerBtn" onclick="document.getElementById('cmdKModal').classList.remove('hidden')" title="Quick Search (Cmd+K)">
+<span class="material-symbols-outlined text-sm">search</span>
+<span class="">Quick Search...</span>
+<kbd class="bg-gray-200 dark:bg-[#1a2c31] text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded font-mono text-[10px]">⌘K</kbd>
+</button>
+<!-- Interactive Theme Toggle Button -->
+<button aria-label="Toggle theme" class="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 border border-gray-300 dark:border-[#24393f] bg-white dark:bg-[#0e1a1d] rounded-lg transition-colors flex items-center justify-center cursor-pointer" id="theme-toggle">
+<span class="material-symbols-outlined text-base dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined text-base hidden dark:inline">light_mode</span>
+</button>
+<!-- Connect Wallet Button -->
+<button class="hidden sm:inline-block bg-[#006064] dark:bg-[#00796b] text-white font-medium text-sm px-4 py-2 rounded-lg hover:bg-[#004d40] dark:hover:bg-[#00695c] transition-colors shadow-sm">
+        Connect Wallet
+      </button>
+<!-- Mobile Hamburger Button -->
+<button aria-label="Open Menu" class="md:hidden p-2 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-[#24393f] bg-white dark:bg-[#0e1a1d] rounded-lg" id="mobileMenuBtn" onclick="document.getElementById('mobileNavDrawer').classList.toggle('hidden')">
+<span class="material-symbols-outlined text-base">menu</span>
+</button>
+</div>
+</div>
+<!-- Mobile Menu Drawer -->
+<div class="hidden md:hidden border-t border-gray-200 dark:border-[#1e2f34] bg-white dark:bg-[#101b1e] px-4 py-4 space-y-2" id="mobileNavDrawer">
+<a class="block py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" href="#">Explorer</a>
+<a class="block py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" href="#">Wallet</a>
+<a class="block py-2 font-bold text-teal-700 dark:text-teal-400" href="#">Dashboard</a>
+<div class="pt-2">
+<button class="w-full bg-[#006064] dark:bg-[#00796b] text-white font-medium text-sm px-4 py-2 rounded-lg">
+        Connect Wallet
+      </button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+<!-- Page Header & Subtitle -->
+<div class="max-w-2xl mx-auto mb-8 text-center md:text-left">
+<h1 class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
+      Issue Credential
+    </h1>
+<p class="text-sm md:text-base text-gray-500 dark:text-gray-400">
+      Record a new milestone or certificate to the ledger. This action is immutable and will generate permanent on-chain and IPFS hashes.
+    </p>
+</div>
+<!-- Main Card Container -->
+<div class="max-w-2xl mx-auto mb-6 p-4 rounded-xl border border-teal-700/30 bg-gray-50 dark:bg-[#101e22] dark:border-[#24393f] flex items-start gap-3 text-xs text-gray-600 dark:text-gray-300 shadow-sm"><span class="material-symbols-outlined text-teal-700 dark:text-teal-400 text-lg flex-shrink-0 mt-0.5">info</span><div class="leading-relaxed"><strong class="text-gray-900 dark:text-white font-semibold">Credential Issuance Engine — Functional Form.</strong> Enter real recipient DID and key, or test with the sample payload below.</div></div><div class="max-w-2xl mx-auto bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] shadow-sm rounded-xl p-6 sm:p-8 transition-colors duration-200">
+<form class="space-y-6" id="issueForm">
+<!-- Event Type -->
+<div class="space-y-1.5">
+<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300" for="eventType">Event Type</label>
+<div class="relative">
+<select class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors" id="eventType" name="eventType">
+<option value="">Select event type...</option>
+<option value="Milestone">Milestone</option>
+<option value="Final Certificate">Final Certificate</option>
+<option value="Land Record">Land Record</option>
+</select>
+</div>
+<p class="hidden text-red-600 dark:text-red-400 text-xs items-center gap-1 mt-1" id="eventTypeValidationMsg">
+<span class="material-symbols-outlined text-xs">error</span> Please select a valid event type.
+        </p>
+</div>
+<!-- Holder Name / Identifier -->
+<div class="space-y-1.5">
+<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300" for="holderName">Holder Name / Identifier</label>
+<input class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors" id="holderName" name="holderName" placeholder="Enter recipient's legal name or decentralized ID" type="text">
+<p class="hidden text-red-600 dark:text-red-400 text-xs items-center gap-1 mt-1" id="holderNameValidationMsg">
+<span class="material-symbols-outlined text-xs">error</span> Recipient identifier is required.
+        </p>
+</div>
+<!-- Drag & Drop File Upload Zone -->
+<div class="space-y-1.5">
+<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Supporting Document</label>
+<div class="border-2 border-dashed border-gray-300 dark:border-[#274047] bg-gray-50/50 dark:bg-[#101e22] hover:bg-gray-100/50 dark:hover:bg-[#14262b] text-gray-600 dark:text-gray-300 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors group" id="dropZone">
+<span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 mb-2 transition-colors">upload_file</span>
+<p class="text-sm font-medium text-gray-700 dark:text-gray-200 text-center">Drag and drop file here, or click to browse</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">Sample file formats accepted: PDF, PNG, JPG (up to 10MB)</p>
+<input accept=".pdf,.png,.jpg,.jpeg" class="hidden" id="fileUpload" type="file">
+</div>
+<!-- Uploaded File Badge -->
+<div class="hidden items-center justify-between bg-gray-100 dark:bg-[#14262b] p-3 rounded-lg border border-gray-200 dark:border-[#24393f] mt-2 text-sm" id="fileInfo">
+<div class="flex items-center gap-2 truncate">
+<span class="material-symbols-outlined text-teal-600 dark:text-teal-400 text-base">description</span>
+<span class="text-gray-800 dark:text-gray-200 font-medium truncate" id="fileName">filename.pdf</span>
+</div>
+<button aria-label="Remove uploaded file" class="text-gray-500 hover:text-red-600 dark:hover:text-red-400 p-1 transition-colors" id="removeFile" type="button">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+</div>
+<!-- Issuer Signing Key / Secret Field with Visibility Toggle -->
+<div class="space-y-1.5" id="issuerKeyFieldContainer">
+<div class="flex justify-between items-center">
+<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300" for="issuerKey">
+            Issuer Signing Key / Secret <span class="text-red-500">*</span>
+</label>
+<span class="text-xs text-gray-500 dark:text-gray-400">Required for cryptographic hash</span>
+</div>
+<div class="relative flex items-center">
+<input class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-3 pr-11 font-mono text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors" id="issuerKey" name="issuerKey" placeholder="Enter signing secret or private key" type="password">
+<button aria-label="Toggle signing key visibility" class="absolute right-3 p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none transition-colors" id="toggleKeyVisibility" type="button">
+<span class="material-symbols-outlined text-xl" id="keyVisIcon">visibility</span>
+</button>
+</div>
+<p class="hidden text-red-600 dark:text-red-400 text-xs items-center gap-1 mt-1" id="keyValidationMsg">
+<span class="material-symbols-outlined text-xs">error</span> Signing key is required to sign this transaction.
+        </p>
+</div>
+<!-- Attached Metadata (Optional) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between"><label class="block text-sm font-semibold text-gray-700 dark:text-gray-300" for="attachedMetadata">Attached Metadata (Optional)</label><span class="px-2 py-0.5 text-[10px] font-mono font-medium rounded bg-gray-100 dark:bg-[#1a2c31] text-teal-700 dark:text-teal-400 border border-gray-200 dark:border-[#274047]">Example Payload Format</span></div>
+<textarea class="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-3 font-mono text-xs focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors" id="attachedMetadata" placeholder="{&quot;course&quot;: &quot;Advanced Cryptography&quot;, &quot;grade&quot;: &quot;A&quot;}" rows="3"></textarea>
+</div>
+<!-- Action Button -->
+<div class="pt-4 border-t border-gray-200 dark:border-[#22353a] flex justify-end">
+<button class="bg-[#006064] dark:bg-[#00796b] text-white hover:bg-[#004d40] dark:hover:bg-[#00695c] font-medium text-sm px-6 py-3 rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer" id="issueBtn" type="button">
+<span class="material-symbols-outlined text-base">add_link</span>
+          Issue Credential
+        </button>
+</div>
+</form>
+<!-- Success State Panel (Initially Hidden) -->
+<div class="hidden flex-col mt-6 p-6 rounded-xl border border-emerald-500/50 bg-emerald-50/40 dark:bg-emerald-950/20" id="successPanel">
+<div class="flex items-center gap-3 mb-4 pb-3 border-b border-emerald-200 dark:border-emerald-900">
+<div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0 text-white">
+<span class="material-symbols-outlined text-base font-bold">check</span>
+</div>
+<h2 class="text-lg font-semibold text-gray-900 dark:text-white">Issuance Successful</h2>
+</div>
+<p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+        The credential has been successfully recorded on the ledger. It is now publicly verifiable.
+      </p>
+<div class="space-y-4">
+<div>
+<span class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Transaction Hash</span>
+<div class="bg-white dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2.5 rounded-lg flex justify-between items-center group">
+<span class="text-xs font-mono text-gray-800 dark:text-gray-200 truncate mr-2" id="resTxHash">0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b</span>
+<button class="text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors" onclick="navigator.clipboard.writeText('0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b')" title="Copy Tx Hash" type="button">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+</div>
+</div>
+<div>
+<span class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">IPFS Content URI</span>
+<div class="bg-white dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2.5 rounded-lg flex justify-between items-center group">
+<span class="text-xs font-mono text-gray-800 dark:text-gray-200 truncate mr-2">ipfs://QmYwAPJzv5CZsnA625s3Xf2sm5D9mUp9DFJz2mX2mJ2mJ2mJ2mJ</span>
+<button class="text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors" onclick="navigator.clipboard.writeText('ipfs://QmYwAPJzv5CZsnA625s3Xf2sm5D9mUp9DFJz2mX2mJ2mJ2mJ2mJ')" title="Copy IPFS URI" type="button">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+</div>
+</div>
+<div class="pt-4 flex flex-col items-center">
+<span class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">Verification QR Code</span>
+<div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+<div class="w-28 h-28 grid grid-cols-5 grid-rows-5 gap-1 p-1 bg-gray-100">
+<div class="bg-gray-900 col-span-2 row-span-2"></div>
+<div class="bg-white col-span-1"></div>
+<div class="bg-gray-900 col-span-2 row-span-2"></div>
+<div class="bg-white col-span-1 row-span-1 col-start-3 row-start-2"></div>
+<div class="bg-gray-900 col-span-1 row-span-3 col-start-1 row-start-3"></div>
+<div class="bg-white col-span-1 row-span-1 col-start-2 row-start-3"></div>
+<div class="bg-gray-900 col-span-1 row-span-1 col-start-3 row-start-3"></div>
+<div class="bg-white col-span-2 row-span-1 col-start-4 row-start-3"></div>
+<div class="bg-gray-900 col-span-2 row-span-2 col-start-1 row-start-4"></div>
+<div class="bg-white col-span-1 row-span-1 col-start-3 row-start-4"></div>
+<div class="bg-gray-900 col-span-2 row-span-2 col-start-4 row-start-4"></div>
+</div>
+</div>
+<a class="mt-3 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline" href="#">Download Certificate JSON</a>
+</div>
+</div>
+</div>
+</div><div class="max-w-2xl mx-auto mt-8 border-2 border-dashed border-teal-700/30 dark:border-[#274047] bg-gray-50/70 dark:bg-[#101e22]/60 rounded-xl p-6 transition-colors duration-200"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-gray-200 dark:border-[#22353a]"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-teal-600 dark:text-teal-400 text-lg">visibility</span><h3 class="text-sm font-semibold text-gray-900 dark:text-white">Expected Output Preview (Mock Example) — How Results Will Look After Completion</h3></div><span class="px-2 py-0.5 self-start sm:self-auto rounded bg-teal-700/10 dark:bg-teal-400/10 text-teal-700 dark:text-teal-400 text-[10px] font-mono font-bold tracking-wider border border-teal-700/20 dark:border-teal-400/20">MOCK PREVIEW FORMAT</span></div><div class="p-3 mb-4 rounded-lg bg-white dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] text-xs text-gray-600 dark:text-gray-400 leading-relaxed"><strong class="text-gray-800 dark:text-gray-200">Note:</strong> Active form inputs above are clean and blank for real input. The cryptographic receipts, Merkle proof anchor, and IPFS identifier below illustrate what will generate after you submit and sign the transaction.</div><div class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] rounded-lg p-4 space-y-3"><div class="flex items-center justify-between text-xs pb-2 border-b border-gray-100 dark:border-[#1e2f34]"><span class="font-medium text-gray-600 dark:text-gray-400">Ledger Status:</span><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-mono text-[11px] font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span> Immutable Record Verified</span></div><div><span class="block text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Example Tx Hash</span><div class="bg-gray-50 dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2 rounded text-xs font-mono text-gray-700 dark:text-gray-300 truncate">0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b</div></div><div><span class="block text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Example Merkle Root / Proof Hash</span><div class="bg-gray-50 dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2 rounded text-xs font-mono text-gray-700 dark:text-gray-300 truncate">0x4f83b19c239d1ee289bc1928374a5f6e7d8c9b0a123456789abcdef012345678</div></div><div><span class="block text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Example IPFS URI</span><div class="bg-gray-50 dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2 rounded text-xs font-mono text-gray-700 dark:text-gray-300 truncate">ipfs://QmYwAPJzv5CZsnA625s3Xf2sm5D9mUp9DFJz2mX2mJ2mJ2mJ2mJ</div></div></div></div>
+</main>
+<!-- Transaction Confirmation Modal Dialog -->
+<div class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" id="confirmationModal">
+<div class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] max-w-md w-full p-6 rounded-xl shadow-2xl space-y-5 transition-colors">
+<div class="flex justify-between items-start border-b border-gray-200 dark:border-[#22353a] pb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-teal-600 dark:text-teal-400 text-xl">gavel</span>
+<h3 class="text-base font-semibold text-gray-900 dark:text-white">Confirm Immutable Issuance</h3>
+</div>
+<button class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1" onclick="document.getElementById('confirmationModal').classList.add('hidden')">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<div class="space-y-3 text-xs text-gray-600 dark:text-gray-300">
+<div class="p-3 bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-500 rounded-r text-amber-900 dark:text-amber-200 leading-relaxed">
+<strong>Warning:</strong> On-chain credentials cannot be modified or erased once recorded. A cryptographically bound hash will be broadcast to the ledger.
+      </div>
+<div class="bg-gray-50 dark:bg-[#0e1a1d] p-3 rounded-lg border border-gray-200 dark:border-[#24393f] space-y-1.5 font-mono">
+<p class=""><strong class="text-gray-700 dark:text-gray-300">Event:</strong> <span class="text-teal-700 dark:text-teal-400" id="modalSummaryType">-</span></p>
+<p class=""><strong class="text-gray-700 dark:text-gray-300">Recipient:</strong> <span class="text-teal-700 dark:text-teal-400 truncate block" id="modalSummaryHolder">-</span></p>
+</div>
+</div>
+<div class="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-[#22353a]">
+<button class="px-4 py-2 border border-gray-300 dark:border-[#24393f] bg-white dark:bg-[#0e1a1d] text-gray-700 dark:text-gray-300 text-xs font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-[#14262b] transition-colors" onclick="document.getElementById('confirmationModal').classList.add('hidden')" type="button">
+        Cancel
+      </button>
+<button class="px-4 py-2 bg-[#006064] dark:bg-[#00796b] text-white text-xs font-medium rounded-lg hover:bg-[#004d40] dark:hover:bg-[#00695c] transition-colors flex items-center gap-1.5 shadow-sm" id="confirmIssueBtn" type="button">
+<span class="material-symbols-outlined text-sm">verified</span>
+        Confirm &amp; Broadcast
+      </button>
+</div>
+</div>
+</div>
+<!-- Quick Search (Cmd+K) Modal -->
+<div class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-24 p-4" id="cmdKModal">
+<div class="bg-white dark:bg-[#132024] border border-gray-200 dark:border-[#22353a] max-w-xl w-full p-4 rounded-xl shadow-2xl space-y-3">
+<div class="flex items-center gap-2 border-b border-gray-200 dark:border-[#22353a] pb-3">
+<span class="material-symbols-outlined text-gray-400">search</span>
+<input class="w-full bg-transparent focus:outline-none text-sm text-gray-900 dark:text-white font-mono placeholder-gray-400" placeholder="Search credentials, schemas, or transaction hashes..." type="text">
+<kbd class="bg-gray-100 dark:bg-[#0e1a1d] px-2 py-0.5 text-xs text-gray-500 border border-gray-300 dark:border-[#24393f] rounded cursor-pointer" onclick="document.getElementById('cmdKModal').classList.add('hidden')">ESC</kbd>
+</div>
+<div class="text-xs text-gray-500 dark:text-gray-400 space-y-1 pt-1">
+<div class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#0e1a1d] rounded-lg cursor-pointer flex items-center justify-between text-gray-700 dark:text-gray-300 transition-colors">
+<span class="">Recent: 0x7a8b9c0d... (Milestone)</span>
+<span class="material-symbols-outlined text-xs text-gray-400">arrow_forward</span>
+</div>
+<div class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#0e1a1d] rounded-lg cursor-pointer flex items-center justify-between text-gray-700 dark:text-gray-300 transition-colors">
+<span class="">Recent: Land Record Schema v2.1</span>
+<span class="material-symbols-outlined text-xs text-gray-400">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Return to Top Button -->
+<button aria-label="Return to top" class="fixed bottom-6 right-6 z-40 bg-white dark:bg-[#132024] border border-gray-300 dark:border-[#24393f] p-3 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-[#1a2c31] transition-all focus:outline-none flex items-center justify-center text-teal-700 dark:text-teal-400" id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+<span class="material-symbols-outlined text-lg">arrow_upward</span>
+</button>
+<!-- Footer -->
+<footer class="bg-white dark:bg-[#0b1315] border-t border-gray-200 dark:border-[#1e2f34] text-xs text-gray-500 dark:text-gray-400 w-full py-6 px-4 sm:px-6 lg:px-8 mt-auto transition-colors duration-200">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="font-medium text-gray-700 dark:text-gray-300">
+      © 2026 CredChain Ledger. Built on open standards.
+    </div>
+<div class="flex gap-6">
+<a class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors" href="#">Privacy</a>
+<a class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors" href="#">Terms</a>
+<a class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors" href="#">API Docs</a>
+<a class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors" href="#">Source</a>
+</div>
+</div>
+</footer>
+<!-- Interactive Scripts -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Theme Toggle with LocalStorage persistence
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('credchain-theme', isDark ? 'dark' : 'light');
+    });
+
+    // 2. Cmd+K keyboard shortcut
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const cmdModal = document.getElementById('cmdKModal');
+        cmdModal.classList.toggle('hidden');
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('cmdKModal').classList.add('hidden');
+        document.getElementById('confirmationModal').classList.add('hidden');
+      }
+    });
+
+    // 3. Password Eye Visibility Toggle
+    const toggleKeyVisibilityBtn = document.getElementById('toggleKeyVisibility');
+    const issuerKeyInput = document.getElementById('issuerKey');
+    const keyVisIcon = document.getElementById('keyVisIcon');
+    toggleKeyVisibilityBtn.addEventListener('click', () => {
+      if (issuerKeyInput.type === 'password') {
+        issuerKeyInput.type = 'text';
+        keyVisIcon.textContent = 'visibility_off';
+      } else {
+        issuerKeyInput.type = 'password';
+        keyVisIcon.textContent = 'visibility';
+      }
+    });
+
+    // 4. Drag & Drop File Simulation
+    const dropZone = document.getElementById('dropZone');
+    const fileUpload = document.getElementById('fileUpload');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+
+    dropZone.addEventListener('click', () => fileUpload.click());
+    
+    fileUpload.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        fileName.textContent = e.target.files[0].name;
+        dropZone.classList.add('hidden');
+        fileInfo.classList.remove('hidden');
+        fileInfo.classList.add('flex');
+      }
+    });
+
+    removeFile.addEventListener('click', () => {
+      fileUpload.value = '';
+      dropZone.classList.remove('hidden');
+      fileInfo.classList.add('hidden');
+      fileInfo.classList.remove('flex');
+    });
+
+    // 5. Form Validation & Confirmation Modal
+    const issueBtn = document.getElementById('issueBtn');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmIssueBtn = document.getElementById('confirmIssueBtn');
+    const successPanel = document.getElementById('successPanel');
+    const eventTypeInput = document.getElementById('eventType');
+    const holderNameInput = document.getElementById('holderName');
+    const eventTypeValidationMsg = document.getElementById('eventTypeValidationMsg');
+    const holderNameValidationMsg = document.getElementById('holderNameValidationMsg');
+
+    issueBtn.addEventListener('click', () => {
+      let isValid = true;
+
+      if (!eventTypeInput.value) {
+        eventTypeValidationMsg.classList.remove('hidden');
+        eventTypeValidationMsg.classList.add('flex');
+        isValid = false;
+      } else {
+        eventTypeValidationMsg.classList.add('hidden');
+        eventTypeValidationMsg.classList.remove('flex');
+      }
+
+      if (!holderNameInput.value.trim()) {
+        holderNameValidationMsg.classList.remove('hidden');
+        holderNameValidationMsg.classList.add('flex');
+        isValid = false;
+      } else {
+        holderNameValidationMsg.classList.add('hidden');
+        holderNameValidationMsg.classList.remove('flex');
+      }
+
+      if (!isValid) return;
+
+      // Populate summary in confirmation modal
+      document.getElementById('modalSummaryType').textContent = eventTypeInput.options[eventTypeInput.selectedIndex].text;
+      document.getElementById('modalSummaryHolder').textContent = holderNameInput.value.trim();
+
+      // Show confirmation dialog
+      confirmationModal.classList.remove('hidden');
+    });
+
+    // 6. Confirm Issuance Execution
+    confirmIssueBtn.addEventListener('click', () => {
+      confirmationModal.classList.add('hidden');
+
+      issueBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Broadcasting...';
+      issueBtn.disabled = true;
+      issueBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+      setTimeout(() => {
+        issueBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check</span> Issued';
+        issueBtn.classList.remove('bg-[#006064]', 'dark:bg-[#00796b]');
+        issueBtn.classList.add('bg-emerald-700');
+
+        // Reveal success feedback panel
+        successPanel.classList.remove('hidden');
+        successPanel.classList.add('flex');
+
+        successPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 1200);
+    });
+  });
+</script>
+
+
+
+
+
+
+
+
+</body></html>

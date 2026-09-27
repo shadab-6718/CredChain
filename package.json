@@ -1,0 +1,26 @@
+{
+  "name": "credchain-monorepo",
+  "version": "1.0.0",
+  "description": "CredChain - Tamper-evident Digital Credential and Land-Record Verification Platform (SIH 2026)",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "compile:blockchain": "cd blockchain && npm run compile",
+    "test:blockchain": "cd blockchain && npm test",
+    "test:backend": "cd backend && npm test",
+    "deploy:amoy": "cd blockchain && npm run deploy:amoy"
+  },
+  "keywords": [
+    "credchain",
+    "sih2026",
+    "blockchain",
+    "polygon-amoy",
+    "ipfs",
+    "supabase",
+    "tamper-evident"
+  ],
+  "author": "CredChain Team",
+  "license": "MIT"
+}

@@ -1,0 +1,319 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CredChain Holder Wallet</title>
+<script>
+  // Initialize dark mode before render to prevent flash
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+  }
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#fcf9f8",
+                      "on-secondary-fixed-variant": "#00497e",
+                      "on-tertiary-container": "#ffbe95",
+                      "on-secondary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "background": "#fcf9f8",
+                      "tertiary-container": "#7e4924",
+                      "primary-container": "#006064",
+                      "on-primary": "#ffffff",
+                      "secondary": "#0061a6",
+                      "secondary-fixed-dim": "#a0caff",
+                      "error": "#ba1a1a",
+                      "on-surface-variant": "#3f4949",
+                      "surface-variant": "#e5e2e1",
+                      "status-pending": "#F47738",
+                      "tertiary": "#62330f",
+                      "on-primary-fixed": "#002021",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed-dim": "#8ad3d7",
+                      "tertiary-fixed-dim": "#ffb688",
+                      "secondary-container": "#6eb2fe",
+                      "on-secondary-container": "#004376",
+                      "primary": "#00464a",
+                      "surface-container-highest": "#e5e2e1",
+                      "outline": "#6f7979",
+                      "on-background": "#1c1b1b",
+                      "inverse-surface": "#313030",
+                      "on-secondary-fixed": "#001c37",
+                      "border-subtle": "#D1D5DB",
+                      "tertiary-fixed": "#ffdbc7",
+                      "status-valid": "#00703C",
+                      "on-error": "#ffffff",
+                      "surface": "#fcf9f8",
+                      "on-error-container": "#93000a",
+                      "on-primary-container": "#8fd8dc",
+                      "surface-container-low": "#f6f3f2",
+                      "inverse-primary": "#8ad3d7",
+                      "surface-tint": "#14696d",
+                      "surface-container": "#f0eded",
+                      "status-revoked": "#D4351C",
+                      "on-surface": "#1c1b1b",
+                      "inverse-on-surface": "#f3f0ef",
+                      "primary-fixed": "#a6eff3",
+                      "on-tertiary-fixed": "#311300",
+                      "outline-variant": "#bec8c9",
+                      "on-tertiary-fixed-variant": "#6b3a16",
+                      "surface-container-high": "#eae7e7",
+                      "surface-dim": "#dcd9d9",
+                      "on-primary-fixed-variant": "#004f53",
+                      "secondary-fixed": "#d2e4ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "margin-mobile": "16px",
+                      "base": "8px",
+                      "container-max": "1280px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "code-sm": ["Inter"],
+                      "headline-lg-mobile": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                      "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }],
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                      "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                      "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+@keyframes darkLogoPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.4)) brightness(0) invert(1) contrast(1.25);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.75)) brightness(0) invert(1) contrast(1.25);
+  }
+}
+.dark .animate-logo-glow {
+  animation: darkLogoPulse 3.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark .animate-logo-glow {
+    animation: none !important;
+  }
+}
+</style></head>
+<body class="bg-background dark:bg-[#0b1315] text-on-background dark:text-slate-100 min-h-screen flex flex-col font-body-lg text-body-lg transition-colors duration-200">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 w-full bg-surface dark:bg-[#0f1b1e] border-b border-outline dark:border-slate-800 transition-colors">
+<nav class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-16 flex justify-between items-center">
+<div class="flex items-center gap-margin-desktop">
+<a class="flex items-center h-8" href="/">
+<img alt="CredChain" class="h-10 w-auto object-contain transition-all duration-200" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</a>
+<div class="hidden md:flex gap-base">
+<a class="text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors px-base py-1" href="#">Explorer</a>
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors px-base py-1 font-semibold" href="#">Wallet</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-800 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors px-base py-1" href="#">Dashboard</a>
+</div>
+</div>
+<div class="flex items-center gap-base">
+<button class="hidden sm:flex items-center gap-2 px-base py-1 border border-outline-variant dark:border-slate-700 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-800 text-body-sm transition-colors" onclick="document.getElementById('search-dialog')?.showModal()" title="Search" type="button">
+<span class="material-symbols-outlined text-body-lg">search</span>
+<span class="">Search...</span>
+<kbd class="text-xs border border-outline-variant dark:border-slate-700 px-1 rounded bg-surface-container dark:bg-slate-800 dark:text-slate-400">⌘K</kbd>
+</button>
+<!-- Dark mode toggle button -->
+<button aria-label="Toggle Dark Mode" class="p-1.5 text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 border border-outline-variant dark:border-slate-700 transition-colors flex items-center justify-center" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme" type="button">
+<span class="material-symbols-outlined text-body-lg dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined text-body-lg hidden dark:inline">light_mode</span>
+</button>
+<button class="bg-primary dark:bg-primary-container text-on-primary px-base py-1 font-label-md text-label-md border-0 hover:bg-surface-tint dark:hover:bg-primary transition-colors hidden sm:inline-block">Connect Wallet</button>
+<button aria-label="Toggle Menu" class="md:hidden p-1 text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors" onclick="document.getElementById('mobile-nav')?.classList.toggle('hidden')" type="button">
+<span class="material-symbols-outlined text-body-lg">menu</span>
+</button>
+</div>
+</nav>
+<div class="hidden md:hidden border-t border-outline-variant dark:border-slate-800 bg-surface dark:bg-[#0f1b1e] px-margin-mobile py-base flex flex-col gap-base" id="mobile-nav">
+<button class="flex items-center justify-between px-base py-2 border border-outline-variant dark:border-slate-700 text-on-surface-variant dark:text-slate-300 text-body-sm" onclick="document.getElementById('search-dialog')?.showModal()" type="button">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-body-lg">search</span>Search ledger...
+      </span>
+<kbd class="text-xs border border-outline-variant dark:border-slate-700 px-1 rounded bg-surface-container dark:bg-slate-800">⌘K</kbd>
+</button>
+<a class="text-on-surface-variant dark:text-slate-300 py-1 px-base hover:bg-surface-container-low dark:hover:bg-slate-800" href="#">Explorer</a>
+<a class="text-primary dark:text-primary-fixed font-bold py-1 px-base bg-surface-container-low dark:bg-slate-800" href="#">Wallet</a>
+<a class="text-on-surface-variant dark:text-slate-300 py-1 px-base hover:bg-surface-container-low dark:hover:bg-slate-800" href="#">Dashboard</a>
+<button class="w-full bg-primary dark:bg-primary-container text-on-primary py-2 font-label-md text-label-md border-0 hover:bg-surface-tint dark:hover:bg-primary transition-colors mt-2">Connect Wallet</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<div class="w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-base"><div class="bg-surface-container-low dark:bg-[#132024] border border-outline-variant dark:border-slate-800 p-base flex flex-col sm:flex-row items-start sm:items-center justify-between gap-base text-body-sm"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-status-pending text-body-lg">info</span><div><div class="font-label-md text-label-md text-primary dark:text-primary-fixed">Sample Credential Trail Preview — Mock Data Demonstration</div><div class="text-on-surface-variant dark:text-slate-400 text-xs">Connected holder wallets will stream real credentials and permissions. These records illustrate milestone progression and approval UX.</div></div></div><span class="bg-surface-dim dark:bg-slate-800 text-on-surface dark:text-slate-300 px-2 py-0.5 font-label-md text-xs border border-outline-variant dark:border-slate-700 whitespace-nowrap">Demo Environment</span></div></div><main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop flex flex-col md:flex-row gap-margin-desktop">
+<!-- Left Column: Vertical Timeline -->
+<div class="flex-grow md:w-2/3">
+<div class="mb-margin-desktop bg-surface dark:bg-[#132024] border border-outline-variant dark:border-slate-800 p-margin-mobile shadow-sm"><div class="flex flex-wrap items-center justify-between gap-base border-b border-outline-variant dark:border-slate-800 pb-2 mb-base"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary dark:text-primary-fixed text-headline-md">account_balance_wallet</span><div><h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">Zone 1: Operational Wallet View</h2><p class="text-xs text-on-surface-variant dark:text-slate-400">Live operational DID session and credential synchronizer</p></div></div><div class="flex items-center gap-2"><span class="bg-surface-dim dark:bg-slate-800 text-on-surface dark:text-slate-300 border border-outline-variant dark:border-slate-700 px-2 py-0.5 text-xs font-label-md uppercase font-semibold">DISCONNECTED</span><span class="bg-surface-container dark:bg-slate-800 text-status-pending border border-outline-variant dark:border-slate-700 px-2 py-0.5 text-xs font-mono font-bold">0 ACTIVE CREDENTIALS LOADED</span></div></div><div class="py-base px-margin-mobile border border-outline-variant dark:border-slate-700 bg-surface-container-low dark:bg-[#0f1b1e] text-center flex flex-col items-center justify-center gap-2"><div class="flex items-center justify-center p-2 rounded-none bg-surface-container dark:bg-slate-800 border border-outline-variant dark:border-slate-700"><span class="material-symbols-outlined text-on-surface-variant dark:text-slate-400 text-headline-lg">link_off</span></div><div class="font-label-md text-label-md text-on-background dark:text-white">No Wallet Connected or Ready to Sync</div><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 max-w-lg">Connect your Web3 or DID holder wallet to unlock and synchronize your verified on-chain verifiable credentials. Live credential trail is currently awaiting connection.</p><div class="flex flex-wrap gap-base mt-2 justify-center"><button class="inline-flex items-center gap-1 bg-primary dark:bg-primary-container text-on-primary px-base py-1 font-label-md text-label-md hover:bg-surface-tint dark:hover:bg-primary transition-colors" type="button"><span class="material-symbols-outlined text-sm">wallet</span> Connect Web3 / DID Wallet</button><button class="inline-flex items-center gap-1 bg-surface dark:bg-[#132024] text-primary dark:text-primary-fixed-dim border border-primary dark:border-primary-fixed-dim px-base py-1 font-label-md text-label-md hover:bg-surface-container dark:hover:bg-slate-800 transition-colors" type="button"><span class="material-symbols-outlined text-sm">qr_code_scanner</span> Scan QR Pairing</button></div><div class="mt-2 pt-2 border-t border-outline-variant dark:border-slate-800 w-full max-w-lg flex items-center justify-between text-xs text-on-surface-variant dark:text-slate-400"><span class="">DID Session: <span class="font-mono">none</span></span><span class="">Ledger Network: <span class="font-semibold text-primary dark:text-primary-fixed">Mainnet (Ready)</span></span><span class="">Sync Status: <span class="font-semibold text-status-pending">0 Loaded</span></span></div></div></div><div class="border-2 border-dashed border-outline-variant dark:border-slate-700 bg-surface dark:bg-[#132024] p-margin-mobile shadow-sm"><div class="border-b border-outline-variant dark:border-slate-800 pb-base mb-base"><div class="flex flex-wrap items-center justify-between gap-base mb-2"><div class="flex items-center gap-2"><span class="bg-surface-dim dark:bg-slate-800 text-on-surface dark:text-slate-300 border border-outline-variant dark:border-slate-700 px-2 py-0.5 text-xs font-label-md uppercase font-semibold">Zone 2 Preview</span><span class="bg-surface-container-highest dark:bg-slate-800 text-primary dark:text-primary-fixed border border-primary dark:border-primary-fixed px-2 py-0.5 text-xs font-label-md uppercase font-bold">MOCK HOLDER PREVIEW</span></div><span class="text-xs text-on-surface-variant dark:text-slate-400 font-mono">SCHEMA: W3C-VC-v2.0</span></div><h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">Expected Output Preview (Mock Example) — How Your Wallet Credentials Will Look After Sync</h2><div class="mt-2 bg-surface-container-low dark:bg-[#0f1b1e] border border-outline-variant dark:border-slate-800 p-base text-body-sm flex items-start gap-2"><span class="material-symbols-outlined text-status-pending text-body-lg">info</span><div class="text-xs text-on-surface-variant dark:text-slate-400"><span class="font-bold text-on-background dark:text-white">Simulation Notice:</span> The records below demonstrate the authenticated credential trail, milestone timeline (Academic Degree, Land Deed), and cryptographic proof inspector you will inspect once your DID wallet completes synchronization.</div></div><div class="flex flex-wrap items-center justify-between gap-base mt-base pt-base border-t border-outline-variant dark:border-slate-800"><div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400"><span class="">Sample Credential ID:</span><span class="font-mono font-bold text-on-background dark:text-slate-200">0x9a7f5c3d2e1b8a904b2e</span><button class="inline-flex items-center gap-1 text-primary dark:text-primary-fixed-dim hover:text-surface-tint dark:hover:text-primary-fixed p-0.5" onclick="navigator.clipboard.writeText('0x9a7f5c3d2e1b8a904b2e'); const s = this.querySelector('.copy-label'); s.textContent = 'Copied!'; setTimeout(() =&gt; s.textContent = 'content_copy', 1500);" title="Copy Credential Hash" type="button"><span class="material-symbols-outlined text-sm copy-label">content_copy</span></button></div><button class="print:hidden inline-flex items-center gap-1 border border-outline-variant dark:border-slate-700 bg-surface dark:bg-[#132024] hover:bg-surface-container-low dark:hover:bg-slate-800 px-2 py-0.5 text-body-sm text-on-surface-variant dark:text-slate-300 transition-colors" onclick="window.print()" title="Print Certificate Trail" type="button"><span class="material-symbols-outlined text-base">print</span><span class="">Print Certificate</span></button></div></div><div class="relative border-l-2 border-outline-variant dark:border-slate-700 ml-3 space-y-margin-desktop mb-margin-desktop"><div class="relative pl-gutter"><div class="absolute w-3 h-3 bg-primary dark:bg-primary-fixed -left-[7px] top-1.5 rounded-none border border-outline dark:border-primary-fixed"></div><div class="flex items-center justify-between mb-1"><div class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Oct 24, 2023</div><span class="bg-status-valid text-on-primary px-2 py-0.5 font-label-md text-label-md font-semibold">Issued</span></div><h3 class="font-headline-md text-headline-md text-on-background dark:text-white">Academic Degree: Bachelor of Science in Computer Science</h3><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-1">University of Technology. Final degree credential securely anchored to the chain with summa cum laude honours.</p></div><div class="relative pl-gutter"><div class="absolute w-3 h-3 bg-status-valid -left-[7px] top-1.5 rounded-none border border-outline-variant dark:border-slate-600"></div><div class="flex items-center justify-between mb-1"><div class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Aug 18, 2022</div><span class="bg-status-valid text-on-primary px-2 py-0.5 font-label-md text-label-md font-semibold">Title Anchored</span></div><h3 class="font-headline-md text-headline-md text-on-background dark:text-white">Land Deed: Title Registration Parcel #4802-A</h3><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-1">National Cadastre &amp; Land Registry Authority. Freehold title deed authenticated via decentralized notary signature.</p></div><div class="relative pl-gutter"><div class="absolute w-3 h-3 bg-surface-container dark:bg-slate-700 -left-[7px] top-1.5 rounded-none border border-outline-variant dark:border-slate-600"></div><div class="flex items-center justify-between mb-1"><div class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">May 15, 2023</div><span class="bg-surface-dim dark:bg-slate-800 text-on-surface dark:text-slate-300 px-2 py-0.5 font-label-md text-label-md border border-outline-variant dark:border-slate-700">Completed</span></div><h3 class="font-body-lg text-body-lg font-bold text-on-background dark:text-slate-100">Final Exams &amp; Prerequisite Milestones</h3><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-1">All comprehensive examination modules verified and signed by University Academic Board.</p></div><div class="relative pl-gutter"><div class="absolute w-3 h-3 bg-surface-container dark:bg-slate-700 -left-[7px] top-1.5 rounded-none border border-outline-variant dark:border-slate-600"></div><div class="flex items-center justify-between mb-1"><div class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Sep 01, 2019</div><span class="bg-surface-dim dark:bg-slate-800 text-on-surface dark:text-slate-300 px-2 py-0.5 font-label-md text-label-md border border-outline-variant dark:border-slate-700">Enrolled</span></div><h3 class="font-body-lg text-body-lg font-bold text-on-background dark:text-slate-100">Identity &amp; Enrollment Verification</h3><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-1">Initial decentralized identifier issuance and institutional enrollment confirmation.</p></div></div><div class="border border-outline dark:border-slate-700 bg-surface-container-low dark:bg-[#0f1b1e] p-base"><div class="flex items-center justify-between border-b border-outline-variant dark:border-slate-800 pb-2 mb-2"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary dark:text-primary-fixed text-label-md">verified_user</span><h4 class="font-label-md text-label-md text-primary dark:text-primary-fixed">Cryptographic Proof Inspector (Mock Sample)</h4></div><span class="text-xs font-mono text-status-valid">Merkle Root Verified ✓</span></div><div class="grid grid-cols-1 gap-2 text-xs font-mono"><div class="flex flex-wrap items-center justify-between"><span class="text-on-surface-variant dark:text-slate-400">Proof Type:</span><span class="text-on-background dark:text-slate-200">Ed25519Signature2020</span></div><div class="flex flex-wrap items-center justify-between"><span class="text-on-surface-variant dark:text-slate-400">Issuer DID:</span><span class="text-on-background dark:text-slate-200">did:ion:EiD8...4f8b91a</span></div><div class="flex flex-wrap items-center justify-between"><span class="text-on-surface-variant dark:text-slate-400">Merkle Root:</span><span class="text-on-background dark:text-slate-200">0x7b2f4c91d...ef4a89</span></div><div class="flex flex-wrap items-center justify-between"><span class="text-on-surface-variant dark:text-slate-400">Revocation Check:</span><span class="text-status-valid font-bold">StatusList2021 Entry Valid</span></div></div></div></div>
+
+</div>
+<!-- Right Column: Access Requests -->
+<aside class="md:w-1/3 bg-surface-container-low dark:bg-[#132024] p-margin-mobile border border-outline-variant dark:border-slate-800 flex flex-col gap-base transition-colors">
+<div class="border-b border-outline-variant dark:border-slate-700 pb-2 mb-base">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between gap-1">
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">Mock Example Preview — Inbound Verifier Requests (Simulation)</h2>
+</div>
+<span class="bg-surface-dim dark:bg-slate-800 text-on-surface-variant dark:text-slate-400 text-xs px-1.5 py-0.5 border border-outline-variant dark:border-slate-700 uppercase font-semibold w-fit">Simulation Mode</span>
+</div>
+<p class="text-xs text-on-surface-variant dark:text-slate-400 mt-1">Interactive simulation of inbound verification requests from third-party verifiers. Live wallet requests appear once connected.</p>
+</div>
+<!-- Request Item 1 -->
+<div class="border border-outline dark:border-slate-700 bg-surface dark:bg-[#17272c] p-base flex flex-col gap-base shadow-sm">
+<div class="flex justify-between items-start">
+<div>
+<div class="font-label-md text-label-md text-on-background dark:text-white">TechCorp Inc.</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">Requesting: Degree Verification</div>
+</div>
+<span class="text-status-pending"><span class="material-symbols-outlined text-label-md" data-icon="pending">pending</span></span>
+</div>
+<div class="flex gap-base mt-2">
+<button class="flex-1 bg-primary dark:bg-primary-container text-on-primary py-1 font-label-md text-label-md hover:bg-surface-tint dark:hover:bg-primary transition-colors">Approve</button>
+<button class="flex-1 bg-surface dark:bg-[#132024] text-primary dark:text-primary-fixed-dim border border-primary dark:border-primary-fixed-dim py-1 font-label-md text-label-md hover:bg-surface-container dark:hover:bg-slate-800 transition-colors">Deny</button>
+</div>
+</div>
+<!-- Request Item 2 -->
+<div class="border border-outline dark:border-slate-700 bg-surface dark:bg-[#17272c] p-base flex flex-col gap-base shadow-sm">
+<div class="flex justify-between items-start">
+<div>
+<div class="font-label-md text-label-md text-on-background dark:text-white">Global Visas Dept.</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">Requesting: Enrollment History</div>
+</div>
+<span class="text-status-pending"><span class="material-symbols-outlined text-label-md" data-icon="pending">pending</span></span>
+</div>
+<div class="flex gap-base mt-2">
+<button class="flex-1 bg-primary dark:bg-primary-container text-on-primary py-1 font-label-md text-label-md hover:bg-surface-tint dark:hover:bg-primary transition-colors">Approve</button>
+<button class="flex-1 bg-surface dark:bg-[#132024] text-primary dark:text-primary-fixed-dim border border-primary dark:border-primary-fixed-dim py-1 font-label-md text-label-md hover:bg-surface-container dark:hover:bg-slate-800 transition-colors">Deny</button>
+</div>
+</div>
+<!-- Request Item 3 (Approved state example) -->
+<div class="border border-outline-variant dark:border-slate-700 bg-surface-container-highest dark:bg-[#0f181b] p-base flex flex-col gap-base opacity-75">
+<div class="flex justify-between items-start">
+<div>
+<div class="font-label-md text-label-md text-on-background dark:text-slate-200">Alumni Association</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">Requested: Degree Verification</div>
+</div>
+<span class="text-status-valid"><span class="material-symbols-outlined text-label-md" data-icon="check_circle">check_circle</span></span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-2 italic">Approved on Oct 25, 2023</div>
+</div>
+</aside>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-[#0f1b1e] border-t border-outline dark:border-slate-800 flat no shadows full-width bottom-0 w-full py-base px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-base mt-auto transition-colors">
+<div class="font-label-md text-label-md font-bold text-on-surface dark:text-slate-300">© 2026 CredChain Ledger. Built on open standards.</div>
+<div class="flex gap-base">
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline Transition-opacity duration-150 font-body-sm text-body-sm" href="#">Privacy</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline Transition-opacity duration-150 font-body-sm text-body-sm" href="#">Terms</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline Transition-opacity duration-150 font-body-sm text-body-sm" href="#">API Docs</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline Transition-opacity duration-150 font-body-sm text-body-sm" href="#">Source</a>
+</div>
+</footer>
+<dialog class="backdrop:bg-black/40 bg-surface dark:bg-[#132024] text-on-surface dark:text-slate-100 border border-outline dark:border-slate-700 p-0 w-full max-w-lg shadow-2xl" id="search-dialog">
+<div class="p-4 border-b border-outline-variant dark:border-slate-700 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant dark:text-slate-400">search</span>
+<input class="w-full bg-transparent border-0 focus:outline-none text-body-sm text-on-background dark:text-white placeholder:text-on-surface-variant dark:placeholder:text-slate-400" id="search-input" placeholder="Search transactions, credentials, or issuers..." type="text">
+<button class="text-on-surface-variant dark:text-slate-400 hover:text-on-background dark:hover:text-white" onclick="document.getElementById('search-dialog').close()" type="button">
+<span class="material-symbols-outlined text-body-lg">close</span>
+</button>
+</div>
+<div class="p-4 flex flex-col gap-2 max-h-60 overflow-y-auto text-body-sm">
+<div class="text-xs font-bold text-on-surface-variant dark:text-slate-400 uppercase">Recent Searches</div>
+<button class="text-left p-2 hover:bg-surface-container-low dark:hover:bg-slate-800 flex items-center justify-between border-b border-outline-variant dark:border-slate-700" type="button">
+<span class="">Bachelor of Science in Computer Science</span>
+<span class="text-xs text-on-surface-variant dark:text-slate-400">Degree</span>
+</button>
+<button class="text-left p-2 hover:bg-surface-container-low dark:hover:bg-slate-800 flex items-center justify-between" type="button">
+<span class="">TechCorp Inc. verification request</span>
+<span class="text-xs text-on-surface-variant dark:text-slate-400">Access Request</span>
+</button>
+</div>
+</dialog>
+<button aria-label="Return to top" class="print:hidden fixed bottom-6 right-6 z-40 bg-primary dark:bg-primary-container text-on-primary p-2.5 shadow-lg hover:bg-surface-tint dark:hover:bg-primary transition-all flex items-center justify-center" id="return-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" type="button">
+<span class="material-symbols-outlined">arrow_upward</span>
+</button>
+<script>
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+
+  // Keyboard shortcut for search (⌘K / Ctrl+K)
+  window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const dialog = document.getElementById('search-dialog');
+      if (dialog) {
+        dialog.open ? dialog.close() : dialog.showModal();
+      }
+    }
+  });
+</script>
+<style>
+@media print {
+  nav, header, aside, footer, #return-to-top, #theme-toggle, .print\:hidden {
+    display: none !important;
+  }
+  main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .md\:w-2\/3 {
+    width: 100% !important;
+  }
+}
+</style>
+
+
+
+
+
+
+
+
+</body></html>

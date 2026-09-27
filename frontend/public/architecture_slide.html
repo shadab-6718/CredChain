@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CredChain — Simplified System Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0f172a;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: #0f172a;
+    }
+
+    /* Controls bar */
+    .toolbar {
+      width: 1333px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .toolbar-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #e2e8f0;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: #334155;
+      color: #ffffff;
+    }
+
+    .btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+
+    /* 16:9 Presentation Canvas */
+    .slide-canvas {
+      width: 1333px;
+      height: 750px;
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45);
+      padding: 28px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* DARK MODE STYLING FOR SLIDE */
+    body.theme-dark .slide-canvas {
+      background: #0b1317;
+      color: #f1f5f9;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px #1e2f38;
+    }
+
+    /* HEADER */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 14px;
+    }
+    body.theme-dark .slide-header {
+      border-bottom-color: #1e2f38;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+
+    .title-text h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    body.theme-dark .title-text h1 {
+      color: #f8fafc;
+    }
+
+    .title-text p {
+      font-size: 13px;
+      color: #64748b;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    body.theme-dark .title-text p {
+      color: #94a3b8;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pill-cyan {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+    body.theme-dark .pill-cyan {
+      background: #082f49;
+      color: #38bdf8;
+      border-color: #0369a1;
+    }
+
+    .pill-green {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+    body.theme-dark .pill-green {
+      background: #052e16;
+      color: #4ade80;
+      border-color: #166534;
+    }
+
+    /* MAIN ARCHITECTURE FLOW (VERTICAL 4-TIER) */
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    /* TIER 1: ACTORS */
+    .tier-label {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.theme-dark .tier-label {
+      color: #94a3b8;
+    }
+
+    .actors-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .actor-card {
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1.5px solid;
+      position: relative;
+      transition: transform 0.15s;
+    }
+
+    .actor-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .actor-info h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .actor-info p {
+      font-size: 11px;
+      margin-top: 2px;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    /* Actor color styles */
+    .actor-admin {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .actor-admin .actor-icon { background: #e2e8f0; color: #334155; }
+    .actor-admin h3 { color: #1e293b; }
+    .actor-admin p { color: #64748b; }
+    body.theme-dark .actor-admin { background: #131c22; border-color: #273b47; }
+    body.theme-dark .actor-admin .actor-icon { background: #1e2f38; color: #94a3b8; }
+    body.theme-dark .actor-admin h3 { color: #f1f5f9; }
+    body.theme-dark .actor-admin p { color: #94a3b8; }
+
+    .actor-issuer {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+    .actor-issuer .actor-icon { background: #dbeafe; color: #1d4ed8; }
+    .actor-issuer h3 { color: #1e40af; }
+    .actor-issuer p { color: #3b82f6; }
+    body.theme-dark .actor-issuer { background: #0c1f36; border-color: #1d4ed8; }
+    body.theme-dark .actor-issuer .actor-icon { background: #1e3a8a; color: #60a5fa; }
+    body.theme-dark .actor-issuer h3 { color: #93c5fd; }
+    body.theme-dark .actor-issuer p { color: #bfdbfe; }
+
+    .actor-holder {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+    .actor-holder .actor-icon { background: #dcfce7; color: #15803d; }
+    .actor-holder h3 { color: #166534; }
+    .actor-holder p { color: #16a34a; }
+    body.theme-dark .actor-holder { background: #062315; border-color: #15803d; }
+    body.theme-dark .actor-holder .actor-icon { background: #14532d; color: #4ade80; }
+    body.theme-dark .actor-holder h3 { color: #86efac; }
+    body.theme-dark .actor-holder p { color: #bbf7d0; }
+
+    .actor-verifier {
+      background: #fff7ed;
+      border-color: #fdba74;
+    }
+    .actor-verifier .actor-icon { background: #ffedd5; color: #c2410c; }
+    .actor-verifier h3 { color: #9a3412; }
+    .actor-verifier p { color: #ea580c; }
+    body.theme-dark .actor-verifier { background: #261608; border-color: #c2410c; }
+    body.theme-dark .actor-verifier .actor-icon { background: #7c2d12; color: #fb923c; }
+    body.theme-dark .actor-verifier h3 { color: #fdba74; }
+    body.theme-dark .actor-verifier p { color: #fed7aa; }
+
+    /* CONNECTOR ARROWS */
+    .flow-arrow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      margin: -2px 0;
+    }
+    body.theme-dark .flow-arrow-row {
+      color: #94a3b8;
+    }
+    .flow-arrow-row span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* TIER 2 & 3 CONTAINER */
+    .middle-tiers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .tier-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+    body.theme-dark .tier-box {
+      background: #111a20;
+      border-color: #1e2f38;
+    }
+
+    .tier-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .tier-box-header h4 {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.theme-dark .tier-box-header h4 {
+      color: #f1f5f9;
+    }
+
+    .tech-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      padding: 2px 7px;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    body.theme-dark .tech-tag {
+      background: #1e2f38;
+      color: #94a3b8;
+    }
+
+    /* Horizontal Pills Inside Tiers */
+    .modules-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .module-item {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 7px 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.2;
+    }
+    body.theme-dark .module-item {
+      background: #16222a;
+      border-color: #273b47;
+      color: #cbd5e1;
+    }
+
+    .module-item span {
+      display: block;
+      font-size: 9.5px;
+      color: #64748b;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+    body.theme-dark .module-item span {
+      color: #94a3b8;
+    }
+
+    /* TIER 4: TWO-ZONE ARCHITECTURE */
+    .two-zone-wrapper {
+      background: #f1f5f9;
+      border: 1.5px dashed #94a3b8;
+      border-radius: 12px;
+      padding: 12px 16px;
+      position: relative;
+    }
+    body.theme-dark .two-zone-wrapper {
+      background: #0d171c;
+      border-color: #2a414e;
+    }
+
+    .two-zone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .two-zone-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    body.theme-dark .two-zone-title {
+      color: #38bdf8;
+    }
+
+    .zone-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* ZONE A: BLOCKCHAIN */
+    .zone-card {
+      border-radius: 9px;
+      padding: 12px 14px;
+      border: 1.5px solid;
+    }
+
+    .zone-chain {
+      background: #ffffff;
+      border-color: #c084fc;
+    }
+    body.theme-dark .zone-chain {
+      background: #191224;
+      border-color: #7e22ce;
+    }
+
+    .zone-chain-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .zone-chain-header h4 {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #6b21a8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.theme-dark .zone-chain-header h4 {
+      color: #c084fc;
+    }
+
+    /* ZONE B: IPFS */
+    .zone-ipfs {
+      background: #ffffff;
+      border-color: #38bdf8;
+    }
+    body.theme-dark .zone-ipfs {
+      background: #091c28;
+      border-color: #0284c7;
+    }
+
+    .zone-ipfs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .zone-ipfs-header h4 {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.theme-dark .zone-ipfs-header h4 {
+      color: #38bdf8;
+    }
+
+    .features-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+    }
+    body.theme-dark .chip {
+      background: #1e293b;
+      color: #cbd5e1;
+      border-color: #334155;
+    }
+
+    .chip-purple {
+      background: #faf5ff;
+      color: #7e22ce;
+      border-color: #e9d5ff;
+    }
+    body.theme-dark .chip-purple {
+      background: #2e1065;
+      color: #d8b4fe;
+      border-color: #6b21a8;
+    }
+
+    .chip-blue {
+      background: #f0f9ff;
+      color: #0369a1;
+      border-color: #bae6fd;
+    }
+    body.theme-dark .chip-blue {
+      background: #082f49;
+      color: #7dd3fc;
+      border-color: #0369a1;
+    }
+
+    /* FOOTER PILLARS (VALUE PROPOSITIONS) */
+    .pillars-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      border-top: 2px solid #e2e8f0;
+      padding-top: 12px;
+    }
+    body.theme-dark .pillars-row {
+      border-top-color: #1e2f38;
+    }
+
+    .pillar-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    body.theme-dark .pillar-card {
+      background: #111a20;
+      border-color: #1e2f38;
+    }
+
+    .pillar-icon {
+      font-size: 16px;
+      margin-top: 1px;
+    }
+
+    .pillar-text h5 {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    body.theme-dark .pillar-text h5 {
+      color: #f1f5f9;
+    }
+
+    .pillar-text p {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+    body.theme-dark .pillar-text p {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="theme-light">
+
+  <div class="toolbar">
+    <div><strong>CredChain Slide Deck</strong> — System Architecture Overview (16:9 Optimized)</div>
+    <div class="toolbar-buttons">
+      <button class="btn active" id="theme-light-btn" onclick="setTheme('light')">☀️ Light Mode (PPT Print)</button>
+      <button class="btn" id="theme-dark-btn" onclick="setTheme('dark')">🌙 Dark Mode (Dev Theme)</button>
+      <button class="btn" onclick="window.print()">🖨️ Save PDF / Print</button>
+    </div>
+  </div>
+
+  <!-- 16:9 Slide Canvas -->
+  <div class="slide-canvas" id="slide-canvas">
+    
+    <!-- SLIDE HEADER -->
+    <header class="slide-header">
+      <div class="brand-title">
+        <div class="logo-badge">⛓️</div>
+        <div class="title-text">
+          <h1>CredChain — System Architecture</h1>
+          <p>Verify the Educational & Property Trail, Not Just the Final Certificate</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="pill pill-cyan">Polygon Amoy (80002)</span>
+        <span class="pill pill-green">Two-Zone Privacy Architecture</span>
+      </div>
+    </header>
+
+    <!-- ARCHITECTURE FLOW -->
+    <div class="arch-flow">
+
+      <!-- TIER 1: THE 4 ROLES -->
+      <div>
+        <div class="tier-label">Tier 1: System Actors & Key Responsibilities</div>
+        <div class="actors-grid">
+          <!-- Admin -->
+          <div class="actor-card actor-admin">
+            <div class="actor-icon">⚙️</div>
+            <div class="actor-info">
+              <h3>Platform Admin</h3>
+              <p>Onboards institutions & manages governance roles</p>
+            </div>
+          </div>
+          <!-- Issuer -->
+          <div class="actor-card actor-issuer">
+            <div class="actor-icon">🏛️</div>
+            <div class="actor-info">
+              <h3>Issuing Authority</h3>
+              <p>Issues progressive milestones & revokes records</p>
+            </div>
+          </div>
+          <!-- Holder -->
+          <div class="actor-card actor-holder">
+            <div class="actor-icon">👤</div>
+            <div class="actor-info">
+              <h3>Credential Holder</h3>
+              <p>Self-sovereign wallet & time-boxed access control</p>
+            </div>
+          </div>
+          <!-- Verifier -->
+          <div class="actor-card actor-verifier">
+            <div class="actor-icon">🔍</div>
+            <div class="actor-info">
+              <h3>Verifier / Employer</h3>
+              <p>Instant QR audit with zero-gas verification</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARROW CONNECTOR -->
+      <div class="flow-arrow-row">
+        <span>↓ Intuitive Role Portals & Seamless Web3 Interactions ↓</span>
+      </div>
+
+      <!-- TIER 2 & 3: APPLICATION & BACKEND ENGINE -->
+      <div class="middle-tiers">
+        <!-- Tier 2: Presentation -->
+        <div class="tier-box">
+          <div class="tier-box-header">
+            <h4>🖥️ Presentation Tier (Web Application)</h4>
+            <span class="tech-tag">React 18 • Vite • Tailwind</span>
+          </div>
+          <div class="modules-list">
+            <div class="module-item">
+              Admin Portal
+              <span>Org Whitelist</span>
+            </div>
+            <div class="module-item">
+              Issuer Dashboard
+              <span>Milestone Form</span>
+            </div>
+            <div class="module-item">
+              Holder Wallet
+              <span>Access Grants</span>
+            </div>
+            <div class="module-item">
+              Verifier Portal
+              <span>QR Scanner</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tier 3: Core API Engine -->
+        <div class="tier-box">
+          <div class="tier-box-header">
+            <h4>⚙️ Application & Relayer Gateway</h4>
+            <span class="tech-tag">Node.js • Express • Ethers.js</span>
+          </div>
+          <div class="modules-list">
+            <div class="module-item">
+              Auth & RBAC
+              <span>Supabase RLS</span>
+            </div>
+            <div class="module-item">
+              Client Encryption
+              <span>AES-256-GCM</span>
+            </div>
+            <div class="module-item">
+              Relayer Service
+              <span>Zero-Gas Tx</span>
+            </div>
+            <div class="module-item">
+              Audit Sequencer
+              <span>SHA-256 Chain</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARROW CONNECTOR -->
+      <div class="flow-arrow-row">
+        <span>↓ Two-Zone Split: Public Audit Proofs On-Chain • Encrypted Documents Off-Chain ↓</span>
+      </div>
+
+      <!-- TIER 4: TWO-ZONE DATA LAYER -->
+      <div class="two-zone-wrapper">
+        <div class="two-zone-header">
+          <div class="two-zone-title">
+            <span>🛡️ Core Innovation: Two-Zone Privacy Architecture (DPDP & GDPR Compliant)</span>
+          </div>
+          <span class="tech-tag">Zero Plaintext PII On Blockchain</span>
+        </div>
+
+        <div class="zone-container">
+          <!-- Zone A: On-Chain Blockchain -->
+          <div class="zone-card zone-chain">
+            <div class="zone-chain-header">
+              <h4>⛓️ Zone A: On-Chain Public Ledger</h4>
+              <span class="tech-tag">Polygon Amoy Testnet</span>
+            </div>
+            <p style="font-size: 11px; color: #64748b; line-height: 1.35; margin-bottom: 6px;">
+              Immutable state machine storing zero personal data. Maintains the cryptographic linked-list of milestone events.
+            </p>
+            <div class="features-chips">
+              <span class="chip chip-purple">SHA-256 Root Hash</span>
+              <span class="chip chip-purple">Previous Event ID (Chain)</span>
+              <span class="chip chip-purple">Issuer & Holder DID</span>
+              <span class="chip chip-purple">IPFS CID Reference</span>
+              <span class="chip chip-purple">Revocation Status</span>
+              <span class="chip chip-purple">Smart Access Grants</span>
+            </div>
+          </div>
+
+          <!-- Zone B: Off-Chain IPFS -->
+          <div class="zone-card zone-ipfs">
+            <div class="zone-ipfs-header">
+              <h4>📦 Zone B: Off-Chain Encrypted Storage</h4>
+              <span class="tech-tag">IPFS / Pinata Node</span>
+            </div>
+            <p style="font-size: 11px; color: #64748b; line-height: 1.35; margin-bottom: 6px;">
+              High-availability decentralized storage for certificates & land deeds, fully encrypted prior to upload.
+            </p>
+            <div class="features-chips">
+              <span class="chip chip-blue">Client-Side Encrypted PDFs</span>
+              <span class="chip chip-blue">Content Addressed (CID)</span>
+              <span class="chip chip-blue">Zero Single-Point-of-Failure</span>
+              <span class="chip chip-blue">Holder-Key Decryption Only</span>
+              <span class="chip chip-blue">48-Hour Temporary Grants</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PILLARS FOOTER -->
+    <footer class="pillars-row">
+      <div class="pillar-card">
+        <div class="pillar-icon">🔗</div>
+        <div class="pillar-text">
+          <h5>Progressive Trail</h5>
+          <p>Links every semester or zoning event to prevent forged final records.</p>
+        </div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon">🔐</div>
+        <div class="pillar-text">
+          <h5>Two-Zone Privacy</h5>
+          <p>No plaintext PII on-chain; holder retains sovereign encryption keys.</p>
+        </div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon">⚡</div>
+        <div class="pillar-text">
+          <h5>Zero-Friction Verify</h5>
+          <p>Employers verify in seconds via QR with zero gas or wallet barriers.</p>
+        </div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon">⏳</div>
+        <div class="pillar-text">
+          <h5>Time-Boxed Access</h5>
+          <p>Consent automatically revokes after 48h to prevent data hoarding.</p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('theme-dark');
+        document.getElementById('theme-dark-btn').classList.add('active');
+        document.getElementById('theme-light-btn').classList.remove('active');
+      } else {
+        document.body.classList.remove('theme-dark');
+        document.body.classList.add('theme-light');
+        document.getElementById('theme-light-btn').classList.add('active');
+        document.getElementById('theme-dark-btn').classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cGradPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="60%" stop-color="#00838F"/>
+      <stop offset="100%" stop-color="#006064"/>
+    </linearGradient>
+    <linearGradient id="cGradSecondary" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#00ACC1"/>
+    </linearGradient>
+    <filter id="nodeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Central Dynamic Double-C Chain & Trust Anchor -->
+  <!-- Left/Upper Interlocking Link forming 'C' -->
+  <path d="M 230,120 L 190,120 C 124,120 70,174 70,240 C 70,306 124,360 190,360 L 230,360 C 242,360 252,350 252,338 L 252,302 C 252,290 242,280 230,280 L 196,280 C 174,280 156,262 156,240 C 156,218 174,200 196,200 L 230,200 C 242,200 252,190 252,178 L 252,142 C 252,130 242,120 230,120 Z"
+        fill="url(#cGradPrimary)"/>
+
+  <!-- Right/Lower Interlocking Link forming interlocking reverse 'C' (Chain link bind) -->
+  <path d="M 282,392 L 322,392 C 388,392 442,338 442,272 C 442,206 388,152 322,152 L 282,152 C 270,152 260,162 260,174 L 260,210 C 260,222 270,232 282,232 L 316,232 C 338,232 356,250 356,272 C 356,294 338,312 316,312 L 282,312 C 270,312 260,322 260,334 L 260,370 C 260,382 270,392 282,392 Z"
+        fill="#00E5FF"/>
+
+  <!-- Central Intersecting Proof Node (Keystone) -->
+  <rect x="232" y="232" width="48" height="48" rx="12" fill="#FFFFFF" transform="rotate(45 256 256)" filter="url(#nodeGlow)"/>
+  <circle cx="256" cy="256" r="8" fill="#006064"/>
+
+  <!-- Immutable Verification Checkpoint Dots -->
+  <circle cx="256" cy="96" r="10" fill="#00E5FF"/>
+  <circle cx="256" cy="416" r="10" fill="#00838F"/>
+  <circle cx="96" cy="240" r="10" fill="#00E5FF"/>
+  <circle cx="416" cy="272" r="10" fill="#00E5FF"/>
+</svg>

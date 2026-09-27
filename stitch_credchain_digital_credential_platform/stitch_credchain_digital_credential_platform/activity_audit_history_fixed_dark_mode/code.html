@@ -1,0 +1,824 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CredChain - Ledger Activity &amp; Event History</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+  // Immediate dark mode initialization before DOM render to prevent flashing
+  (function() {
+    try {
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } catch(e) {}
+  })();
+</script>
+<style>
+@media print {
+  header, footer, .no-print, #cookie-banner, #return-to-top, #node-support-btn, .export-group, #quick-filter-pills, #search-modal {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .print-expand {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
+
+@keyframes breathing-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(20, 184, 166, 0.45)) drop-shadow(0 0 16px rgba(45, 212, 191, 0.25));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(20, 184, 166, 0.85)) drop-shadow(0 0 28px rgba(6, 182, 212, 0.5));
+    transform: scale(1.015);
+  }
+}
+
+.dark .logo-glow {
+  animation: breathing-pulse 3s ease-in-out infinite;
+}
+
+#scroll-progress {
+  transition: width 0.1s ease-out;
+}
+</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-low": "#f6f3f2",
+          "primary": "#00464a",
+          "status-valid": "#00703C",
+          "on-tertiary": "#ffffff",
+          "on-surface": "#1c1b1b",
+          "inverse-surface": "#313030",
+          "error-container": "#ffdad6",
+          "secondary": "#0061a6",
+          "tertiary-fixed-dim": "#ffb688",
+          "on-tertiary-container": "#ffbe95",
+          "surface-container-lowest": "#ffffff",
+          "error": "#ba1a1a",
+          "outline-variant": "#bec8c9",
+          "primary-fixed": "#a6eff3",
+          "status-revoked": "#D4351C",
+          "tertiary": "#62330f",
+          "surface-tint": "#14696d",
+          "outline": "#6f7979",
+          "on-primary-fixed": "#002021",
+          "on-tertiary-fixed-variant": "#6b3a16",
+          "on-error": "#ffffff",
+          "surface-bright": "#fcf9f8",
+          "surface-variant": "#e5e2e1",
+          "on-primary-container": "#8fd8dc",
+          "on-surface-variant": "#3f4949",
+          "secondary-container": "#6eb2fe",
+          "border-subtle": "#D1D5DB",
+          "on-tertiary-fixed": "#311300",
+          "on-secondary-fixed": "#001c37",
+          "surface-dim": "#dcd9d9",
+          "tertiary-fixed": "#ffdbc7",
+          "secondary-fixed-dim": "#a0caff",
+          "status-pending": "#F47738",
+          "tertiary-container": "#7e4924",
+          "surface-container": "#f0eded",
+          "on-secondary-fixed-variant": "#00497e",
+          "surface": "#fcf9f8",
+          "primary-fixed-dim": "#8ad3d7",
+          "on-secondary": "#ffffff",
+          "on-primary-fixed-variant": "#004f53",
+          "primary-container": "#006064",
+          "on-primary": "#ffffff",
+          "inverse-primary": "#8ad3d7",
+          "secondary-fixed": "#d2e4ff",
+          "inverse-on-surface": "#f3f0ef",
+          "on-error-container": "#93000a",
+          "on-background": "#1c1b1b",
+          "surface-container-high": "#eae7e7",
+          "on-secondary-container": "#004376",
+          "background": "#fcf9f8",
+          "surface-container-highest": "#e5e2e1"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "base": "8px",
+          "margin-desktop": "32px",
+          "container-max": "1280px",
+          "margin-mobile": "16px",
+          "gutter": "16px"
+        },
+        "fontFamily": {
+          "headline-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "code-sm": ["Inter"],
+          "label-md": ["Inter"],
+          "headline-lg": ["Inter"],
+          "body-lg": ["Inter"],
+          "headline-lg-mobile": ["Inter"]
+        },
+        "fontSize": {
+          "headline-md": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "code-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "14px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      },
+    },
+  }
+</script>
+</head>
+<body class="bg-background text-on-surface font-body-lg text-body-lg min-h-screen flex flex-col antialiased selection:bg-primary-fixed selection:text-on-primary-fixed dark:bg-[#0e1417] dark:text-slate-100 transition-colors duration-200">
+<a class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-on-primary focus:font-label-md focus:shadow-lg focus:outline-none" href="#main-content">Skip to main content</a>
+<!-- Scroll progress indicator -->
+<div class="fixed top-0 left-0 right-0 h-1 bg-transparent z-50 pointer-events-none" id="scroll-progress-container">
+<div class="h-full bg-teal-500 w-0" id="scroll-progress"></div>
+</div>
+<!-- Top Navigation Bar -->
+<header class="w-full bg-surface border-b border-outline-variant dark:border-slate-800 sticky top-0 z-40 backdrop-blur-md dark:bg-[#0e1417]/95 transition-colors">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-base">
+<!-- Standalone Logo with Glowing breathing pulse in dark mode -->
+<a aria-label="CredChain Home" class="flex items-center focus:outline-none focus:ring-2 focus:ring-primary rounded" href="#">
+<img alt="CredChain Logo" class="h-10 w-auto object-contain block logo-glow transition-all" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</a>
+</div>
+<!-- Navigation Links with FAQs added -->
+<nav class="hidden md:flex items-center space-x-base font-body-lg text-body-lg">
+<a class="text-primary dark:text-teal-300 border-b-2 border-primary dark:border-teal-400 pb-1 px-base hover:bg-surface-container-low dark:hover:bg-[#162227] transition-colors font-semibold" href="#">Explorer</a>
+<a class="text-on-surface-variant dark:text-slate-300 px-base hover:bg-surface-container-low dark:hover:bg-[#162227] hover:text-primary dark:hover:text-teal-300 transition-colors" href="#">Wallet</a>
+<a class="text-on-surface-variant dark:text-slate-300 px-base hover:bg-surface-container-low dark:hover:bg-[#162227] hover:text-primary dark:hover:text-teal-300 transition-colors" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-slate-300 px-base hover:bg-surface-container-low dark:hover:bg-[#162227] hover:text-primary dark:hover:text-teal-300 transition-colors" href="#">FAQs</a>
+</nav>
+<!-- Trailing Actions: Search shortcut, theme toggle, connect wallet -->
+<div class="flex items-center gap-base">
+<button aria-label="Open search palette" class="p-2 text-on-surface-variant dark:text-slate-300 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#131f24] hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-teal-400 hidden sm:flex items-center gap-1 text-xs" id="nav-search-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">search</span>
+<kbd class="font-code-sm px-1 py-0.5 bg-surface-container dark:bg-slate-800 text-[10px] rounded">⌘K</kbd>
+</button>
+<button aria-label="Toggle dark mode" class="p-2 text-on-surface-variant dark:text-amber-300 border border-border-subtle dark:border-slate-700 bg-surface-container-lowest dark:bg-[#131f24] hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-teal-400 cursor-pointer" id="theme-toggle-btn" type="button">
+<span class="material-symbols-outlined text-[20px] block" id="theme-toggle-icon" title="Switch to Dark Mode">dark_mode</span>
+</button>
+<button class="bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-950 font-label-md text-label-md px-4 py-2 border border-primary dark:border-teal-500 hover:bg-primary-container dark:hover:bg-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="connect-wallet-btn" type="button">
+    Connect Wallet
+  </button>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-desktop py-8" id="main-content">
+<!-- Breadcrumbs -->
+<nav aria-label="Breadcrumb" class="flex items-center gap-2 mb-6 font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400">
+<a class="hover:text-primary dark:hover:text-teal-300 transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">home</span>
+<span class="">Home</span>
+</a>
+<span class="text-outline">&gt;</span>
+<a class="hover:text-primary dark:hover:text-teal-300 transition-colors" href="#">Explorer</a>
+<span class="text-outline">&gt;</span>
+<span aria-current="page" class="text-on-surface dark:text-slate-200 font-label-md text-label-md">Activity History</span>
+</nav>
+<!-- Page Header & Export Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border-subtle dark:border-slate-800">
+<div class="max-w-3xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        Mainnet Synchronized
+      </span>
+<span class="text-xs text-on-surface-variant dark:text-slate-400">Last block indexed: <button class="copy-btn font-code-sm text-on-surface dark:text-slate-200 font-bold hover:text-primary dark:hover:text-teal-300" data-copy="8419250" title="Click to copy Block Height">#8,419,250</button> (12s ago)</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface dark:text-white tracking-tight">Ledger Activity &amp; Event History</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 mt-2">
+      A transparent chronological record of all system events: credential issuances, milestone updates, verifications, and revocations.
+    </p>
+</div>
+<div class="export-group flex items-center gap-2 self-start md:self-auto shrink-0">
+<button class="inline-flex items-center gap-2 bg-surface-container-lowest dark:bg-[#131f24] text-primary dark:text-teal-300 border border-border-subtle dark:border-slate-700 font-label-md text-label-md px-3 py-2 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors" id="btn-export-csv" type="button">
+<span class="material-symbols-outlined text-[18px]">table_view</span>
+<span id="export-csv-text" class="">Export CSV</span>
+</button>
+<button class="inline-flex items-center gap-2 bg-surface-container-lowest dark:bg-[#131f24] text-primary dark:text-teal-300 border border-border-subtle dark:border-slate-700 font-label-md text-label-md px-3 py-2 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors" id="btn-download-json" type="button">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+<span id="download-json-text" class="">Download Audit JSON</span>
+</button>
+</div>
+</div>
+<!-- Quick Filter & Search Toolbar -->
+<div class="mt-6 mb-6 space-y-4"><div class="bg-surface-container-lowest dark:bg-[#131f24] border border-border-subtle dark:border-slate-800 p-6 rounded transition-colors"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-border-subtle dark:border-slate-800"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary dark:text-teal-400 text-[22px]">manage_search</span><div><h2 class="font-label-md text-label-md text-on-surface dark:text-white uppercase tracking-wider">Zone 1: Operational Audit Query</h2><p class="text-xs text-on-surface-variant dark:text-slate-400">Configure cryptographic filters to stream matching ledger verification proofs</p></div></div><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-code-sm bg-surface-container dark:bg-[#162227] text-on-surface-variant dark:text-slate-300 border border-border-subtle dark:border-slate-700">Status: Ready for Query</span></div><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div class="flex flex-col gap-1.5"><label for="ledger-search" class="font-label-md text-label-md text-on-surface dark:text-slate-200">Actor / Recipient DID</label><div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant dark:text-slate-400"><span class="material-symbols-outlined text-[18px]">fingerprint</span></div><input class="block w-full pl-10 pr-3 py-2 border border-border-subtle dark:border-slate-700 bg-surface-container-low dark:bg-[#0e1417] font-body-sm text-body-sm text-on-surface dark:text-slate-100 placeholder:dark:text-slate-500 focus:border-primary dark:focus:border-teal-400 focus:ring-2 focus:ring-primary dark:focus:ring-teal-400 focus:outline-none rounded-sm" id="ledger-search" placeholder="e.g. did:0x7a83... or did:key:..." type="text" value=""></div></div><div class="flex flex-col gap-1.5"><label for="action-type-select" class="font-label-md text-label-md text-on-surface dark:text-slate-200">Action / Event Type</label><div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant dark:text-slate-400"><span class="material-symbols-outlined text-[18px]">category</span></div><select id="action-type-select" class="block w-full pl-10 pr-8 py-2 border border-border-subtle dark:border-slate-700 bg-surface-container-low dark:bg-[#0e1417] font-body-sm text-body-sm text-on-surface dark:text-slate-100 focus:border-primary dark:focus:border-teal-400 focus:ring-2 focus:ring-primary dark:focus:ring-teal-400 focus:outline-none rounded-sm cursor-pointer"><option value="all">All Event Types</option><option value="issuance">Credential Issuances</option><option value="milestone">Milestones Appended</option><option value="verification">Verifications</option><option value="access">Access Granted / Denied</option><option value="revocation">Revocations</option></select></div></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface dark:text-slate-200">Audit Date Range</label><button id="date-filter-dropdown" type="button" class="flex items-center justify-between px-3 py-2 border border-border-subtle dark:border-slate-700 bg-surface-container-low dark:bg-[#0e1417] text-on-surface dark:text-slate-200 font-body-sm text-body-sm hover:bg-surface-container dark:hover:bg-[#162227] transition-colors rounded-sm cursor-pointer"><span class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-slate-400">calendar_today</span><span class="">Last 30 Days</span></span><span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-slate-400">expand_more</span></button></div></div><div class="flex flex-wrap items-center justify-between gap-3 mt-5 pt-4 border-t border-border-subtle dark:border-slate-800"><div class="flex items-center gap-2 overflow-x-auto scrollbar-none" id="quick-filter-pills"><span class="text-xs font-label-md text-on-surface-variant dark:text-slate-400 shrink-0">Filter Presets:</span><button class="filter-pill bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-950 px-2.5 py-1 text-xs font-label-md shrink-0 border border-primary dark:border-teal-500 cursor-pointer" data-filter="all" type="button">All Events</button><button class="filter-pill bg-surface-container-low dark:bg-[#0e1417] text-on-surface dark:text-slate-300 px-2.5 py-1 text-xs font-body-sm shrink-0 border border-border-subtle dark:border-slate-700 hover:bg-surface-container dark:hover:bg-[#1a2c32] cursor-pointer transition-colors" data-filter="issuance" type="button">Issuances</button><button class="filter-pill bg-surface-container-low dark:bg-[#0e1417] text-on-surface dark:text-slate-300 px-2.5 py-1 text-xs font-body-sm shrink-0 border border-border-subtle dark:border-slate-700 hover:bg-surface-container dark:hover:bg-[#1a2c32] cursor-pointer transition-colors" data-filter="milestone" type="button">Milestones</button><button class="filter-pill bg-surface-container-low dark:bg-[#0e1417] text-on-surface dark:text-slate-300 px-2.5 py-1 text-xs font-body-sm shrink-0 border border-border-subtle dark:border-slate-700 hover:bg-surface-container dark:hover:bg-[#1a2c32] cursor-pointer transition-colors" data-filter="verification" type="button">Verifications</button><button class="filter-pill bg-surface-container-low dark:bg-[#0e1417] text-on-surface dark:text-slate-300 px-2.5 py-1 text-xs font-body-sm shrink-0 border border-border-subtle dark:border-slate-700 hover:bg-surface-container dark:hover:bg-[#1a2c32] cursor-pointer transition-colors" data-filter="access" type="button">Access Logs</button><button class="filter-pill bg-surface-container-low dark:bg-[#0e1417] text-on-surface dark:text-slate-300 px-2.5 py-1 text-xs font-body-sm shrink-0 border border-border-subtle dark:border-slate-700 hover:bg-surface-container dark:hover:bg-[#1a2c32] cursor-pointer transition-colors" data-filter="revocation" type="button">Revocations</button></div><div class="flex items-center gap-2"><button type="button" class="px-3 py-1.5 text-xs font-label-md text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-white transition-colors cursor-pointer">Reset Filters</button><button type="button" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-950 text-xs font-label-md hover:bg-primary-container dark:hover:bg-teal-400 transition-colors cursor-pointer"><span class="material-symbols-outlined text-[16px]">search</span><span class="">Execute Query</span></button></div></div></div></div>
+<!-- Chronological Event Ledger Timeline & Table -->
+<div class="bg-surface-container-lowest dark:bg-[#131f24] border border-border-subtle dark:border-slate-800 transition-colors"><div class="p-4 bg-surface-container-low dark:bg-[#111a1e] border-b border-border-subtle dark:border-slate-800"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-secondary dark:text-teal-400 text-[22px]">preview</span><div><div class="flex items-center gap-2"><h2 class="font-label-md text-label-md text-on-surface dark:text-white">Expected Output Preview (Mock Example) — How Results Will Look After Completion</h2><span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-secondary/15 text-secondary dark:bg-teal-950/90 dark:text-teal-300 border border-secondary/30 dark:border-teal-700">MOCK AUDIT PREVIEW</span></div><p class="text-xs text-on-surface-variant dark:text-slate-400 mt-0.5">Sample mock events below demonstrate layout, schema verification badges, and transaction hashes for executed queries.</p></div></div><div class="flex items-center gap-2 self-start sm:self-auto shrink-0"><span class="w-2 h-2 rounded-full bg-status-pending animate-pulse"></span><span class="text-xs font-code-sm text-on-surface-variant dark:text-slate-400">Mock Stream Feed</span></div></div><div class="mt-3 p-3 bg-surface dark:bg-[#162227] border border-border-subtle dark:border-slate-700 rounded-sm flex items-start gap-2 text-xs text-on-surface-variant dark:text-slate-300"><span class="material-symbols-outlined text-secondary dark:text-teal-400 text-[18px] shrink-0 mt-0.5">info</span><span class=""><strong class="text-on-surface dark:text-white">Live append behavior:</strong> Upon submitting verified operational queries or executing new cryptographic transactions on mainnet, real-time verifiable event blocks will automatically stream and append directly into this log view.</span></div></div>
+<!-- Table Header Information Bar -->
+<div class="px-4 py-3 bg-surface-container-low dark:bg-[#162227] border-b border-border-subtle dark:border-slate-800 flex justify-between items-center text-on-surface-variant dark:text-slate-400 font-code-sm text-code-sm">
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-100 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+      LEDGER EVENT STREAM (VERIFIED CANONICAL CHAIN)
+    </span>
+<span class="">Showing 6 most recent immutable events</span>
+</div>
+<!-- High-Readability Data Table / Ledger Row List -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container dark:bg-[#0e1417] border-b border-border-subtle dark:border-slate-800 text-on-surface-variant dark:text-slate-300 font-label-md text-label-md">
+<th class="py-3 px-4 w-48" scope="col">Event Type</th>
+<th class="py-3 px-4" scope="col">Actor / Origin</th>
+<th class="py-3 px-4" scope="col">Subject / Credential</th>
+<th class="py-3 px-4" scope="col">Details / TxHash</th>
+<th class="py-3 px-4 w-28" scope="col">Timestamp</th>
+<th class="py-3 px-4 w-48" scope="col">Status / Block</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle dark:divide-slate-800/80 font-body-sm text-body-sm">
+<!-- Row 1: Credential Issued -->
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#162227]/70 transition-colors" data-event="issuance">
+<td class="py-4 px-4 align-top">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-status-valid dark:bg-emerald-400 shrink-0"></span>
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-100">Credential Issued</span>
+</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-100">Stanford Registrar</div>
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 group" data-copy="did:0x7a839f11a8411b" title="Click to copy DID">
+<span class="">did:0x7a839f...411b</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</button>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-primary dark:text-teal-300 font-semibold">B.S. Computer Science</div>
+<div class="text-on-surface-variant dark:text-slate-400 text-xs">Recipient: did:0x39c... (Alex Chen)</div>
+</td>
+<td class="py-4 px-4 align-top">
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-secondary dark:text-teal-400 hover:underline cursor-pointer group" data-copy="0x89f4b392ac8192a" title="Click to copy TxHash">
+<span class="">Tx: 0x89f4...2a</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</button>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">Schema: AcademicCredential.v2</div>
+</td>
+<td class="py-4 px-4 align-top text-on-surface-variant dark:text-slate-400 whitespace-nowrap">
+            12 mins ago
+          </td>
+<td class="py-4 px-4 align-top">
+<button class="copy-btn inline-block bg-status-valid dark:bg-emerald-950/90 text-on-primary dark:text-emerald-300 dark:border dark:border-emerald-700 px-2 py-0.5 font-label-md text-xs hover:opacity-90" data-copy="Block #8419250" title="Click to copy Block #">
+              Confirmed (Block #8,419,250)
+            </button>
+</td>
+</tr>
+<!-- Row 2: Access Allowed -->
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#162227]/70 transition-colors" data-event="access">
+<td class="py-4 px-4 align-top">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-secondary dark:bg-sky-400 shrink-0"></span>
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-100">Access Allowed</span>
+</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-100">Alex Chen (Holder)</div>
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 group" data-copy="did:0x39c81198e201" title="Click to copy DID">
+<span class="">did:0x39c811...e201</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</button>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-primary dark:text-teal-300 font-semibold">Milestone: Algorithms &amp; Capstone</div>
+<div class="text-on-surface-variant dark:text-slate-400 text-xs">Granted to: Google Verifier Bot</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-300">Perm: Read-Only Verification</div>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">ZKP Proof: Disclosed</div>
+</td>
+<td class="py-4 px-4 align-top text-on-surface-variant dark:text-slate-400 whitespace-nowrap">
+            45 mins ago
+          </td>
+<td class="py-4 px-4 align-top">
+<span class="inline-block bg-secondary-container dark:bg-sky-950/80 text-on-secondary-container dark:text-sky-300 dark:border dark:border-sky-700 px-2 py-0.5 font-label-md text-xs">
+              Access Active (48h)
+            </span>
+</td>
+</tr>
+<!-- Row 3: Credential Revoked -->
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#162227]/70 transition-colors" data-event="revocation">
+<td class="py-4 px-4 align-top">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-status-revoked dark:bg-rose-500 shrink-0"></span>
+<span class="font-label-md text-label-md text-status-revoked dark:text-rose-400 font-semibold">Credential Revoked</span>
+</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-100">Travis County Land Registry</div>
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 group" data-copy="did:0x41f90089a1" title="Click to copy DID">
+<span class="">did:0x41f900...89a1</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</button>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-200">Deed Parcel #402</div>
+<div class="text-on-surface-variant dark:text-slate-400 text-xs">Recipient: did:0x11e...</div>
+</td>
+<td class="py-4 px-4 align-top">
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-secondary dark:text-rose-400 hover:underline cursor-pointer group" data-copy="0x33e144a99fcbb" title="Click to copy TxHash">
+<span class="">Tx: 0x33e1...bb</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</button>
+<div class="text-xs text-status-revoked dark:text-rose-400">Reason: Superseded by Deed Split #403</div>
+</td>
+<td class="py-4 px-4 align-top text-on-surface-variant dark:text-slate-400 whitespace-nowrap">
+            2 hours ago
+          </td>
+<td class="py-4 px-4 align-top">
+<button class="copy-btn inline-block bg-status-revoked dark:bg-rose-950/80 text-on-primary dark:text-rose-300 dark:border dark:border-rose-700 px-2 py-0.5 font-label-md text-xs hover:opacity-90" data-copy="Block #8419238" title="Click to copy Block #">
+              Revoked (Block #8,419,238)
+            </button>
+</td>
+</tr>
+<!-- Row 4: Milestone Verification Checked -->
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#162227]/70 transition-colors" data-event="verification">
+<td class="py-4 px-4 align-top">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-status-valid dark:bg-emerald-400 shrink-0"></span>
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-100">Milestone Verification Checked</span>
+</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-100">Deloitte Audit Gateway</div>
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 group" data-copy="did:0x88bb729990" title="Click to copy DID">
+<span class="">did:0x88bb72...9990</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</button>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-primary dark:text-teal-300 font-semibold">Land Registry Title Deed</div>
+<div class="text-on-surface-variant dark:text-slate-400 text-xs">Proof Check: Merkle Root #1092</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="text-xs text-on-surface dark:text-slate-200">Result: <span class="font-semibold text-status-valid dark:text-emerald-400">Valid (Tamper-Free)</span></div>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">Anchor: Ethereum Mainnet Sync</div>
+</td>
+<td class="py-4 px-4 align-top text-on-surface-variant dark:text-slate-400 whitespace-nowrap">
+            4 hours ago
+          </td>
+<td class="py-4 px-4 align-top">
+<span class="inline-block bg-surface-container dark:bg-[#162227] text-status-valid dark:text-emerald-400 border border-status-valid dark:border-emerald-600 px-2 py-0.5 font-label-md text-xs">
+              Verified
+            </span>
+</td>
+</tr>
+<!-- Row 5: Access Denied -->
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#162227]/70 transition-colors" data-event="access">
+<td class="py-4 px-4 align-top">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-error dark:bg-rose-500 shrink-0"></span>
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-100">Access Denied</span>
+</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-100">Sarah Jenkins (Holder)</div>
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 group" data-copy="did:0x642c88121f" title="Click to copy DID">
+<span class="">did:0x642c88...121f</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</button>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-primary dark:text-teal-300 font-semibold">High School Diploma</div>
+<div class="text-on-surface-variant dark:text-slate-400 text-xs">Target: Unknown Third Party</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-slate-300">Policy: Unauthenticated Request</div>
+<div class="text-xs text-error dark:text-rose-400">Zero Access Token Issued</div>
+</td>
+<td class="py-4 px-4 align-top text-on-surface-variant dark:text-slate-400 whitespace-nowrap">
+            6 hours ago
+          </td>
+<td class="py-4 px-4 align-top">
+<span class="inline-block bg-error dark:bg-rose-950/80 text-on-error dark:text-rose-300 dark:border dark:border-rose-700 px-2 py-0.5 font-label-md text-xs">
+              Denied
+            </span>
+</td>
+</tr>
+<!-- Row 6: Milestone Added -->
+<tr class="hover:bg-surface-container-low dark:hover:bg-[#162227]/70 transition-colors" data-event="milestone">
+<td class="py-4 px-4 align-top">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-primary dark:bg-teal-400 shrink-0"></span>
+<span class="font-label-md text-label-md text-on-surface dark:text-slate-100">Milestone Added</span>
+</div>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-on-surface dark:text-slate-100">MIT Department of Civil Eng.</div>
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 group" data-copy="did:0x12bb99399c" title="Click to copy DID">
+<span class="">did:0x12bb99...399c</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</button>
+</td>
+<td class="py-4 px-4 align-top">
+<div class="font-label-md text-label-md text-primary dark:text-teal-300 font-semibold">Stage 3: Lab Practicum Completed</div>
+<div class="text-on-surface-variant dark:text-slate-400 text-xs">Recipient: did:0x55b...</div>
+</td>
+<td class="py-4 px-4 align-top">
+<button class="copy-btn flex items-center gap-1 font-code-sm text-code-sm text-secondary dark:text-teal-400 hover:underline cursor-pointer group" data-copy="0x904ae7101c" title="Click to copy TxHash">
+<span class="">Tx: 0x904a...1c</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</button>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">Credential: Civil Eng Certificate</div>
+</td>
+<td class="py-4 px-4 align-top text-on-surface-variant dark:text-slate-400 whitespace-nowrap">
+            1 day ago
+          </td>
+<td class="py-4 px-4 align-top">
+<span class="inline-block bg-primary dark:bg-teal-950/80 text-on-primary dark:text-teal-300 dark:border dark:border-teal-700 px-2 py-0.5 font-label-md text-xs">
+              Confirmed
+            </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination controls -->
+<div class="p-4 bg-surface-container-low dark:bg-[#162227] border-t border-border-subtle dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 font-body-sm text-body-sm">
+<span class="text-on-surface-variant dark:text-slate-400">Displaying entries 1 - 6 of 1,280 total ledger events</span>
+<div class="flex items-center gap-1">
+<button class="px-3 py-1 bg-surface-container-lowest dark:bg-[#111a1e] border border-border-subtle dark:border-slate-700 text-on-surface-variant dark:text-slate-500 disabled:opacity-50 cursor-not-allowed" disabled="" type="button">
+        Previous
+      </button>
+<button class="px-3 py-1 bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-950 font-semibold border border-primary dark:border-teal-500" type="button">
+        1
+      </button>
+<button class="px-3 py-1 bg-surface-container-lowest dark:bg-[#111a1e] border border-border-subtle dark:border-slate-700 text-on-surface dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors" type="button">
+        2
+      </button>
+<button class="px-3 py-1 bg-surface-container-lowest dark:bg-[#111a1e] border border-border-subtle dark:border-slate-700 text-on-surface dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors" type="button">
+        3
+      </button>
+<span class="px-2 text-on-surface-variant dark:text-slate-500">...</span>
+<button class="px-3 py-1 bg-surface-container-lowest dark:bg-[#111a1e] border border-border-subtle dark:border-slate-700 text-on-surface dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors" type="button">
+        Next
+      </button>
+</div>
+</div>
+</div>
+<!-- Ledger Trust Note -->
+<div class="mt-8 p-4 bg-surface-container dark:bg-[#131f24] border border-border-subtle dark:border-slate-800 flex items-start gap-3 rounded-sm transition-colors">
+<span class="material-symbols-outlined text-primary dark:text-teal-400 text-[24px] shrink-0 mt-0.5">verified_user</span>
+<div class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-300">
+<span class="font-label-md text-label-md text-on-surface dark:text-white">Cryptographic Authenticity Guarantee:</span>
+    All entries reflected in this log are immutably written to the decentralized ledger with public state roots. Hashes can be cross-verified independently via standard W3C Verifiable Credential and DID resolvers.
+  </div>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="w-full bg-surface-container border-t border-outline-variant dark:border-slate-800 mt-auto dark:bg-[#0e1417] transition-colors">
+<div class="w-full py-base px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-base max-w-container-max mx-auto">
+<div class="font-label-md text-label-md font-bold text-on-surface dark:text-slate-200">
+    © 2026 CredChain Ledger. Built on open standards.
+  </div>
+<nav class="flex items-center space-x-6 font-body-sm text-body-sm">
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 underline transition-opacity duration-150" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 underline transition-opacity duration-150" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 underline transition-opacity duration-150" href="#">API Docs</a>
+<a class="text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 underline transition-opacity duration-150" href="#">Source Code</a>
+</nav>
+</div>
+</footer>
+<!-- Command Palette / Search Modal (Cmd+K) -->
+<div aria-labelledby="modal-search-label" aria-modal="true" class="fixed inset-0 z-50 hidden flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-sm" id="search-modal" role="dialog">
+<div class="w-full max-w-2xl bg-surface dark:bg-[#131f24] border border-border-subtle dark:border-slate-700 shadow-2xl overflow-hidden transition-all">
+<div class="flex items-center px-4 py-3 border-b border-border-subtle dark:border-slate-700">
+<span class="material-symbols-outlined text-on-surface-variant dark:text-slate-400 mr-2 text-[20px]">search</span>
+<input class="w-full bg-transparent border-0 text-on-surface dark:text-slate-100 placeholder:text-on-surface-variant dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 text-sm" id="palette-search-input" placeholder="Search ledger by DID, TxHash, Schema, or Actor..." type="text">
+<button aria-label="Close dialog" class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-white p-1" id="close-search-modal" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-3 bg-surface-container-low dark:bg-[#162227] text-xs text-on-surface-variant dark:text-slate-400 flex items-center justify-between">
+<span class="">Quick filters:</span>
+<div class="flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 bg-surface dark:bg-slate-800 rounded font-code-sm">ESC</kbd>
+<span class="">to exit</span>
+</div>
+</div>
+<ul class="max-h-72 overflow-y-auto divide-y divide-border-subtle dark:divide-slate-800 text-sm" id="palette-results">
+<li class="p-3 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] cursor-pointer flex items-center justify-between">
+<div>
+<div class="font-semibold text-on-surface dark:text-slate-100">AcademicCredential.v2</div>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">Schema • Stanford Registrar</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[18px]">arrow_forward</span>
+</li>
+<li class="p-3 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] cursor-pointer flex items-center justify-between">
+<div>
+<div class="font-semibold text-on-surface dark:text-slate-100">did:0x7a839f...411b</div>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">DID • Stanford University Issuer</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[18px]">arrow_forward</span>
+</li>
+<li class="p-3 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] cursor-pointer flex items-center justify-between">
+<div>
+<div class="font-semibold text-on-surface dark:text-slate-100">Block #8,419,250</div>
+<div class="text-xs text-on-surface-variant dark:text-slate-400">Height • 4 Transactions confirmed</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[18px]">arrow_forward</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Floating Return-to-Top Button -->
+<button aria-label="Return to top" class="fixed bottom-6 right-6 hidden z-40 p-3 bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-950 shadow-lg hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-teal-400 rounded-full cursor-pointer" id="return-to-top">
+<span class="material-symbols-outlined text-[20px] block">arrow_upward</span>
+</button>
+<!-- Floating Node Support Status Button -->
+<button class="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-3 py-2 bg-surface-container-lowest dark:bg-[#131f24] text-on-surface dark:text-slate-200 border border-border-subtle dark:border-slate-700 shadow-md hover:bg-surface-container-low dark:hover:bg-[#1a2c32] transition-colors rounded-full font-label-md text-xs cursor-pointer" id="node-support-btn">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+<span class="">Node RPC: 28ms</span>
+</button>
+<!-- Toast Feedback Notification Container -->
+<div class="fixed top-20 right-6 z-50 flex flex-col gap-2 pointer-events-none" id="toast-container"></div>
+<!-- GDPR / Cookie Consent Banner in bottom corner -->
+
+<script>
+(function() {
+  // 1. Dark Mode State Management
+  const rootHtml = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle-btn');
+  const themeIcon = document.getElementById('theme-toggle-icon');
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      rootHtml.classList.add('dark');
+      if (themeIcon) {
+        themeIcon.textContent = 'light_mode';
+        themeIcon.title = 'Switch to Light Mode';
+      }
+    } else {
+      rootHtml.classList.remove('dark');
+      if (themeIcon) {
+        themeIcon.textContent = 'dark_mode';
+        themeIcon.title = 'Switch to Dark Mode';
+      }
+    }
+  }
+
+  // Initialize icon reflecting initial dark state
+  const isInitialDark = rootHtml.classList.contains('dark');
+  updateThemeUI(isInitialDark);
+
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const willBeDark = !rootHtml.classList.contains('dark');
+      updateThemeUI(willBeDark);
+      localStorage.setItem('theme', willBeDark ? 'dark' : 'light');
+      showToast(willBeDark ? 'Dark Mode activated' : 'Light Mode activated');
+    });
+  }
+
+  // 2. Scroll Progress & Return to Top
+  const progressBar = document.getElementById('scroll-progress');
+  const returnTopBtn = document.getElementById('return-to-top');
+  window.addEventListener('scroll', function() {
+    const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (totalScroll > 0) {
+      const progress = (window.scrollY / totalScroll) * 100;
+      if (progressBar) progressBar.style.width = progress + '%';
+    }
+    if (returnTopBtn) {
+      if (window.scrollY > 200) {
+        returnTopBtn.classList.remove('hidden');
+      } else {
+        returnTopBtn.classList.add('hidden');
+      }
+    }
+  });
+
+  if (returnTopBtn) {
+    returnTopBtn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // 3. Command Palette / Search Modal (Cmd+K or click)
+  const searchModal = document.getElementById('search-modal');
+  const navSearchBtn = document.getElementById('nav-search-btn');
+  const closeSearchModalBtn = document.getElementById('close-search-modal');
+  const paletteInput = document.getElementById('palette-search-input');
+  const ledgerSearchInput = document.getElementById('ledger-search');
+
+  function openSearchModal() {
+    if (searchModal) {
+      searchModal.classList.remove('hidden');
+      setTimeout(() => paletteInput && paletteInput.focus(), 50);
+    }
+  }
+
+  function closeSearchModal() {
+    if (searchModal) {
+      searchModal.classList.add('hidden');
+    }
+  }
+
+  if (navSearchBtn) navSearchBtn.addEventListener('click', openSearchModal);
+  if (closeSearchModalBtn) closeSearchModalBtn.addEventListener('click', closeSearchModal);
+
+  if (searchModal) {
+    searchModal.addEventListener('click', function(e) {
+      if (e.target === searchModal) closeSearchModal();
+    });
+  }
+
+  window.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openSearchModal();
+    }
+    if (e.key === 'Escape' && searchModal && !searchModal.classList.contains('hidden')) {
+      closeSearchModal();
+    }
+  });
+
+  // 4. Toast System
+  function showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'px-4 py-2 bg-[#1c1b1b] dark:bg-slate-800 text-white dark:text-slate-100 text-sm font-label-md shadow-xl border border-slate-700 flex items-center gap-2 transition-all duration-300 transform translate-y-0';
+    toast.innerHTML = '<span class="material-symbols-outlined text-[18px] text-teal-400">check_circle</span><span>' + message + '</span>';
+    container.appendChild(toast);
+    setTimeout(function() {
+      toast.classList.add('opacity-0');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  }
+
+  // 5. Copy DID & TxHash & Block Functionality
+  document.querySelectorAll('.copy-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const textToCopy = btn.getAttribute('data-copy') || btn.innerText.trim();
+      if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy).then(function() {
+          showToast('Copied to clipboard: ' + textToCopy);
+        }).catch(function() {
+          showToast('Copied: ' + textToCopy);
+        });
+      }
+    });
+  });
+
+  // 6. CSV and JSON Export Simulation
+  const exportCsvBtn = document.getElementById('btn-export-csv');
+  const downloadJsonBtn = document.getElementById('btn-download-json');
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', function() {
+      const label = document.getElementById('export-csv-text');
+      if (label) label.textContent = 'Generating CSV...';
+      setTimeout(function() {
+        if (label) label.textContent = 'Export CSV';
+        showToast('CSV generated: CredChain_Ledger_Activity.csv');
+      }, 700);
+    });
+  }
+  if (downloadJsonBtn) {
+    downloadJsonBtn.addEventListener('click', function() {
+      const label = document.getElementById('download-json-text');
+      if (label) label.textContent = 'Preparing JSON...';
+      setTimeout(function() {
+        if (label) label.textContent = 'Download Audit JSON';
+        showToast('Audit JSON downloaded (ZKP Proofs verified)');
+      }, 800);
+    });
+  }
+
+  // 7. Event Filter Pills Interactive Toggling
+  const pills = document.querySelectorAll('.filter-pill');
+  const rows = document.querySelectorAll('tbody tr[data-event]');
+  pills.forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      pills.forEach(function(p) {
+        p.className = 'filter-pill bg-surface-container-lowest dark:bg-[#131f24] text-on-surface dark:text-slate-300 px-3 py-1 font-body-sm text-body-sm shrink-0 border border-border-subtle dark:border-slate-700 hover:bg-surface-container-low dark:hover:bg-[#1a2c32] cursor-pointer transition-colors';
+      });
+      pill.className = 'filter-pill bg-primary dark:bg-teal-500 text-on-primary dark:text-slate-950 px-3 py-1 font-label-md text-label-md shrink-0 border border-primary dark:border-teal-500 cursor-pointer';
+      const filterVal = pill.getAttribute('data-filter');
+      rows.forEach(function(row) {
+        if (filterVal === 'all' || row.getAttribute('data-event') === filterVal) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Table search input filter
+  if (ledgerSearchInput) {
+    ledgerSearchInput.addEventListener('input', function(e) {
+      const q = e.target.value.toLowerCase().trim();
+      rows.forEach(function(row) {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  }
+
+  // 8. Cookie Banner Dismissal & Preferences
+  const cookieBtn = document.getElementById('cookie-accept-btn');
+  const cookiePrefBtn = document.getElementById('cookie-pref-btn');
+  const cookieBanner = document.getElementById('cookie-banner');
+  if (cookieBtn && cookieBanner) {
+    cookieBtn.addEventListener('click', function() {
+      cookieBanner.style.display = 'none';
+      localStorage.setItem('cookies-acknowledged', 'true');
+      showToast('Privacy preferences saved');
+    });
+    if (cookiePrefBtn) {
+      cookiePrefBtn.addEventListener('click', function() {
+        cookieBanner.style.display = 'none';
+        localStorage.setItem('cookies-acknowledged', 'true');
+        showToast('Local ledger cache preserved');
+      });
+    }
+    if (localStorage.getItem('cookies-acknowledged') === 'true') {
+      cookieBanner.style.display = 'none';
+    }
+  }
+
+  // Connect Wallet button interactive toast
+  const connectBtn = document.getElementById('connect-wallet-btn');
+  if (connectBtn) {
+    connectBtn.addEventListener('click', function() {
+      showToast('Connecting to Web3 Provider...');
+    });
+  }
+})();
+</script>
+
+
+
+
+
+
+</body></html>

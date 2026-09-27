@@ -1,0 +1,15 @@
+# Frontend Secrets & Environment
+.env
+.env.*
+*.env
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Production Build
+dist/
+build/
+
+# Logs
+*.log

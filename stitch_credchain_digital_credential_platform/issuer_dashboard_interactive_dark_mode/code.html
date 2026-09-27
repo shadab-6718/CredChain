@@ -1,0 +1,241 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Issuer Dashboard - CredChain</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+  // Initial check to prevent flash of wrong theme
+  if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+</script>
+<style>
+  @media print { nav, footer, button, .no-print { display: none !important; } body { background: #fff !important; color: #000 !important; } .border { border-color: #ddd !important; } }
+  html { scroll-behavior: smooth; }
+</style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#fcf9f8",
+                    "on-secondary-fixed-variant": "#00497e",
+                    "on-tertiary-container": "#ffbe95",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "background": "#fcf9f8",
+                    "tertiary-container": "#7e4924",
+                    "primary-container": "#006064",
+                    "on-primary": "#ffffff",
+                    "secondary": "#0061a6",
+                    "secondary-fixed-dim": "#a0caff",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#3f4949",
+                    "surface-variant": "#e5e2e1",
+                    "status-pending": "#F47738",
+                    "tertiary": "#62330f",
+                    "on-primary-fixed": "#002021",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#8ad3d7",
+                    "tertiary-fixed-dim": "#ffb688",
+                    "secondary-container": "#6eb2fe",
+                    "on-secondary-container": "#004376",
+                    "primary": "#00464a",
+                    "surface-container-highest": "#e5e2e1",
+                    "outline": "#6f7979",
+                    "on-background": "#1c1b1b",
+                    "inverse-surface": "#313030",
+                    "on-secondary-fixed": "#001c37",
+                    "border-subtle": "#D1D5DB",
+                    "tertiary-fixed": "#ffdbc7",
+                    "status-valid": "#00703C",
+                    "on-error": "#ffffff",
+                    "surface": "#fcf9f8",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#8fd8dc",
+                    "surface-container-low": "#f6f3f2",
+                    "inverse-primary": "#8ad3d7",
+                    "surface-tint": "#14696d",
+                    "surface-container": "#f0eded",
+                    "status-revoked": "#D4351C",
+                    "on-surface": "#1c1b1b",
+                    "inverse-on-surface": "#f3f0ef",
+                    "primary-fixed": "#a6eff3",
+                    "on-tertiary-fixed": "#311300",
+                    "outline-variant": "#bec8c9",
+                    "on-tertiary-fixed-variant": "#6b3a16",
+                    "surface-container-high": "#eae7e7",
+                    "surface-dim": "#dcd9d9",
+                    "on-primary-fixed-variant": "#004f53",
+                    "secondary-fixed": "#d2e4ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "32px",
+                    "margin-mobile": "16px",
+                    "base": "8px",
+                    "container-max": "1280px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "code-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                    "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "label-md": ["14px", { "lineHeight": "16px", "fontWeight": "600" }],
+                    "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "code-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                    "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+            }
+          },
+        },
+      }
+</script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+</style>
+</head>
+<body class="min-h-screen flex flex-col bg-background dark:bg-[#0b1315] text-on-background dark:text-slate-100 transition-colors duration-200">
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-[#0f1a1d] border-b border-border-subtle dark:border-slate-800 w-full sticky top-0 z-50 transition-colors">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-gutter">
+<div class="flex items-center gap-2">
+<img alt="CredChain" class="h-10 w-auto object-contain transition-all duration-200" src="https://lh3.googleusercontent.com/aida/AEtjO1UJ7XZhusTeZYSopnsAmCJkupDl_oku8s21NeTXPYEVMET_Qf_pDel_I7IYkq18tp0yDeWidV2dKzgAg-qo_s2dX2TxGiC9E7m60H8XFNZCSZTUAANF6DZu20UqXFsey2pApk3uiRdeVKozyJ1t_TvzGTGJeh33m5X_NQg7K3VdgNSBekg0bFWo7E4ZueJBw71lh_k4RRV6aNjhmVyxzYn9io-4whrueMSMPO2c9nrgzWH_cHZHh8wgOHA">
+</div>
+<div class="hidden md:flex items-center ml-8 h-full">
+<a class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors px-4 py-2 h-full flex items-center" href="#">Explorer</a>
+<a class="font-body-lg text-body-lg text-on-surface-variant dark:text-slate-300 hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors px-4 py-2 h-full flex items-center" href="#">Wallet</a>
+<a class="font-body-lg text-body-lg text-primary dark:text-[#8ad3d7] border-b-2 border-primary dark:border-[#8ad3d7] pb-1 px-4 h-full flex items-center font-medium" href="#">Dashboard</a>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="hidden md:flex items-center gap-2 px-3 py-1.5 border border-border-subtle dark:border-slate-700 bg-surface-bright dark:bg-[#142327] text-on-surface-variant dark:text-slate-300 text-body-sm hover:border-primary dark:hover:border-primary-fixed-dim transition-colors" onclick="document.querySelector('#credential-search')?.focus()" title="Search (Cmd+K)">
+<span class="material-symbols-outlined text-[18px]">search</span>
+<span class="">Search...</span>
+<kbd class="text-code-sm font-code-sm border border-border-subtle dark:border-slate-700 px-1 py-0.5 bg-surface-container-low dark:bg-slate-800 text-outline dark:text-slate-400">⌘K</kbd>
+</button>
+<!-- Dark mode toggle -->
+<button class="p-2 border border-border-subtle dark:border-slate-700 bg-surface dark:bg-[#142327] hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors text-on-surface-variant dark:text-slate-200 flex items-center justify-center" id="theme-toggle" title="Toggle Theme">
+<span class="material-symbols-outlined text-[20px]" id="theme-toggle-icon">dark_mode</span>
+</button>
+<button class="font-label-md text-label-md bg-primary dark:bg-[#14696d] text-on-primary px-4 py-2 rounded-none hover:bg-surface-tint dark:hover:bg-[#004f53] transition-colors shadow-sm">Connect Wallet</button>
+<button class="md:hidden p-2 border border-border-subtle dark:border-slate-700 hover:bg-surface-container-low dark:hover:bg-slate-800 text-on-surface-variant dark:text-slate-300 flex items-center justify-center">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background dark:text-white">Issuer Dashboard</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-2">Manage and track issued credentials.</p>
+<div class="inline-flex items-center gap-2 mt-2 px-2.5 py-1 bg-status-valid/10 dark:bg-emerald-950/40 border border-status-valid/20 dark:border-emerald-500/30">
+<span class="material-symbols-outlined text-status-valid dark:text-emerald-400 text-[16px]">verified</span>
+<span class="font-label-md text-[12px] text-status-valid dark:text-emerald-400 uppercase tracking-wider">Registry Sync: Active • 2026</span>
+</div>
+</div>
+<button class="font-label-md text-label-md bg-primary dark:bg-[#14696d] text-on-primary px-4 py-2 rounded-none hover:bg-surface-tint dark:hover:bg-[#004f53] transition-colors flex items-center gap-2 border border-primary dark:border-[#14696d]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add</span>
+    Issue New Event
+  </button>
+</div>
+<!-- Density Data Table Container -->
+<div class="mb-8 flex flex-col gap-6"><div class="flex items-center justify-between border-b border-border-subtle dark:border-slate-800 pb-3"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary dark:text-[#8ad3d7] text-[20px]">dashboard</span><h2 class="font-headline-md text-[18px] text-on-background dark:text-white font-bold">Live Operations &amp; Registry Activity</h2></div><span class="px-2.5 py-1 bg-surface-container-low dark:bg-slate-800 border border-border-subtle dark:border-slate-700 text-on-surface-variant dark:text-slate-300 font-code-sm text-[11px] uppercase tracking-wider">Zone 1 • Operational State</span></div><div class="grid grid-cols-1 md:grid-cols-4 gap-4"><div class="bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-4"><p class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Total Active Credentials</p><p class="font-headline-lg text-headline-lg text-on-background dark:text-white mt-1">0</p><span class="font-body-sm text-[12px] text-on-surface-variant dark:text-slate-400">Awaiting issuance stream</span></div><div class="bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-4"><p class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Valid On-Chain Proofs</p><p class="font-headline-lg text-headline-lg text-status-valid dark:text-emerald-400 mt-1">0</p><span class="font-body-sm text-[12px] text-on-surface-variant dark:text-slate-400">0% of issued register</span></div><div class="bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-4"><p class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Pending Issuances</p><p class="font-headline-lg text-headline-lg text-status-pending dark:text-amber-400 mt-1">0</p><span class="font-body-sm text-[12px] text-on-surface-variant dark:text-slate-400">No items in sync queue</span></div><div class="bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-4"><p class="font-label-md text-label-md text-on-surface-variant dark:text-slate-400">Revoked Proofs</p><p class="font-headline-lg text-headline-lg text-status-revoked dark:text-red-400 mt-1">0</p><span class="font-body-sm text-[12px] text-on-surface-variant dark:text-slate-400">Zero revocation flags</span></div></div><div class="bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-3 flex flex-col md:flex-row justify-between items-center gap-3"><div class="flex items-center gap-2 w-full md:w-auto flex-grow max-w-md"><span class="material-symbols-outlined text-outline dark:text-slate-400 text-[18px]">filter_list</span><input class="w-full bg-surface-bright dark:bg-[#0c1619] border border-border-subtle dark:border-slate-700 px-3 py-1.5 text-body-sm text-on-surface dark:text-slate-200 placeholder:text-outline dark:placeholder:text-slate-500 focus:outline-none focus:border-primary" id="credential-search" placeholder="Filter credentials by holder address, event type, or hash..." type="text"></div><div class="flex items-center gap-2 w-full md:w-auto justify-end"><button class="px-3 py-1.5 border border-border-subtle dark:border-slate-700 text-on-surface-variant dark:text-slate-300 font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors">All Types</button><button class="px-3 py-1.5 border border-border-subtle dark:border-slate-700 text-on-surface-variant dark:text-slate-300 font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors">Status: Any</button></div></div><div class="bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-800 p-12 text-center flex flex-col items-center justify-center"><div class="p-4 bg-surface-container-low dark:bg-slate-800/80 rounded-none mb-4"><span class="material-symbols-outlined text-[36px] text-outline dark:text-slate-400">folder_off</span></div><h3 class="font-headline-md text-headline-md text-on-surface dark:text-white font-semibold">No Active Credentials Loaded</h3><p class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-2 max-w-md">Connect Issuer Node or Issue New Credential to initialize live ledger sync and populate operational metrics.</p><div class="mt-6 flex flex-wrap gap-3 justify-center"><button class="font-label-md text-label-md bg-primary dark:bg-[#14696d] text-on-primary px-5 py-2.5 rounded-none hover:bg-surface-tint dark:hover:bg-[#004f53] transition-colors flex items-center gap-2 shadow-sm"><span class="material-symbols-outlined text-[18px]">add</span>Issue Credential</button><button class="font-label-md text-label-md border border-border-subtle dark:border-slate-700 text-on-surface dark:text-slate-200 px-4 py-2.5 rounded-none hover:bg-surface-container-low dark:hover:bg-slate-800 transition-colors flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">sync</span>Connect Issuer Node</button></div></div></div>
+<div class="bg-surface dark:bg-[#132024] border-2 border-dashed border-status-pending/40 dark:border-amber-500/40 rounded-none overflow-hidden shadow-sm mt-4"><div class="p-4 bg-status-pending/10 dark:bg-amber-950/40 border-b border-status-pending/20 dark:border-amber-500/30 flex flex-col md:flex-row justify-between md:items-center gap-3"><div class="flex items-start gap-3"><span class="material-symbols-outlined text-status-pending dark:text-amber-400 text-[24px] mt-0.5">developer_board</span><div><div class="flex flex-wrap items-center gap-2"><h3 class="font-headline-md text-[16px] text-status-pending dark:text-amber-400 font-bold">Expected Registry Preview (Mock Example) — How Issued Credentials Table Will Look After Issuance</h3><span class="px-2 py-0.5 bg-status-pending/20 dark:bg-amber-500/20 text-status-pending dark:text-amber-400 font-code-sm text-[11px] uppercase tracking-wider font-bold">MOCK DATA PREVIEW</span></div></div></div></div></div></main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-[#0f1a1d] border-t border-outline dark:border-slate-800 w-full mt-auto transition-colors">
+<div class="w-full py-base px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-base max-w-container-max mx-auto h-16">
+<span class="font-label-md text-label-md font-bold text-on-surface dark:text-slate-300">© 2026 CredChain Ledger. Built on open standards.</span>
+<div class="flex items-center gap-4">
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline transition-opacity duration-150" href="#">Privacy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline transition-opacity duration-150" href="#">Terms</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline transition-opacity duration-150" href="#">API Docs</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 hover:text-primary dark:hover:text-primary-fixed-dim underline transition-opacity duration-150" href="#">Source</a>
+</div>
+</div>
+</footer>
+<!-- Return to Top Button -->
+<button class="no-print fixed bottom-6 right-6 p-3 bg-surface dark:bg-[#132024] border border-border-subtle dark:border-slate-700 text-on-surface-variant dark:text-slate-300 hover:text-primary dark:hover:text-primary-fixed-dim hover:border-primary dark:hover:border-primary-fixed-dim shadow transition-colors flex items-center justify-center z-50" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Return to Top">
+<span class="material-symbols-outlined">arrow_upward</span>
+</button>
+<script>
+  (function() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    const toggleIcon = document.getElementById('theme-toggle-icon');
+
+    function updateIcon() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (toggleIcon) {
+        toggleIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      }
+    }
+
+    // Initialize icon on ready
+    updateIcon();
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateIcon();
+      });
+    }
+
+    // Handle system preference changes if user hasn't set explicit preference
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      if (!('theme' in localStorage)) {
+        if (e.matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        updateIcon();
+      }
+    });
+
+    // Keyboard shortcut (Cmd+K / Ctrl+K) to focus search
+    window.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('credential-search');
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+    });
+  })();
+</script>
+
+
+
+
+
+
+
+
+</body></html>
