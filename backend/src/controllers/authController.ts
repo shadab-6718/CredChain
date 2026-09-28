@@ -27,6 +27,15 @@ export class AuthController {
     }
   }
 
+  public static async listHolders(req: Request, res: Response): Promise<void> {
+    try {
+      const holders = await SupabaseService.getAllHolders();
+      res.json({ holders });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch holders", message: error.message });
+    }
+  }
+
   public static async saveGoogleUser(req: Request, res: Response): Promise<void> {
     try {
       const { email, fullName, role, organization, walletAddress } = req.body;

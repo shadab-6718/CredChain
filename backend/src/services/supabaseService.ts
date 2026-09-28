@@ -457,6 +457,39 @@ export class SupabaseService {
     return Array.from(this.memoryStore.profiles.values()).filter((p) => p.role === "verifier");
   }
 
+  public static async getAllHolders() {
+    const client = this.getAdminClient();
+    if (client) {
+      const { data, error } = await client
+        .from("profiles")
+        .select("id, full_name, email, role, organization, wallet_address")
+        .eq("role", "holder");
+      if (!error && data && data.length > 0) return data;
+    }
+    return Array.from(this.memoryStore.profiles.values()).filter((p) => p.role === "holder");
+  }
+
+  public static async findHolder(criteria: { id?: string; email?: string; name?: string; wallet?: string }) {
+    const holders = await this.getAllHolders();
+    if (criteria.id) {
+      const found = holders.find((h: any) => h.id === criteria.id);
+      if (found) return found;
+    }
+    if (criteria.email) {
+      const found = holders.find((h: any) => h.email?.toLowerCase() === criteria.email?.toLowerCase());
+      if (found) return found;
+    }
+    if (criteria.wallet) {
+      const found = holders.find((h: any) => h.wallet_address?.toLowerCase() === criteria.wallet?.toLowerCase());
+      if (found) return found;
+    }
+    if (criteria.name) {
+      const found = holders.find((h: any) => h.full_name?.toLowerCase() === criteria.name?.toLowerCase());
+      if (found) return found;
+    }
+    return null;
+  }
+
   public static async getCredentialById(credentialId: string) {
     const client = this.getAdminClient();
     if (client) {
@@ -466,26 +499,67 @@ export class SupabaseService {
     return this.memoryStore.credentials.get(credentialId) || null;
   }
 
-  public static async listCredentials(query?: { holderId?: string; issuerId?: string; status?: string }) {
+  public static async listCredentials(query?: {
+    holderId?: string;
+    holderEmail?: string;
+    holderWallet?: string;
+    holderName?: string;
+    issuerId?: string;
+    status?: string;
+  }) {
     const client = this.getAdminClient();
     if (client) {
       let dbQuery = client.from("credentials").select("*").order("issued_at", { ascending: false });
-      if (query?.holderId) dbQuery = dbQuery.eq("holder_id", query.holderId);
+      if (query?.holderId) {
+        dbQuery = dbQuery.or(`holder_id.eq.${query.holderId},holder_id.eq.22222222-2222-2222-2222-222222222222`);
+      }
       if (query?.issuerId) dbQuery = dbQuery.eq("issuer_id", query.issuerId);
       if (query?.status) dbQuery = dbQuery.eq("status", query.status);
 
       const { data, error } = await dbQuery;
-      if (!error && data) return data;
+      if (!error && data) {
+        const dbIds = new Set(data.map((c: any) => c.credential_id));
+        let memoryItems = Array.from(this.memoryStore.credentials.values()).filter(
+          (c) => !dbIds.has(c.credential_id)
+        );
+        if (query?.holderId) {
+          memoryItems = memoryItems.filter((c) => {
+            if (c.holder_id === query.holderId) return true;
+            if (query.holderId === "22222222-2222-2222-2222-222222222222" && (!c.holder_id || c.holder_id === "22222222-2222-2222-2222-222222222222")) return true;
+            if (query.holderEmail && (c.holder_email?.toLowerCase() === query.holderEmail.toLowerCase() || c.metadata?.holderEmail?.toLowerCase() === query.holderEmail.toLowerCase())) return true;
+            if (query.holderWallet && c.holder_wallet?.toLowerCase() === query.holderWallet.toLowerCase()) return true;
+            if (query.holderName && (c.holder_name?.toLowerCase() === query.holderName.toLowerCase() || c.recipient_name?.toLowerCase() === query.holderName.toLowerCase())) return true;
+            return false;
+          });
+        }
+        if (query?.issuerId) {
+          memoryItems = memoryItems.filter(
+            (c) =>
+              c.issuer_id === query.issuerId ||
+              c.issuer_id === "11111111-1111-1111-1111-111111111111" ||
+              !c.issuer_id
+          );
+        }
+        if (query?.status) memoryItems = memoryItems.filter((c) => c.status === query.status);
+        return [...memoryItems, ...data];
+      }
     }
 
     let results = Array.from(this.memoryStore.credentials.values());
     if (query?.holderId) {
-      results = results.filter(
-        (c) =>
-          c.holder_id === query.holderId ||
-          c.holder_id === "22222222-2222-2222-2222-222222222222" ||
-          !c.holder_id
-      );
+      results = results.filter((c) => {
+        // Direct ID match
+        if (c.holder_id === query.holderId) return true;
+        // Default demo holder ID gets all unassigned or demo credentials
+        if (query.holderId === "22222222-2222-2222-2222-222222222222" && (!c.holder_id || c.holder_id === "22222222-2222-2222-2222-222222222222")) return true;
+        // Match by email if recorded
+        if (query.holderEmail && (c.holder_email?.toLowerCase() === query.holderEmail.toLowerCase() || c.metadata?.holderEmail?.toLowerCase() === query.holderEmail.toLowerCase())) return true;
+        // Match by wallet address
+        if (query.holderWallet && c.holder_wallet?.toLowerCase() === query.holderWallet.toLowerCase()) return true;
+        // Match by holder/recipient full name
+        if (query.holderName && (c.holder_name?.toLowerCase() === query.holderName.toLowerCase() || c.recipient_name?.toLowerCase() === query.holderName.toLowerCase())) return true;
+        return false;
+      });
     }
     if (query?.issuerId) {
       results = results.filter(
@@ -508,6 +582,21 @@ export class SupabaseService {
         saved = data;
       } else if (error) {
         console.warn("Supabase credentials table insert note:", error.message);
+        // Schema tolerance: if column does not exist yet before migration is applied
+        if (error.message.includes("column")) {
+          const fallbackRecord = { ...record };
+          delete fallbackRecord.event_type;
+          delete fallbackRecord.linked_previous_event_id;
+          delete fallbackRecord.is_encrypted;
+          delete fallbackRecord.holder_name;
+          delete fallbackRecord.recipient_name;
+          try {
+            const retryRes = await client.from("credentials").insert(fallbackRecord).select().single();
+            if (!retryRes.error && retryRes.data) {
+              saved = { ...retryRes.data, ...record };
+            }
+          } catch {}
+        }
       }
     }
     this.memoryStore.credentials.set(record.credential_id, saved);

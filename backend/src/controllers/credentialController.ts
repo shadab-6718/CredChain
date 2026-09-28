@@ -25,8 +25,11 @@ export class CredentialController {
 
       const {
         credentialId: userGivenId,
-        holderId,
+        holderId: userGivenHolderId,
+        holderEmail,
         holderWallet,
+        holderName: userGivenHolderName,
+        recipientName,
         credentialType,
         title,
         description,
@@ -64,15 +67,31 @@ export class CredentialController {
         return;
       }
 
+      // Resolve target holder profile (by ID, email, name, or wallet)
+      const resolvedHolder = await SupabaseService.findHolder({
+        id: userGivenHolderId,
+        email: holderEmail,
+        name: userGivenHolderName || recipientName,
+        wallet: holderWallet,
+      });
+
       const issuerAddress = user.wallet_address || "0x71C80F25A0B2C79b8aE133F2e41a94371fa7D619";
-      const targetHolderWallet = holderWallet || "0x9965507D1a55bcC2695C58ba16FB37d819B0A4df";
+      const targetHolderId = userGivenHolderId || resolvedHolder?.id || "22222222-2222-2222-2222-222222222222";
+      const targetHolderWallet = holderWallet || resolvedHolder?.wallet_address || "0x9965507D1a55bcC2695C58ba16FB37d819B0A4df";
       const resolvedHolderName = (
+        userGivenHolderName ||
+        recipientName ||
+        resolvedHolder?.full_name ||
         req.body.holderName ||
-        req.body.recipientName ||
         metadata?.holderName ||
         metadata?.recipientName ||
         "Rahul Kumar"
       ).trim();
+      const resolvedHolderEmail = (
+        holderEmail ||
+        resolvedHolder?.email ||
+        (targetHolderId === "22222222-2222-2222-2222-222222222222" ? "rahul.kumar.demo@gmail.com" : undefined)
+      );
 
       // Determine event type & linked parent (PRD Section 3A & 10)
       const resolvedParentId = (userParentId || parentCredentialId || metadata?.linkedPreviousEventId || metadata?.parentCredentialId || "").trim();
@@ -93,10 +112,11 @@ export class CredentialController {
       // 2. Save metadata to Supabase
       const credentialRecord = {
         credential_id: credentialId,
-        holder_id: holderId || "22222222-2222-2222-2222-222222222222",
+        holder_id: targetHolderId,
         holder_wallet: targetHolderWallet,
         holder_name: resolvedHolderName,
         recipient_name: resolvedHolderName,
+        holder_email: resolvedHolderEmail,
         issuer_id: user.id,
         issuer_wallet: issuerAddress,
         issuer_name:
@@ -121,10 +141,12 @@ export class CredentialController {
         blockchain_network: "Polygon Amoy",
         contract_address: process.env.CREDCHAIN_CONTRACT_ADDRESS || "0xCredChainRegistry",
         issued_at: new Date().toISOString(),
-        status: "PENDING",
+        status: "PENDING", // Delivered to holder's account in PENDING state awaiting acceptance
         is_encrypted: Boolean(isEncrypted || metadata?.isEncrypted),
         metadata: {
           ...metadata,
+          holderId: targetHolderId,
+          holderEmail: resolvedHolderEmail,
           holderName: resolvedHolderName,
           recipientName: resolvedHolderName,
           linkedPreviousEventId: resolvedParentId || undefined,
@@ -184,6 +206,9 @@ export class CredentialController {
         query.issuerId = user.id;
       } else if (user.role === "holder") {
         query.holderId = user.id;
+        query.holderEmail = user.email;
+        query.holderWallet = user.wallet_address;
+        query.holderName = user.full_name;
       }
 
       const credentials = await SupabaseService.listCredentials(query);
@@ -219,14 +244,8 @@ export class CredentialController {
       const milestoneTrail = await SupabaseService.getMilestoneTrail(credentialId);
       const onChainTrail = await BlockchainService.verifyMilestoneTrailOnChain(credentialId);
 
-      // Access verification for sensitive off-chain document CID
-      const userId = req.user?.id;
-      const userRole = req.user?.role || "verifier";
-
-      let hasFullDocumentAccess = false;
-      if (userId) {
-        hasFullDocumentAccess = await SupabaseService.checkAccess(credentialId, userId, userRole);
-      }
+      // Direct verification: verifiers can directly verify without needing permission from holder
+      const hasFullDocumentAccess = true;
 
       const responseData = {
         ...credential,

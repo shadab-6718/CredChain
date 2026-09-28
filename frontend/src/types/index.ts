@@ -42,6 +42,7 @@ export interface Credential {
   documentHash?: string;
   blockchain_tx_hash?: string;
   blockchainTxHash?: string;
+  explorerUrl?: string;
   blockchain_network: string;
   contract_address?: string;
   issued_at: string;

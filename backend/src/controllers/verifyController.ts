@@ -287,24 +287,20 @@ export class VerifyController {
         return;
       }
 
-      // 6. Check access permission for sensitive off-chain document
+      // 6. Direct Verification (No holder permission required)
       const userId = req.user?.id;
-      const userRole = req.user?.role || "verifier";
-      let hasDocumentAccess = false;
-      if (userId) {
-        hasDocumentAccess = await SupabaseService.checkAccess(trimmedId, userId, userRole);
-      }
+      const hasDocumentAccess = true;
 
       // Log verification event
       await SupabaseService.addHistoryEvent({
         credential_id: trimmedId,
         action: "VERIFIED",
         performed_by: userId || null,
-        performed_by_name: req.user?.full_name || "Public Verifier",
+        performed_by_name: req.user?.full_name || "Verifier",
         performed_by_address: req.user?.wallet_address || null,
         timestamp: new Date().toISOString(),
         is_blockchain_event: false,
-        details: "Cryptographic hash verified against Polygon Amoy blockchain: 100% integrity match. Milestone trail verified.",
+        details: "Cryptographic hash verified against Polygon Amoy blockchain: 100% integrity match. Verified directly without requiring holder permission.",
       });
 
       const holderResolved = dbCredential?.holder_name || dbCredential?.recipient_name || dbCredential?.metadata?.holderName || "Rahul Kumar";
@@ -315,8 +311,9 @@ export class VerifyController {
       res.status(200).json({
         status: "VALID",
         isValid: true,
-        headline: "✓ Credential Verified",
-        message: "This credential is authentic, permanently anchored to Polygon Amoy, and backed by a complete, verified prerequisite milestone trail.",
+        headline: "✓ Credential Verified Directly",
+        message: "This credential is authentic, permanently anchored to Polygon Amoy, and verified directly without requiring permission from the holder.",
+        permissionRequired: false,
         credential: {
           credentialId: trimmedId,
           credential_id: trimmedId,
@@ -351,10 +348,10 @@ export class VerifyController {
           explorerUrl: dbCredential?.blockchain_tx_hash
             ? BlockchainService.getExplorerTxUrl(dbCredential.blockchain_tx_hash)
             : undefined,
-          hasDocumentAccess,
-          pinataCid: hasDocumentAccess ? dbCredential?.pinata_cid : undefined,
-          pinata_cid: hasDocumentAccess ? dbCredential?.pinata_cid : undefined,
-          documentUrl: hasDocumentAccess && dbCredential?.pinata_cid
+          hasDocumentAccess: true,
+          pinataCid: dbCredential?.pinata_cid,
+          pinata_cid: dbCredential?.pinata_cid,
+          documentUrl: dbCredential?.pinata_cid
             ? `https://gateway.pinata.cloud/ipfs/${dbCredential.pinata_cid}`
             : undefined,
           metadata: dbCredential?.metadata || {},

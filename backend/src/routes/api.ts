@@ -31,6 +31,7 @@ router.post("/auth/role", authMiddleware, AuthController.updateRole);
 router.put("/auth/role", authMiddleware, AuthController.updateRole);
 router.post("/auth/google-sync", AuthController.saveGoogleUser);
 router.get("/users/verifiers", authMiddleware, AuthController.listVerifiers);
+router.get("/users/holders", authMiddleware, AuthController.listHolders);
 
 // 2. File Upload & SHA-256 Hashing (Protected)
 router.post("/files/upload", authMiddleware, upload.single("file"), FileController.uploadFile);

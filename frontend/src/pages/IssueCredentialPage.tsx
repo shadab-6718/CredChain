@@ -12,7 +12,11 @@ export const IssueCredentialPage: React.FC = () => {
 
   const [credentialType, setCredentialType] = useState("Degree Certificate");
   const [organizationName, setOrganizationName] = useState(user?.organization || "ABC Institute of Technology");
-  const [holderName, setHolderName] = useState("");
+  const [holdersList, setHoldersList] = useState<any[]>([]);
+  const [selectedHolderId, setSelectedHolderId] = useState<string>("22222222-2222-2222-2222-222222222222");
+  const [holderName, setHolderName] = useState("Rahul Kumar");
+  const [holderEmail, setHolderEmail] = useState("rahul.kumar.demo@gmail.com");
+  const [holderWallet, setHolderWallet] = useState("0x9965507D1a55bcC2695C58ba16FB37d819B0A4df");
   const [issuerKey, setIssuerKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [eventType, setEventType] = useState<"FINAL_CERTIFICATE" | "MILESTONE">("FINAL_CERTIFICATE");
@@ -26,6 +30,35 @@ export const IssueCredentialPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successResult, setSuccessResult] = useState<any>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  useEffect(() => {
+    apiService.getHolders().then((res) => {
+      if (res.holders && res.holders.length > 0) {
+        setHoldersList(res.holders);
+        const demoOrFirst = res.holders.find((h: any) => h.id === "22222222-2222-2222-2222-222222222222") || res.holders[0];
+        setSelectedHolderId(demoOrFirst.id);
+        setHolderName(demoOrFirst.full_name || "Rahul Kumar");
+        setHolderEmail(demoOrFirst.email || "rahul.kumar.demo@gmail.com");
+        setHolderWallet(demoOrFirst.wallet_address || "0x9965507D1a55bcC2695C58ba16FB37d819B0A4df");
+      }
+    }).catch(() => {});
+  }, []);
+
+  const handleHolderSelection = (val: string) => {
+    setSelectedHolderId(val);
+    if (val === "custom") {
+      setHolderName("");
+      setHolderEmail("");
+      setHolderWallet("");
+    } else {
+      const found = holdersList.find((h: any) => h.id === val);
+      if (found) {
+        setHolderName(found.full_name || "");
+        setHolderEmail(found.email || "");
+        setHolderWallet(found.wallet_address || "");
+      }
+    }
+  };
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -73,6 +106,9 @@ export const IssueCredentialPage: React.FC = () => {
         documentSizeBytes: selectedFile?.size || 245100,
         pinataCid: uploadRes.pinataCid,
         documentHash: uploadRes.documentHash,
+        holderId: selectedHolderId !== "custom" ? selectedHolderId : undefined,
+        holderEmail: holderEmail.trim() || undefined,
+        holderWallet: holderWallet.trim() || undefined,
         holderName: targetHolderName,
         recipientName: targetHolderName,
         issuerName: issuerEntityName,
@@ -81,6 +117,8 @@ export const IssueCredentialPage: React.FC = () => {
         linkedPreviousEventId: linkedPreviousEventId.trim() || undefined,
         isEncrypted,
         metadata: {
+          holderId: selectedHolderId !== "custom" ? selectedHolderId : undefined,
+          holderEmail: holderEmail.trim() || undefined,
           holderName: targetHolderName,
           recipientName: targetHolderName,
           issuerName: issuerEntityName,
@@ -229,19 +267,76 @@ export const IssueCredentialPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Holder Name */}
-          <div className="space-y-1.5">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300" htmlFor="holderName">
-              Holder Name / Identifier
-            </label>
-            <input
-              type="text"
-              id="holderName"
-              value={holderName}
-              onChange={(e) => setHolderName(e.target.value)}
-              placeholder="e.g. Rahul Kumar (Student / Property Owner)"
-              className="w-full bg-white dark:bg-[#0e1a1d] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-            />
+          {/* Holder Account Selection & Recipient Info */}
+          <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 text-base">account_circle</span>
+                Target Holder Account &amp; Recipient
+              </label>
+              <span className="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
+                Direct Vault Routing
+              </span>
+            </div>
+
+            {/* Holder Account Dropdown */}
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                Select Registered Holder
+              </label>
+              <select
+                value={selectedHolderId}
+                onChange={(e) => handleHolderSelection(e.target.value)}
+                className="w-full bg-white dark:bg-[#132024] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+              >
+                {holdersList.map((h: any) => (
+                  <option key={h.id} value={h.id}>
+                    {h.full_name} ({h.email || "No email"}) — {h.organization || "Holder"}
+                  </option>
+                ))}
+                <option value="custom">✏️ Custom Holder / Direct Recipient Email</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Holder Name */}
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300" htmlFor="holderName">
+                  Holder Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="holderName"
+                  required
+                  value={holderName}
+                  onChange={(e) => setHolderName(e.target.value)}
+                  placeholder="e.g. Rahul Kumar"
+                  className="w-full bg-white dark:bg-[#132024] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                />
+              </div>
+
+              {/* Holder Email */}
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300" htmlFor="holderEmail">
+                  Holder Email (for account routing)
+                </label>
+                <input
+                  type="email"
+                  id="holderEmail"
+                  value={holderEmail}
+                  onChange={(e) => setHolderEmail(e.target.value)}
+                  placeholder="e.g. rahul.kumar.demo@gmail.com"
+                  className="w-full bg-white dark:bg-[#132024] border border-gray-300 dark:border-[#24393f] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-teal-500/10 border border-teal-500/20 text-[11px] text-teal-800 dark:text-teal-300 flex items-start gap-2">
+              <span className="material-symbols-outlined text-base text-teal-600 dark:text-teal-400 shrink-0">mark_email_read</span>
+              <span>
+                <strong>Direct Delivery Workflow:</strong> Once issued, this credential will immediately appear in the holder&apos;s account in <strong>PENDING</strong> status. The holder must formally review and click <strong>Accept</strong> in their wallet to activate it.
+              </span>
+            </div>
           </div>
 
           {/* Drag & Drop File Upload Zone */}
@@ -506,20 +601,40 @@ export const IssueCredentialPage: React.FC = () => {
 
               <div>
                 <span className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                  IPFS Content URI
+                  Recipient &amp; Delivery Status
                 </span>
-                <div className="bg-white dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2.5 rounded-lg flex justify-between items-center group">
-                  <span className="text-xs font-mono text-gray-800 dark:text-gray-200 truncate mr-2">
-                    ipfs://{successResult.credential.pinata_cid}
+                <div className="bg-white dark:bg-[#0e1a1d] border border-gray-200 dark:border-[#24393f] p-2.5 rounded-lg flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <div className="text-xs">
+                    <span className="font-bold text-gray-800 dark:text-gray-200">
+                      {successResult.credential.holder_name || "Rahul Kumar"}
+                    </span>{" "}
+                    <span className="text-gray-500 dark:text-gray-400">
+                      ({successResult.credential.holder_email || successResult.credential.holder_wallet || "Holder Vault"})
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono text-[11px] font-bold border border-amber-500/30">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    PENDING ACCEPTANCE
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => navigator.clipboard.writeText(`ipfs://${successResult.credential.pinata_cid}`)}
-                    className="text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-sm">content_copy</span>
-                  </button>
                 </div>
+              </div>
+
+              {/* Next Steps Buttons */}
+              <div className="pt-2 flex flex-wrap gap-2.5">
+                <Link
+                  to="/wallet"
+                  className="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">wallet</span>
+                  Switch to Holder Wallet to Accept
+                </Link>
+                <Link
+                  to={`/verify?id=${successResult.credential.credential_id}`}
+                  className="px-4 py-2 text-xs font-bold border border-teal-600/40 text-teal-700 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-950/30 rounded-lg flex items-center gap-1.5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">verified</span>
+                  Direct Verifier Inspection
+                </Link>
               </div>
             </div>
           </div>

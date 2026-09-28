@@ -934,6 +934,38 @@ export const VerificationResultPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Direct Verification (No Holder Permission Required) Action Row */}
+                <div className="pt-3 border-t border-dashed border-border-subtle dark:border-[#223138] flex flex-wrap items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <span className="material-symbols-outlined text-[16px]">lock_open</span>
+                    Direct Verification (No Holder Permission Required)
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {(liveResult?.credential?.documentUrl || liveResult?.credential?.pinata_cid || liveResult?.credential?.pinataCid) && (
+                      <a
+                        href={liveResult?.credential?.documentUrl || `https://gateway.pinata.cloud/ipfs/${liveResult?.credential?.pinata_cid || liveResult?.credential?.pinataCid}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 text-xs bg-primary/10 hover:bg-primary/20 text-primary dark:text-teal-300 font-bold rounded flex items-center gap-1.5 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">open_in_new</span>
+                        View Document Proof
+                      </a>
+                    )}
+                    {liveResult?.credential?.explorerUrl && (
+                      <a
+                        href={liveResult.credential.explorerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 text-xs border border-border-subtle dark:border-[#223138] hover:bg-surface-container text-on-surface dark:text-neutral-300 rounded flex items-center gap-1.5 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">link</span>
+                        On-Chain Explorer
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
 

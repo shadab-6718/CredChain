@@ -703,6 +703,36 @@ export const VerifyCredentialPage: React.FC = () => {
                       <span className="text-on-surface-variant dark:text-slate-400">Issued Date:</span>
                       <span>{new Date(result.credential.issued_at).toLocaleString()}</span>
                     </div>
+                    <div className="pt-2 border-t border-border-subtle dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <span className="material-symbols-outlined text-sm">lock_open</span>
+                        Direct Verification (No Holder Permission Required)
+                      </span>
+                      <div className="flex gap-2">
+                        {(result.credential.documentUrl || result.credential.pinata_cid || result.credential.pinataCid) && (
+                          <a
+                            href={result.credential.documentUrl || `https://gateway.pinata.cloud/ipfs/${result.credential.pinata_cid || result.credential.pinataCid}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1 text-[11px] bg-primary/10 hover:bg-primary/20 text-primary dark:text-teal-300 font-bold rounded flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-xs">open_in_new</span>
+                            View Document Proof
+                          </a>
+                        )}
+                        {result.credential.explorerUrl && (
+                          <a
+                            href={result.credential.explorerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1 text-[11px] border border-border-subtle dark:border-slate-700 hover:bg-surface-container text-on-surface dark:text-slate-300 rounded flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-xs">link</span>
+                            On-Chain Ledger
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
