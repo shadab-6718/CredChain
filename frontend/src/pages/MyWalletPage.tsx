@@ -51,16 +51,20 @@ export const MyWalletPage: React.FC = () => {
     setLoading(true);
     try {
       const [credsRes, verifiersRes] = await Promise.all([
-        apiService.listCredentials(),
-        apiService.getVerifiers(),
+        apiService.listCredentials().catch(() => ({ credentials: [] })),
+        apiService.getVerifiers().catch(() => ({ verifiers: [] })),
       ]);
-      setCredentials(credsRes.credentials);
-      setVerifiersList(verifiersRes.verifiers);
-      if (verifiersRes.verifiers.length > 0) {
-        setSelectedVerifierId(verifiersRes.verifiers[0].id);
+      const creds = Array.isArray(credsRes?.credentials) ? credsRes.credentials : [];
+      const verifiers = Array.isArray(verifiersRes?.verifiers) ? verifiersRes.verifiers : [];
+      setCredentials(creds);
+      setVerifiersList(verifiers);
+      if (verifiers.length > 0) {
+        setSelectedVerifierId(verifiers[0].id);
       }
     } catch (err) {
       console.error("Failed to load holder wallet data:", err);
+      setCredentials([]);
+      setVerifiersList([]);
     } finally {
       setLoading(false);
     }
@@ -69,6 +73,9 @@ export const MyWalletPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  const safeCredentials = Array.isArray(credentials) ? credentials : [];
+  const safeVerifiers = Array.isArray(verifiersList) ? verifiersList : [];
 
   const handleGrantAccess = async () => {
     if (!grantModalCred || !selectedVerifierId) return;
@@ -262,7 +269,7 @@ export const MyWalletPage: React.FC = () => {
                   {account ? "CONNECTED" : "DEMO HOLDER SESSION"}
                 </span>
                 <span className="bg-surface-container dark:bg-slate-800 text-status-pending border border-outline-variant dark:border-slate-700 px-2 py-0.5 text-xs font-mono font-bold">
-                  {credentials.filter((c) => c.status === "ACTIVE").length} ACTIVE • {credentials.filter((c) => c.status === "PENDING").length} PENDING
+                  {safeCredentials.filter((c) => c?.status === "ACTIVE").length} ACTIVE • {safeCredentials.filter((c) => c?.status === "PENDING").length} PENDING
                 </span>
               </div>
             </div>
@@ -295,7 +302,7 @@ export const MyWalletPage: React.FC = () => {
             )}
 
             {/* Pending Acceptance Action Banner */}
-            {credentials.some((c) => c.status === "PENDING") && (
+            {safeCredentials.some((c) => c?.status === "PENDING") && (
               <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-base text-amber-600 dark:text-amber-400">mark_email_unread</span>

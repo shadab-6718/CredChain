@@ -54,15 +54,16 @@ export const AccessRequestsPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const { credentials } = await apiService.listCredentials();
-      setCredentials(credentials);
+      const res = await apiService.listCredentials();
+      const creds = Array.isArray(res?.credentials) ? res.credentials : [];
+      setCredentials(creds);
 
       const map: Record<string, AccessGrant[]> = {};
       await Promise.all(
-        credentials.map(async (c) => {
+        creds.map(async (c) => {
           try {
-            const res = await apiService.getAccessGrants(c.credential_id);
-            map[c.credential_id] = res.grants;
+            const r = await apiService.getAccessGrants(c.credential_id);
+            map[c.credential_id] = Array.isArray(r?.grants) ? r.grants : [];
           } catch {}
         })
       );

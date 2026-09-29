@@ -36,16 +36,21 @@ export const LedgerExplorerPage: React.FC = () => {
   useEffect(() => {
     apiService
       .listCredentials()
-      .then((res) => setCredentials(res.credentials))
-      .catch((err) => console.error("Explorer load error:", err))
+      .then((res) => setCredentials(Array.isArray(res?.credentials) ? res.credentials : []))
+      .catch((err) => {
+        console.error("Explorer load error:", err);
+        setCredentials([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = credentials.filter(
+  const safeCredentials = Array.isArray(credentials) ? credentials : [];
+  const filtered = safeCredentials.filter(
     (c) =>
-      c.credential_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.document_hash.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      !c ? false :
+      (c.credential_id || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.document_hash || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.blockchain_tx_hash && c.blockchain_tx_hash.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 

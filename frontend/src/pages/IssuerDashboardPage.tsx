@@ -38,10 +38,12 @@ export const IssuerDashboardPage: React.FC = () => {
   const loadCredentials = async () => {
     setLoading(true);
     try {
-      const { credentials } = await apiService.listCredentials();
-      setCredentials(credentials);
+      const res = await apiService.listCredentials();
+      const list = Array.isArray(res?.credentials) ? res.credentials : [];
+      setCredentials(list);
     } catch (err) {
       console.error("Failed to load issuer credentials:", err);
+      setCredentials([]);
     } finally {
       setLoading(false);
     }
@@ -51,18 +53,25 @@ export const IssuerDashboardPage: React.FC = () => {
     loadCredentials();
   }, []);
 
-  const totalIssued = credentials.length;
-  const activeCount = credentials.filter((c) => c.status === "ACTIVE").length;
-  const pendingCount = credentials.filter((c) => c.status === "PENDING").length;
-  const revokedCount = credentials.filter((c) => c.status === "REVOKED").length;
+  const safeCredentials = Array.isArray(credentials) ? credentials : [];
+  const totalIssued = safeCredentials.length;
+  const activeCount = safeCredentials.filter((c) => c?.status === "ACTIVE").length;
+  const pendingCount = safeCredentials.filter((c) => c?.status === "PENDING").length;
+  const revokedCount = safeCredentials.filter((c) => c?.status === "REVOKED").length;
 
-  const filteredCredentials = credentials.filter((c) => {
+  const filteredCredentials = safeCredentials.filter((c) => {
+    if (!c) return false;
+    const credId = c.credential_id || "";
+    const title = c.title || "";
+    const recipient = c.recipient_did || c.holder_wallet || c.holder_name || "";
+    const docHash = c.document_hash || "";
+
     const matchesSearch =
       !searchTerm.trim() ||
-      c.credential_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (c.recipient_did || c.holder_wallet || c.holder_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.document_hash.toLowerCase().includes(searchTerm.toLowerCase());
+      credId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      docHash.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       filterStatus === "ALL" ||
@@ -71,7 +80,7 @@ export const IssuerDashboardPage: React.FC = () => {
       (filterStatus === "REVOKED" && c.status === "REVOKED");
 
     const matchesType =
-      filterType === "ALL" || c.credential_type.toUpperCase().includes(filterType);
+      filterType === "ALL" || (c.credential_type || "").toUpperCase().includes(filterType);
 
     return matchesSearch && matchesStatus && matchesType;
   });

@@ -91,11 +91,12 @@ export const ActivityAuditPage: React.FC = () => {
     try {
       const res = await apiService.listCredentials();
       const allEvents: CredentialHistoryEvent[] = [];
+      const creds = Array.isArray(res?.credentials) ? res.credentials : [];
       await Promise.all(
-        res.credentials.map(async (c: Credential) => {
+        creds.map(async (c: Credential) => {
           try {
             const h = await apiService.getHistory(c.credential_id);
-            if (h.history) allEvents.push(...h.history);
+            if (h && Array.isArray(h.history)) allEvents.push(...h.history);
           } catch {}
         })
       );

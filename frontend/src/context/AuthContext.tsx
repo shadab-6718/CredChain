@@ -99,30 +99,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : (savedRole || (session.user.user_metadata?.role as UserRole) || "holder");
           setAuthToken(session.access_token, activeRole, session.user.id);
 
-          let currentProfile: UserProfile;
+          const fallbackProfile: UserProfile = {
+            id: session.user.id,
+            email,
+            full_name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "User",
+            role: activeRole,
+            organization: savedOrg || session.user.user_metadata?.organization || "",
+          };
+
+          let currentProfile: UserProfile = fallbackProfile;
           try {
             if (savedRole && !isAdminEmail(email)) {
               const updateRes = await apiService.updateProfileRole(savedRole, savedOrg);
-              currentProfile = updateRes.profile;
+              if (updateRes?.profile) currentProfile = updateRes.profile;
             } else {
-              const { profile } = await apiService.getProfile();
-              currentProfile = profile;
+              const res = await apiService.getProfile();
+              if (res?.profile) currentProfile = res.profile;
             }
           } catch {
-            const { profile } = await apiService.getProfile().catch(() => ({
-              profile: {
-                id: session.user.id,
-                email,
-                full_name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "User",
-                role: activeRole,
-                organization: savedOrg || session.user.user_metadata?.organization || "",
-              },
-            }));
-            currentProfile = {
-              ...profile,
-              role: activeRole,
-              organization: savedOrg || profile.organization || "",
-            };
+            currentProfile = fallbackProfile;
+          }
+
+          if (!currentProfile || !currentProfile.id) {
+            currentProfile = fallbackProfile;
           }
 
           if (isAdminEmail(currentProfile.email)) {
@@ -167,31 +166,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           : (savedRole || (session.user.user_metadata?.role as UserRole) || "holder");
 
         setAuthToken(session.access_token, activeRole, session.user.id);
+        const fallbackProfile: UserProfile = {
+          id: session.user.id,
+          email,
+          full_name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "User",
+          role: activeRole,
+          organization: savedOrg || session.user.user_metadata?.organization || "",
+        };
+
+        let profileToSet: UserProfile = fallbackProfile;
         try {
           if (savedRole && !isAdminEmail(email)) {
             const updateRes = await apiService.updateProfileRole(savedRole, savedOrg);
-            if (isAdminEmail(updateRes.profile.email)) updateRes.profile.role = "admin";
-            setUser(updateRes.profile);
-            localStorage.setItem("credchain_user", JSON.stringify(updateRes.profile));
+            if (updateRes?.profile) profileToSet = updateRes.profile;
           } else {
-            const { profile } = await apiService.getProfile();
-            if (isAdminEmail(profile.email)) profile.role = "admin";
-            setUser(profile);
-            localStorage.setItem("credchain_user", JSON.stringify(profile));
+            const res = await apiService.getProfile();
+            if (res?.profile) profileToSet = res.profile;
           }
         } catch {
-          const role = activeRole;
-          const fallbackProfile: UserProfile = {
-            id: session.user.id,
-            email,
-            full_name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "User",
-            role,
-            organization: savedOrg || session.user.user_metadata?.organization || "",
-          };
-          if (isAdminEmail(fallbackProfile.email)) fallbackProfile.role = "admin";
-          setUser(fallbackProfile);
-          localStorage.setItem("credchain_user", JSON.stringify(fallbackProfile));
+          profileToSet = fallbackProfile;
         }
+
+        if (!profileToSet || !profileToSet.id) profileToSet = fallbackProfile;
+        if (isAdminEmail(profileToSet.email)) profileToSet.role = "admin";
+        setUser(profileToSet);
+        localStorage.setItem("credchain_user", JSON.stringify(profileToSet));
       } else {
         if (!isDemoMode && !localStorage.getItem("credchain_user")) {
           setUser(null);

@@ -136,5 +136,12 @@ export interface VerificationResponse {
     parentVerified: boolean;
     rootMilestone: string;
   };
+  blockchainTx?: {
+    txHash: string;
+    network: string;
+    blockNumber?: number;
+    confirmed?: boolean;
+    explorerUrl?: string;
+  };
   timestamp: string;
 }
