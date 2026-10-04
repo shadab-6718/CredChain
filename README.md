@@ -193,3 +193,4 @@ Use the top **Role Switcher** in the navbar to test all 4 personas:
 * **Project:** CredChain
 * **Problem Statement:** PS 26194 (Student Innovation — Distributed Ledger Technology)
 * **Theme:** Blockchain & Cybersecurity
+* **Contributors:** Mohammed Shadab Hussain, Manideep Teja, Syed Riyan Uddin, B.Abhilash, K.Keerthana, D.Rupa Laxmi.
